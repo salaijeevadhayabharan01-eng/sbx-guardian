@@ -2,10 +2,9 @@
   "name": "sbx-guardian",
   "version": "2.0.0",
   "description": "SBX Guardian — AI Systems Black Box & Compliance Platform",
-  "main": "src/server.js",
+  "main": "server.js",
   "scripts": {
-    "start": "node scripts/seed.js && node src/server.js",
-    "seed": "node scripts/seed.js"
+    "start": "node seed.js && node server.js"
   },
   "dependencies": {
     "sql.js": "^1.10.2",
