@@ -1,10 +1,11 @@
 {
   "name": "sbx-guardian",
-  "version": "2.0.0",
-  "description": "SBX Guardian — AI Systems Black Box & Compliance Platform",
+  "version": "5.0.0",
+  "description": "SBX Guardian — Enterprise AI Systems Compliance Platform",
   "main": "server.js",
   "scripts": {
-    "start": "node seed.js && node server.js"
+    "start": "node seed.js && node server.js",
+    "seed": "node seed.js"
   },
   "dependencies": {
     "sql.js": "^1.10.2",
@@ -12,9 +13,11 @@
     "jsonwebtoken": "^9.0.2",
     "express": "^4.18.2",
     "ws": "^8.16.0",
-    "uuid": "^9.0.0"
+    "uuid": "^9.0.0",
+    "nodemailer": "^6.9.9",
+    "express-rate-limit": "^7.2.0",
+    "helmet": "^7.1.0",
+    "cors": "^2.8.5"
   },
-  "engines": {
-    "node": ">=18.0.0"
-  }
+  "engines": { "node": ">=18.0.0" }
 }

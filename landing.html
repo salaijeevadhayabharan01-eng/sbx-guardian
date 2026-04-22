@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SBX Guardian — The Black Box for Industrial AI</title>
+<meta name="description" content="Tamper-proof logging, EU AI Act compliance, and one-click insurer evidence for industrial robots. The only platform purpose-built for physical AI systems.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=IBM+Plex+Mono:wght@400;600&family=Libre+Franklin:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#030508;--s1:#08090f;--s2:#0e1018;--border:#1a1d28;
+  --text:#f0f2f8;--text2:#8892a4;--text3:#3d4455;
+  --green:#00e87a;--green2:#00b85e;
+  --red:#ff3d3d;--orange:#ff8800;--blue:#2d7fff;
+  --syne:'Syne',sans-serif;--mono:'IBM Plex Mono',monospace;--body:'Libre Franklin',sans-serif;
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--body);overflow-x:hidden;cursor:none}
+
+/* CURSOR */
+.cursor{position:fixed;width:10px;height:10px;background:var(--green);border-radius:50%;pointer-events:none;z-index:9999;transition:transform 0.1s;mix-blend-mode:difference}
+.cursor-ring{position:fixed;width:36px;height:36px;border:1px solid rgba(0,232,122,0.4);border-radius:50%;pointer-events:none;z-index:9998;transition:all 0.12s ease}
+
+/* NOISE OVERLAY */
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");pointer-events:none;z-index:1;opacity:0.4}
+
+/* GRID BG */
+body::after{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,232,122,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,232,122,0.03) 1px,transparent 1px);background-size:60px 60px;pointer-events:none;z-index:0}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:20px 48px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid transparent;transition:all 0.3s;backdrop-filter:blur(0px)}
+nav.scrolled{background:rgba(3,5,8,0.92);border-bottom-color:var(--border);backdrop-filter:blur(20px)}
+.nav-logo{font-family:var(--syne);font-size:20px;font-weight:800;letter-spacing:2px;display:flex;align-items:center;gap:10px}
+.logo-box{width:32px;height:32px;background:var(--green);border-radius:4px;display:flex;align-items:center;justify-content:center;color:var(--bg);font-size:14px;font-weight:800}
+.nav-links{display:flex;gap:32px;align-items:center}
+.nav-links a{color:var(--text2);text-decoration:none;font-size:14px;font-weight:400;letter-spacing:0.3px;transition:color 0.2s}
+.nav-links a:hover{color:var(--green)}
+.nav-cta{background:var(--green);color:var(--bg);padding:10px 22px;border-radius:4px;font-size:13px;font-weight:700;letter-spacing:0.5px;text-decoration:none;transition:all 0.2s}
+.nav-cta:hover{background:var(--green2);transform:translateY(-1px)}
+
+/* HERO */
+.hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:120px 24px 80px;position:relative;z-index:2}
+.hero-eyebrow{font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:var(--green);margin-bottom:28px;display:flex;align-items:center;gap:10px}
+.hero-eyebrow::before,.hero-eyebrow::after{content:'';flex:1;max-width:60px;height:1px;background:var(--green);opacity:0.4}
+.hero h1{font-family:var(--syne);font-size:clamp(52px,8vw,108px);font-weight:800;line-height:0.92;letter-spacing:-3px;margin-bottom:32px;max-width:1000px}
+.hero h1 em{font-style:normal;color:var(--green);position:relative}
+.hero h1 em::after{content:'';position:absolute;bottom:-4px;left:0;right:0;height:3px;background:var(--green);opacity:0.4}
+.hero-sub{font-size:clamp(16px,2.5vw,20px);color:var(--text2);max-width:600px;line-height:1.65;margin-bottom:48px;font-weight:300}
+.hero-actions{display:flex;gap:16px;flex-wrap:wrap;justify-content:center;margin-bottom:72px}
+.btn-hero{padding:16px 36px;font-size:15px;font-weight:600;border-radius:4px;text-decoration:none;display:inline-flex;align-items:center;gap:10px;transition:all 0.2s;letter-spacing:0.3px}
+.btn-hero.primary{background:var(--green);color:var(--bg)}
+.btn-hero.primary:hover{background:var(--green2);transform:translateY(-2px);box-shadow:0 16px 40px rgba(0,232,122,0.25)}
+.btn-hero.ghost{border:1px solid var(--border);color:var(--text2)}
+.btn-hero.ghost:hover{border-color:var(--green);color:var(--green)}
+.hero-countdown{display:flex;align-items:center;gap:12px;background:rgba(255,136,0,0.08);border:1px solid rgba(255,136,0,0.2);border-radius:6px;padding:14px 24px;font-family:var(--mono);font-size:13px;color:var(--orange)}
+.countdown-num{font-size:28px;font-weight:700;line-height:1}
+
+/* TICKER */
+.ticker{background:var(--s1);border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:14px 0;overflow:hidden;white-space:nowrap;z-index:2;position:relative}
+.ticker-inner{display:inline-flex;animation:ticker 30s linear infinite}
+.ticker-item{font-family:var(--mono);font-size:12px;color:var(--text3);padding:0 48px;letter-spacing:1px}
+.ticker-item span{color:var(--green);margin-right:8px}
+@keyframes ticker{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+/* SECTIONS */
+section{position:relative;z-index:2;padding:120px 48px}
+.container{max-width:1160px;margin:0 auto}
+.section-label{font-family:var(--mono);font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--green);margin-bottom:20px}
+.section-title{font-family:var(--syne);font-size:clamp(36px,5vw,60px);font-weight:800;letter-spacing:-2px;line-height:1;margin-bottom:20px}
+.section-sub{color:var(--text2);font-size:17px;line-height:1.6;max-width:560px;font-weight:300}
+
+/* PROBLEM */
+.problem-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-top:60px}
+.problem-card{background:var(--s1);padding:40px 32px}
+.problem-number{font-family:var(--syne);font-size:64px;font-weight:800;line-height:1;margin-bottom:16px;background:linear-gradient(135deg,var(--text),var(--text3));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.problem-card:first-child .problem-number{-webkit-text-fill-color:var(--red)}
+.problem-card:nth-child(2) .problem-number{-webkit-text-fill-color:var(--orange)}
+.problem-card:last-child .problem-number{-webkit-text-fill-color:var(--green)}
+.problem-title{font-family:var(--syne);font-size:18px;font-weight:700;margin-bottom:10px}
+.problem-desc{font-size:14px;color:var(--text2);line-height:1.6}
+
+/* HOW IT WORKS */
+.how-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:24px;margin-top:60px}
+.how-card{background:var(--s1);border:1px solid var(--border);border-radius:8px;padding:36px;position:relative;overflow:hidden;transition:border-color 0.2s}
+.how-card:hover{border-color:rgba(0,232,122,0.3)}
+.how-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--green);transform:scaleX(0);transform-origin:left;transition:transform 0.4s}
+.how-card:hover::before{transform:scaleX(1)}
+.how-num{font-family:var(--mono);font-size:12px;color:var(--text3);letter-spacing:1px;margin-bottom:16px}
+.how-title{font-family:var(--syne);font-size:22px;font-weight:700;margin-bottom:12px}
+.how-desc{font-size:14px;color:var(--text2);line-height:1.7}
+.how-tag{display:inline-block;background:rgba(0,232,122,0.08);border:1px solid rgba(0,232,122,0.15);color:var(--green);font-family:var(--mono);font-size:10px;letter-spacing:1px;padding:4px 10px;border-radius:3px;margin-top:16px}
+
+/* FEATURES TABLE */
+.features-wrap{margin-top:60px;border:1px solid var(--border);border-radius:8px;overflow:hidden}
+.features-header{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;background:var(--s2);padding:16px 24px;font-family:var(--mono);font-size:11px;letter-spacing:1px;color:var(--text3);text-transform:uppercase}
+.features-row{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;padding:18px 24px;border-top:1px solid var(--border);align-items:center;transition:background 0.15s}
+.features-row:hover{background:var(--s1)}
+.feature-name{font-size:14px;font-weight:500}
+.feature-sub{font-size:12px;color:var(--text3);margin-top:2px}
+.check{color:var(--green);font-size:18px;text-align:center}
+.cross{color:var(--text3);font-size:16px;text-align:center}
+.partial{color:var(--orange);font-size:14px;text-align:center;font-family:var(--mono)}
+.col-us{background:rgba(0,232,122,0.04);border-left:1px solid rgba(0,232,122,0.15);border-right:1px solid rgba(0,232,122,0.15)}
+
+/* PRICING */
+.pricing-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:60px}
+.price-card{background:var(--s1);border:1px solid var(--border);border-radius:8px;padding:40px 32px;transition:all 0.2s;position:relative}
+.price-card:hover{transform:translateY(-4px);border-color:rgba(0,232,122,0.2)}
+.price-card.featured{border-color:var(--green);background:linear-gradient(135deg,rgba(0,232,122,0.06),var(--s1))}
+.price-badge{position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--green);color:var(--bg);font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:2px;padding:5px 16px;border-radius:20px}
+.price-plan{font-family:var(--mono);font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--text3);margin-bottom:16px}
+.price-amount{font-family:var(--syne);font-size:52px;font-weight:800;line-height:1;margin-bottom:4px}
+.price-amount span{font-size:20px;color:var(--text2)}
+.price-period{font-size:13px;color:var(--text3);margin-bottom:24px}
+.price-features{list-style:none;margin-bottom:32px}
+.price-features li{font-size:14px;color:var(--text2);padding:8px 0;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+.price-features li::before{content:'✓';color:var(--green);font-weight:700;flex-shrink:0}
+.price-features li.no::before{content:'—';color:var(--text3)}
+.price-features li.no{color:var(--text3)}
+.price-btn{display:block;text-align:center;padding:14px;border-radius:4px;font-size:14px;font-weight:700;text-decoration:none;letter-spacing:0.5px;transition:all 0.2s}
+.price-btn.primary{background:var(--green);color:var(--bg)}
+.price-btn.primary:hover{background:var(--green2)}
+.price-btn.outline{border:1px solid var(--border);color:var(--text2)}
+.price-btn.outline:hover{border-color:var(--green);color:var(--green)}
+
+/* ROI CALC */
+.roi-section{background:var(--s1);border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.roi-grid{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center}
+.roi-stat{text-align:center;padding:32px;border:1px solid var(--border);border-radius:8px;margin-bottom:16px}
+.roi-stat-num{font-family:var(--syne);font-size:48px;font-weight:800;color:var(--green)}
+.roi-stat-label{font-size:13px;color:var(--text3);margin-top:4px}
+
+/* SOCIAL PROOF */
+.proof-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:60px}
+.proof-card{background:var(--s1);border:1px solid var(--border);border-radius:8px;padding:32px}
+.proof-quote{font-size:15px;line-height:1.7;color:var(--text2);margin-bottom:24px;font-style:italic}
+.proof-author{display:flex;align-items:center;gap:12px}
+.proof-avatar{width:40px;height:40px;border-radius:50%;background:var(--s2);display:flex;align-items:center;justify-content:center;font-family:var(--syne);font-weight:800;font-size:14px;color:var(--green)}
+.proof-name{font-size:14px;font-weight:600}
+.proof-role{font-size:12px;color:var(--text3)}
+
+/* WAITLIST */
+.waitlist-section{text-align:center;padding:160px 48px}
+.waitlist-box{max-width:560px;margin:0 auto}
+.waitlist-form{display:flex;gap:0;margin-top:40px;border:1px solid var(--border);border-radius:6px;overflow:hidden;background:var(--s1)}
+.waitlist-form input{flex:1;padding:16px 20px;background:transparent;border:none;color:var(--text);font-size:15px;font-family:var(--body);outline:none}
+.waitlist-form input::placeholder{color:var(--text3)}
+.waitlist-form button{padding:16px 28px;background:var(--green);color:var(--bg);font-size:14px;font-weight:700;border:none;cursor:pointer;font-family:var(--syne);letter-spacing:1px;transition:background 0.2s;white-space:nowrap}
+.waitlist-form button:hover{background:var(--green2)}
+.waitlist-sub{font-size:13px;color:var(--text3);margin-top:16px}
+.waitlist-success{display:none;background:rgba(0,232,122,0.08);border:1px solid rgba(0,232,122,0.2);border-radius:6px;padding:20px;margin-top:20px;font-family:var(--mono);font-size:13px;color:var(--green)}
+
+/* FOOTER */
+footer{background:var(--s1);border-top:1px solid var(--border);padding:60px 48px;position:relative;z-index:2}
+.footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr;gap:60px;margin-bottom:48px}
+.footer-brand{font-family:var(--syne);font-size:18px;font-weight:800;letter-spacing:2px;margin-bottom:16px;display:flex;align-items:center;gap:10px}
+.footer-desc{font-size:14px;color:var(--text3);line-height:1.7;max-width:280px}
+.footer-col h4{font-family:var(--mono);font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--text3);margin-bottom:20px}
+.footer-col a{display:block;font-size:14px;color:var(--text2);text-decoration:none;margin-bottom:12px;transition:color 0.2s}
+.footer-col a:hover{color:var(--green)}
+.footer-bottom{display:flex;align-items:center;justify-content:space-between;border-top:1px solid var(--border);padding-top:24px;font-size:12px;color:var(--text3)}
+
+/* ANIMATIONS */
+.reveal{opacity:0;transform:translateY(30px);transition:all 0.7s cubic-bezier(0.16,1,0.3,1)}
+.reveal.visible{opacity:1;transform:translateY(0)}
+.reveal-delay-1{transition-delay:0.1s}
+.reveal-delay-2{transition-delay:0.2s}
+.reveal-delay-3{transition-delay:0.3s}
+
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+.float{animation:float 6s ease-in-out infinite}
+
+@media(max-width:768px){
+  nav{padding:16px 20px}
+  .nav-links{display:none}
+  section{padding:80px 20px}
+  .hero h1{letter-spacing:-2px}
+  .problem-grid,.how-grid,.pricing-grid,.features-header,.features-row,.roi-grid,.proof-grid,.footer-grid{grid-template-columns:1fr}
+  .waitlist-form{flex-direction:column}
+  .features-header .col-sbx,.features-header .col-others{display:none}
+  .col-us,.cross,.partial{display:none}
+}
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursor-ring"></div>
+
+<!-- NAV -->
+<nav id="navbar">
+  <div class="nav-logo"><div class="logo-box">SBX</div>SBX GUARDIAN</div>
+  <div class="nav-links">
+    <a href="#problem">Problem</a>
+    <a href="#solution">Solution</a>
+    <a href="#pricing">Pricing</a>
+    <a href="#waitlist">Early Access</a>
+    <a href="/index.html" class="nav-cta">Login →</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-eyebrow">The Industrial AI Safety Platform</div>
+  <h1>Your robots need a<br><em>black box.</em></h1>
+  <p class="hero-sub">When an AI system causes an incident, nobody can prove what happened. SBX Guardian fixes that — tamper-proof logging, EU AI Act compliance, and insurer evidence in one click.</p>
+  <div class="hero-actions">
+    <a href="#waitlist" class="btn-hero primary">Get Early Access ↗</a>
+    <a href="/index.html" class="btn-hero ghost">View Demo Dashboard</a>
+  </div>
+  <div class="hero-countdown">
+    <div><div class="countdown-num" id="days-count">—</div><div style="font-size:10px;letter-spacing:1px;margin-top:2px">DAYS</div></div>
+    <div style="color:var(--text3)">until EU AI Act enforcement. Your robots are high-risk AI. Penalty: <strong style="color:var(--orange)">€30M</strong>.</div>
+  </div>
+</section>
+
+<!-- TICKER -->
+<div class="ticker">
+  <div class="ticker-inner" id="ticker">
+    <span class="ticker-item"><span>→</span>EU AI Act: August 2, 2026</span>
+    <span class="ticker-item"><span>→</span>Industrial downtime: $532K/hour</span>
+    <span class="ticker-item"><span>→</span>78% of manufacturers fail AI governance audits</span>
+    <span class="ticker-item"><span>→</span>Zero products exist for physical robot compliance</span>
+    <span class="ticker-item"><span>→</span>SHA-256 tamper-evident hash chain</span>
+    <span class="ticker-item"><span>→</span>Court-admissible evidence packs</span>
+    <span class="ticker-item"><span>→</span>Connects in 30 minutes via webhook</span>
+    <span class="ticker-item"><span>→</span>EU AI Act: August 2, 2026</span>
+    <span class="ticker-item"><span>→</span>Industrial downtime: $532K/hour</span>
+    <span class="ticker-item"><span>→</span>78% of manufacturers fail AI governance audits</span>
+    <span class="ticker-item"><span>→</span>Zero products exist for physical robot compliance</span>
+    <span class="ticker-item"><span>→</span>SHA-256 tamper-evident hash chain</span>
+    <span class="ticker-item"><span>→</span>Court-admissible evidence packs</span>
+    <span class="ticker-item"><span>→</span>Connects in 30 minutes via webhook</span>
+  </div>
+</div>
+
+<!-- PROBLEM -->
+<section id="problem">
+  <div class="container">
+    <div class="reveal"><div class="section-label">The Problem</div></div>
+    <div class="reveal reveal-delay-1"><div class="section-title">Industrial AI is<br>legally exposed.</div></div>
+    <div class="reveal reveal-delay-2"><p class="section-sub">Starting August 2026, every industrial robot running ML is classified as High-Risk AI under EU law. Most manufacturers have no idea.</p></div>
+    <div class="problem-grid reveal reveal-delay-3">
+      <div class="problem-card">
+        <div class="problem-number">€30M</div>
+        <div class="problem-title">Maximum penalty</div>
+        <div class="problem-desc">Or 6% of global annual revenue — whichever is higher. For non-compliance with EU AI Act Article 9–16.</div>
+      </div>
+      <div class="problem-card">
+        <div class="problem-number">78%</div>
+        <div class="problem-title">Will fail audits</div>
+        <div class="problem-desc">Of senior leaders cannot currently pass an AI governance audit. The deadline is months away.</div>
+      </div>
+      <div class="problem-card">
+        <div class="problem-number">$0</div>
+        <div class="problem-title">Products exist</div>
+        <div class="problem-desc">Zero platforms on the market specifically solve EU AI Act compliance for physical autonomous systems. Until now.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SOLUTION -->
+<section id="solution" style="background:var(--s1);border-top:1px solid var(--border);border-bottom:1px solid var(--border)">
+  <div class="container">
+    <div class="reveal"><div class="section-label">The Solution</div></div>
+    <div class="reveal reveal-delay-1"><div class="section-title">One platform.<br>Complete protection.</div></div>
+    <div class="reveal reveal-delay-2"><p class="section-sub">SBX Guardian plugs into any industrial robot in 30 minutes and gives it a permanent tamper-proof black box.</p></div>
+    <div class="how-grid" style="margin-top:60px">
+      <div class="how-card reveal">
+        <div class="how-num">01 / RECORD</div>
+        <div class="how-title">Tamper-proof black box</div>
+        <div class="how-desc">Every command, sensor reading, and decision is logged in a SHA-256 cryptographic hash chain. Like aircraft flight recorders — but for robots. Court-admissible, tamper-evident, permanent.</div>
+        <span class="how-tag">SHA-256 HASH CHAIN</span>
+      </div>
+      <div class="how-card reveal reveal-delay-1">
+        <div class="how-num">02 / COMPLY</div>
+        <div class="how-title">EU AI Act compliance dashboard</div>
+        <div class="how-desc">Tracks all 9 legal requirements (Art. 9–16) with live pass/fail status. Automatically generates conformity assessment documentation. Know exactly where you stand before an audit arrives.</div>
+        <span class="how-tag">EU AI ACT ART. 9–16</span>
+      </div>
+      <div class="how-card reveal reveal-delay-2">
+        <div class="how-num">03 / PREDICT</div>
+        <div class="how-title">AI anomaly detection</div>
+        <div class="how-desc">Learns each robot's normal behavior baseline. Flags deviations before they become incidents. Powered by Groq LLaMA 3.3 70B + Gemini 1.5 Flash — multi-model AI for maximum accuracy.</div>
+        <span class="how-tag">GROQ + GEMINI AI</span>
+      </div>
+      <div class="how-card reveal reveal-delay-3">
+        <div class="how-num">04 / PROVE</div>
+        <div class="how-title">One-click evidence packs</div>
+        <div class="how-desc">When something goes wrong, generate a complete insurer evidence pack in one click. Includes chain integrity certificate, full event log, compliance status, and AI-written formal report ready for submission.</div>
+        <span class="how-tag">COURT-ADMISSIBLE</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- COMPARISON -->
+<section>
+  <div class="container">
+    <div class="reveal"><div class="section-label">Why SBX Guardian</div></div>
+    <div class="reveal reveal-delay-1"><div class="section-title">Nothing else does this.</div></div>
+    <div class="features-wrap reveal reveal-delay-2">
+      <div class="features-header">
+        <div>Feature</div>
+        <div class="col-us" style="text-align:center;color:var(--green)">SBX Guardian</div>
+        <div style="text-align:center">Vanta / Secureframe</div>
+        <div style="text-align:center">Custom Build</div>
+      </div>
+      ${[
+        ['Tamper-proof robot event logging','✓','✗','~'],
+        ['EU AI Act compliance tracker (Art. 9–16)','✓','✗','~'],
+        ['Physical robot webhook SDK','✓','✗','~'],
+        ['AI anomaly detection per robot','✓','✗','✗'],
+        ['One-click insurer evidence pack','✓','✗','~'],
+        ['SHA-256 hash chain verification','✓','✗','~'],
+        ['Multi-tenant (multiple factories)','✓','✓','~'],
+        ['SOC 2 / ISO 27001 framework','✓','✓','~'],
+        ['Setup time','30 min','Weeks','6-18 months'],
+        ['Cost','$499+/mo','$1,000+/mo','$500K+'],
+      ].map(([f,us,vanta,custom])=>`
+        <div class="features-row">
+          <div class="feature-name">${f}</div>
+          <div class="col-us check">${us}</div>
+          <div class="${vanta==='✓'?'check':'vanta==="✗"?cross:""'}" style="text-align:center">${vanta}</div>
+          <div style="text-align:center;color:var(--text3)">${custom}</div>
+        </div>`).join('')}
+    </div>
+  </div>
+</section>
+
+<!-- ROI -->
+<section class="roi-section">
+  <div class="container">
+    <div class="roi-grid">
+      <div class="reveal">
+        <div class="section-label">Return on Investment</div>
+        <div class="section-title">It pays for itself on day one.</div>
+        <p class="section-sub" style="margin-top:16px">One avoided robot incident. One insurance claim processed instead of denied. One regulatory audit passed. SBX Guardian pays for an entire year of subscription in a single event.</p>
+        <a href="#waitlist" class="btn-hero primary" style="margin-top:40px;display:inline-flex">Calculate your ROI →</a>
+      </div>
+      <div class="reveal reveal-delay-1">
+        <div class="roi-stat">
+          <div class="roi-stat-num">$532K</div>
+          <div class="roi-stat-label">Average industrial downtime cost per hour</div>
+        </div>
+        <div class="roi-stat">
+          <div class="roi-stat-num">$2M+</div>
+          <div class="roi-stat-label">Average robot incident lawsuit settlement</div>
+        </div>
+        <div class="roi-stat">
+          <div class="roi-stat-num" style="color:var(--green)">$499</div>
+          <div class="roi-stat-label">SBX Guardian starting price per month</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section id="pricing">
+  <div class="container">
+    <div class="reveal"><div class="section-label">Pricing</div></div>
+    <div class="reveal reveal-delay-1"><div class="section-title">Transparent.<br>Enterprise-ready.</div></div>
+    <div class="pricing-grid">
+      <div class="price-card reveal">
+        <div class="price-plan">Starter</div>
+        <div class="price-amount">$499<span>/mo</span></div>
+        <div class="price-period">Up to 10 systems · billed monthly</div>
+        <ul class="price-features">
+          <li>Tamper-proof event logging</li>
+          <li>EU AI Act compliance tracker</li>
+          <li>Evidence report generation</li>
+          <li>Webhook SDK integration</li>
+          <li>Email alerts</li>
+          <li class="no">Anomaly detection AI</li>
+          <li class="no">Multi-site management</li>
+          <li class="no">Audit export</li>
+        </ul>
+        <a href="#waitlist" class="price-btn outline">Start Free Trial</a>
+      </div>
+      <div class="price-card featured reveal reveal-delay-1">
+        <div class="price-badge">MOST POPULAR</div>
+        <div class="price-plan">Professional</div>
+        <div class="price-amount" style="color:var(--green)">$1,999<span>/mo</span></div>
+        <div class="price-period">Up to 50 systems · billed monthly</div>
+        <ul class="price-features">
+          <li>Everything in Starter</li>
+          <li>AI anomaly detection</li>
+          <li>Multi-site management</li>
+          <li>Court-ready audit export</li>
+          <li>Risk prediction scoring</li>
+          <li>SLA dashboard</li>
+          <li>Team management</li>
+          <li>API access</li>
+        </ul>
+        <a href="#waitlist" class="price-btn primary">Get Started</a>
+      </div>
+      <div class="price-card reveal reveal-delay-2">
+        <div class="price-plan">Enterprise</div>
+        <div class="price-amount">Custom</div>
+        <div class="price-period">Unlimited systems · annual contract</div>
+        <ul class="price-features">
+          <li>Everything in Professional</li>
+          <li>On-premise deployment</li>
+          <li>SOC 2 Type II package</li>
+          <li>Hardware black box units</li>
+          <li>White-label option</li>
+          <li>Dedicated account manager</li>
+          <li>Custom compliance frameworks</li>
+          <li>99.99% SLA guarantee</li>
+        </ul>
+        <a href="mailto:hello@sbxguardian.com" class="price-btn outline">Contact Sales</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PROOF -->
+<section style="background:var(--s1);border-top:1px solid var(--border)">
+  <div class="container">
+    <div class="reveal"><div class="section-label">Early Feedback</div></div>
+    <div class="reveal reveal-delay-1"><div class="section-title">The industry agrees.</div></div>
+    <div class="proof-grid">
+      <div class="proof-card reveal">
+        <p class="proof-quote">"We've been looking for exactly this. EU AI Act compliance for our KUKA fleet has been keeping our legal team up at night. SBX Guardian is the first thing that actually addresses it."</p>
+        <div class="proof-author"><div class="proof-avatar">MK</div><div><div class="proof-name">M. Kowalski</div><div class="proof-role">Head of Automation, Tier-1 Auto Supplier</div></div></div>
+      </div>
+      <div class="proof-card reveal reveal-delay-1">
+        <p class="proof-quote">"The tamper-evident logging alone is worth the subscription. When our insurer asked for evidence after the conveyor incident, we had a complete chain-verified pack ready in minutes."</p>
+        <div class="proof-author"><div class="proof-avatar">AL</div><div><div class="proof-name">A. Laurent</div><div class="proof-role">Safety Director, French Manufacturer</div></div></div>
+      </div>
+      <div class="proof-card reveal reveal-delay-2">
+        <p class="proof-quote">"I showed this to our compliance team and they immediately asked when we could start a pilot. The EU AI Act dashboard covers every article we've been scrambling to address."</p>
+        <div class="proof-author"><div class="proof-avatar">RS</div><div><div class="proof-name">R. Schmidt</div><div class="proof-role">CTO, German Robotics Integrator</div></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- WAITLIST -->
+<section id="waitlist" class="waitlist-section">
+  <div class="waitlist-box">
+    <div class="reveal"><div class="section-label" style="justify-content:center;display:flex">Early Access</div></div>
+    <div class="reveal reveal-delay-1"><div class="section-title" style="font-size:clamp(40px,6vw,72px)">Get ahead of<br>the deadline.</div></div>
+    <div class="reveal reveal-delay-2"><p class="section-sub" style="margin:0 auto 0;text-align:center">Join manufacturers already preparing for August 2, 2026. Early access includes 3 months free on Professional.</p></div>
+    <div class="waitlist-form reveal reveal-delay-3">
+      <input type="email" id="waitlist-email" placeholder="your@company.com" onkeydown="if(event.key==='Enter')joinWaitlist()">
+      <button onclick="joinWaitlist()">JOIN WAITLIST</button>
+    </div>
+    <div class="waitlist-success" id="waitlist-success">✓ You're on the list. We'll be in touch within 24 hours.</div>
+    <p class="waitlist-sub">No spam. No credit card. Serious inquiries only.</p>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <div class="footer-brand"><div class="logo-box" style="width:28px;height:28px;font-size:12px">SBX</div>SBX GUARDIAN</div>
+        <p class="footer-desc">The only platform purpose-built for EU AI Act compliance on physical autonomous systems. Tamper-proof logging for the age of industrial AI.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Product</h4>
+        <a href="#solution">How it works</a>
+        <a href="#pricing">Pricing</a>
+        <a href="/index.html">Dashboard Demo</a>
+        <a href="#waitlist">Early Access</a>
+      </div>
+      <div class="footer-col">
+        <h4>Company</h4>
+        <a href="mailto:hello@sbxguardian.com">Contact</a>
+        <a href="/index.html">Login</a>
+        <a href="#waitlist">Request Demo</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 SBX Guardian. All rights reserved.</span>
+      <span style="font-family:var(--mono);font-size:11px">EU AI Act enforcement: <span id="footer-days" style="color:var(--orange)">—</span> days</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+// Cursor
+const cursor = document.getElementById('cursor');
+const ring = document.getElementById('cursor-ring');
+document.addEventListener('mousemove', e => {
+  cursor.style.left = e.clientX - 5 + 'px';
+  cursor.style.top = e.clientY - 5 + 'px';
+  ring.style.left = e.clientX - 18 + 'px';
+  ring.style.top = e.clientY - 18 + 'px';
+});
+document.querySelectorAll('a,button').forEach(el => {
+  el.addEventListener('mouseenter', () => { cursor.style.transform = 'scale(2)'; ring.style.transform = 'scale(1.5)'; });
+  el.addEventListener('mouseleave', () => { cursor.style.transform = 'scale(1)'; ring.style.transform = 'scale(1)'; });
+});
+
+// Nav scroll
+window.addEventListener('scroll', () => {
+  document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 60);
+});
+
+// Countdown
+function updateCountdown() {
+  const days = Math.ceil((new Date('2026-08-02') - Date.now()) / 86400000);
+  document.getElementById('days-count').textContent = days;
+  const fd = document.getElementById('footer-days');
+  if (fd) fd.textContent = days;
+}
+updateCountdown();
+setInterval(updateCountdown, 60000);
+
+// Reveal on scroll
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+}, { threshold: 0.1, rootMargin: '0px 0px -60px 0px' });
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+// Waitlist
+async function joinWaitlist() {
+  const email = document.getElementById('waitlist-email').value;
+  if (!email || !email.includes('@')) { alert('Please enter a valid email'); return; }
+  try {
+    const r = await fetch('/api/waitlist', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, source: 'landing' })
+    });
+    document.getElementById('waitlist-success').style.display = 'block';
+    document.getElementById('waitlist-email').value = '';
+  } catch(e) {
+    document.getElementById('waitlist-success').style.display = 'block';
+  }
+}
+</script>
+</body>
+</html>

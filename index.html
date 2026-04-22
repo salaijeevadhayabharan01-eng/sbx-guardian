@@ -1176,3 +1176,998 @@ document.querySelectorAll('.modal-overlay').forEach(o => o.addEventListener('cli
 </script>
 </body>
 </html>
+<script>
+// ===================== MAX UPGRADES INJECTED =====================
+// Override connectWS to use token-based auth
+const _origConnectWS = connectWS;
+connectWS = function() {
+  if (!token) return;
+  const proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
+  ws = new WebSocket(proto + '//' + location.host + '?token=' + token);
+  ws.onopen = () => { document.getElementById('ws-dot').classList.add('connected'); document.getElementById('ws-label').textContent = 'Live'; };
+  ws.onclose = () => { document.getElementById('ws-dot').classList.remove('connected'); document.getElementById('ws-label').textContent = 'Reconnecting...'; setTimeout(connectWS, 3000); };
+  ws.onmessage = (e) => {
+    const msg = JSON.parse(e.data);
+    if (msg.type === 'NEW_EVENT' || msg.type === 'TELEMETRY') {
+      if (document.getElementById('page-dashboard').classList.contains('active')) loadDashboard();
+    }
+    if (msg.type === 'ANOMALY') {
+      toast('🚨 Anomaly detected: ' + msg.data?.metric + ' deviation', 'error');
+      const badge = document.getElementById('anom-badge');
+      if (badge) { badge.style.display = ''; badge.textContent = (parseInt(badge.textContent)||0)+1; }
+    }
+    if (msg.type === 'BREAKER_UPDATE') {
+      if (document.getElementById('page-breakers').classList.contains('active')) loadBreakers();
+    }
+  };
+};
+
+// Add new nav items after app loads
+const _origDoLogin = doLogin;
+doLogin = async function() {
+  await _origDoLogin();
+  // Inject new nav items
+  setTimeout(() => {
+    const nav = document.querySelector('.sidebar');
+    if (!nav || document.getElementById('nav-anomalies')) return;
+    const intelSection = nav.querySelector('.nav-section:last-of-type');
+    intelSection.insertAdjacentHTML('beforebegin', `
+      <div class="nav-section" style="margin-top:8px">
+        <div class="nav-label">Live Intelligence</div>
+        <div id="nav-anomalies" class="nav-item" onclick="showPage('anomalies')"><span class="nav-icon">⚡</span> Anomalies <span class="nav-badge" id="anom-badge" style="display:none">0</span></div>
+        <div class="nav-item" onclick="showPage('alerts-page')"><span class="nav-icon">🔔</span> Alerts <span class="nav-badge" id="alert-badge" style="display:none">0</span></div>
+        <div class="nav-item" onclick="showPage('webhook')"><span class="nav-icon">⬡</span> Webhook SDK</div>
+        <div class="nav-item" onclick="showPage('audit')"><span class="nav-icon">📋</span> Audit Export</div>
+        <div class="nav-item" onclick="showPage('pricing')"><span class="nav-icon">💎</span> Pricing</div>
+      </div>
+    `);
+    // Inject new pages
+    document.querySelector('.content').insertAdjacentHTML('beforeend', `
+      <div id="page-anomalies" class="page">
+        <div class="page-header"><div><div class="page-title">Anomaly Detection</div><div class="page-sub">AI-powered behavioral analysis — flags deviations before failures</div></div><button class="btn btn-ghost" onclick="loadAnomalies()">↻ Refresh</button></div>
+        <div id="anomalies-content"></div>
+      </div>
+      <div id="page-alerts-page" class="page">
+        <div class="page-header"><div><div class="page-title">Alert Center</div><div class="page-sub">All system alerts and notifications</div></div><button class="btn btn-ghost" onclick="loadAlertsPage()">↻ Refresh</button></div>
+        <div class="card"><div id="alerts-content"></div></div>
+      </div>
+      <div id="page-webhook" class="page">
+        <div class="page-header"><div><div class="page-title">Webhook SDK</div><div class="page-sub">Connect any real device to SBX Guardian in minutes</div></div></div>
+        <div id="webhook-content"></div>
+      </div>
+      <div id="page-audit" class="page">
+        <div class="page-header"><div><div class="page-title">Audit Export</div><div class="page-sub">Tamper-proof full audit trail export for legal/regulatory use</div></div></div>
+        <div id="audit-content"></div>
+      </div>
+      <div id="page-pricing" class="page">
+        <div class="page-header"><div><div class="page-title">Pricing & Plans</div><div class="page-sub">Enterprise AI compliance platform</div></div></div>
+        <div id="pricing-content"></div>
+      </div>
+    `);
+    loadAnomaliesCount();
+    loadAlertsCount();
+  }, 500);
+};
+
+async function loadAnomaliesCount() {
+  try {
+    const d = await api('/anomalies');
+    const active = d.filter(a => !a.resolved).length;
+    const b = document.getElementById('anom-badge');
+    if (b) { b.style.display = active > 0 ? '' : 'none'; b.textContent = active; }
+  } catch {}
+}
+
+async function loadAlertsCount() {
+  try {
+    const d = await api('/alerts');
+    const active = d.filter(a => !a.resolved).length;
+    const b = document.getElementById('alert-badge');
+    if (b) { b.style.display = active > 0 ? '' : 'none'; b.textContent = active; }
+  } catch {}
+}
+
+async function loadAnomalies() {
+  try {
+    const data = await api('/anomalies');
+    const el = document.getElementById('anomalies-content');
+    if (!data.length) { el.innerHTML = '<div class="empty"><div class="empty-icon">✓</div><p>No anomalies detected — fleet operating normally</p></div>'; return; }
+    el.innerHTML = `
+      <div class="grid grid-2" style="margin-bottom:20px">
+        <div class="stat-card red"><div class="stat-label">Active Anomalies</div><div class="stat-value" style="color:var(--red)">${data.filter(a=>!a.resolved).length}</div></div>
+        <div class="stat-card green"><div class="stat-label">Resolved</div><div class="stat-value" style="color:var(--accent)">${data.filter(a=>a.resolved).length}</div></div>
+      </div>
+      <div class="card">
+        <table><thead><tr><th>Time</th><th>System</th><th>Metric</th><th>Expected</th><th>Actual</th><th>Deviation</th><th>Severity</th><th>Status</th><th></th></tr></thead>
+        <tbody>${data.map(a=>`<tr>
+          <td class="mono" style="font-size:11px">${new Date(a.detected_at).toLocaleString()}</td>
+          <td>${a.system_name||'Unknown'}</td>
+          <td><span class="badge badge-blue">${a.metric}</span></td>
+          <td class="mono">${parseFloat(a.expected).toFixed(1)}</td>
+          <td class="mono" style="color:${a.severity==='critical'?'var(--red)':'var(--orange)'}">${parseFloat(a.actual).toFixed(1)}</td>
+          <td class="mono" style="color:var(--orange)">+${parseFloat(a.deviation).toFixed(1)}</td>
+          <td><span class="badge ${a.severity==='critical'?'badge-red':'badge-orange'}">${a.severity}</span></td>
+          <td><span class="badge ${a.resolved?'badge-green':'badge-red'}">${a.resolved?'Resolved':'Active'}</span></td>
+          <td>${!a.resolved?`<button class="btn btn-ghost" onclick="resolveAnomaly('${a.id}')" style="padding:4px 10px;font-size:11px">Resolve</button>`:''}</td>
+        </tr>`).join('')}</tbody></table>
+      </div>`;
+  } catch(e) { toast('Failed to load anomalies','error'); }
+}
+
+async function resolveAnomaly(id) {
+  try { await api(`/anomalies/${id}/resolve`, {method:'PUT'}); loadAnomalies(); loadAnomaliesCount(); toast('Anomaly resolved','success'); } catch(e) { toast(e.message,'error'); }
+}
+
+async function loadAlertsPage() {
+  try {
+    const data = await api('/alerts');
+    const el = document.getElementById('alerts-content');
+    if (!data.length) { el.innerHTML = '<div class="empty" style="padding:40px"><p>No alerts</p></div>'; return; }
+    el.innerHTML = data.map(a=>`
+      <div style="display:flex;align-items:flex-start;gap:12px;padding:14px 0;border-bottom:1px solid var(--border2)">
+        <div class="event-dot ${a.severity}" style="margin-top:4px"></div>
+        <div style="flex:1">
+          <div style="font-size:14px;font-weight:600">${a.type}</div>
+          <div style="font-size:13px;color:var(--text2);margin-top:2px">${a.message}</div>
+          <div class="mono" style="font-size:11px;color:var(--text3);margin-top:4px">${a.system_name||'Fleet'} · ${new Date(a.created_at).toLocaleString()}</div>
+        </div>
+        <span class="badge ${a.severity==='critical'?'badge-red':a.severity==='warning'?'badge-orange':'badge-gray'}">${a.severity}</span>
+        ${!a.resolved?`<button class="btn btn-ghost" onclick="resolveAlertItem('${a.id}')" style="padding:5px 10px;font-size:11px">✓ Resolve</button>`:'<span class="badge badge-green">Resolved</span>'}
+      </div>`).join('');
+  } catch(e) { toast('Failed','error'); }
+}
+
+async function resolveAlertItem(id) {
+  try { await api(`/alerts/${id}/resolve`, {method:'PUT'}); loadAlertsPage(); loadAlertsCount(); toast('Alert resolved','success'); } catch {}
+}
+
+async function loadWebhook() {
+  try {
+    const org = await api('/org');
+    document.getElementById('webhook-content').innerHTML = `
+      <div class="grid grid-2" style="margin-bottom:20px">
+        <div class="card">
+          <div class="card-header"><div class="card-title">Your Webhook URL</div></div>
+          <p style="font-size:13px;color:var(--text2);margin-bottom:12px">Any device can POST events to this URL. No SDK needed — just an HTTP request.</p>
+          <div style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:12px;font-family:var(--mono);font-size:12px;word-break:break-all;color:var(--accent)">${org.webhook_url}</div>
+          <button class="btn btn-ghost" onclick="navigator.clipboard.writeText('${org.webhook_url}');toast('Copied!','success')" style="margin-top:10px;padding:7px 14px;font-size:12px">📋 Copy URL</button>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">Quick Test</div></div>
+          <p style="font-size:13px;color:var(--text2);margin-bottom:12px">Send a test event from any terminal or device:</p>
+          <div style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:12px;font-family:var(--mono);font-size:11px;line-height:1.8;color:var(--text2)">
+curl -X POST \\<br>
+&nbsp;&nbsp;"${org.webhook_url}" \\<br>
+&nbsp;&nbsp;-H "Content-Type: application/json" \\<br>
+&nbsp;&nbsp;-d '{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;"type": "heartbeat",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;"severity": "info",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;"message": "Robot heartbeat",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;"health": 95,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;"load": 45.2<br>
+&nbsp;&nbsp;}'
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-title">Integration Examples</div></div>
+        <div class="tabs" id="sdk-tabs">
+          <div class="tab active" onclick="showSDK('python',this)">Python</div>
+          <div class="tab" onclick="showSDK('node',this)">Node.js</div>
+          <div class="tab" onclick="showSDK('arduino',this)">Arduino/C++</div>
+          <div class="tab" onclick="showSDK('ros',this)">ROS</div>
+        </div>
+        <div id="sdk-python" class="sdk-example">
+<pre style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:16px;font-size:12px;overflow-x:auto;line-height:1.6"><code>import requests, time
+
+WEBHOOK_URL = "${org.webhook_url}"
+
+def log_event(event_type, message, severity="info", health=None, load=None):
+    payload = {
+        "type": event_type,
+        "message": message,
+        "severity": severity,
+    }
+    if health is not None: payload["health"] = health
+    if load is not None: payload["load"] = load
+    
+    response = requests.post(WEBHOOK_URL, json=payload)
+    return response.json()
+
+# Example: log a heartbeat every 30 seconds
+while True:
+    log_event("heartbeat", "Robot operating normally", health=95, load=42.1)
+    time.sleep(30)</code></pre>
+        </div>
+        <div id="sdk-node" class="sdk-example" style="display:none">
+<pre style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:16px;font-size:12px;overflow-x:auto;line-height:1.6"><code>const WEBHOOK_URL = "${org.webhook_url}";
+
+async function logEvent(type, message, severity = "info", extra = {}) {
+  const res = await fetch(WEBHOOK_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ type, message, severity, ...extra })
+  });
+  return res.json();
+}
+
+// Heartbeat every 30s
+setInterval(() => {
+  logEvent("heartbeat", "System nominal", "info", { health: 95, load: 42.1 });
+}, 30000);
+
+// Log critical event
+logEvent("alert", "Temperature exceeded threshold", "critical", { health: 72 });</code></pre>
+        </div>
+        <div id="sdk-arduino" class="sdk-example" style="display:none">
+<pre style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:16px;font-size:12px;overflow-x:auto;line-height:1.6"><code>#include &lt;WiFi.h&gt;
+#include &lt;HTTPClient.h&gt;
+#include &lt;ArduinoJson.h&gt;
+
+const char* WEBHOOK_URL = "${org.webhook_url}";
+
+void logEvent(String type, String message, String severity, float health, float load) {
+  HTTPClient http;
+  http.begin(WEBHOOK_URL);
+  http.addHeader("Content-Type", "application/json");
+  
+  StaticJsonDocument&lt;200&gt; doc;
+  doc["type"] = type;
+  doc["message"] = message;
+  doc["severity"] = severity;
+  doc["health"] = health;
+  doc["load"] = load;
+  
+  String body;
+  serializeJson(doc, body);
+  http.POST(body);
+  http.end();
+}
+
+void loop() {
+  logEvent("heartbeat", "Arduino sensor nominal", "info", 95.0, 42.1);
+  delay(30000);
+}</code></pre>
+        </div>
+        <div id="sdk-ros" class="sdk-example" style="display:none">
+<pre style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:16px;font-size:12px;overflow-x:auto;line-height:1.6"><code>#!/usr/bin/env python3
+import rospy, requests
+from std_msgs.msg import String
+
+WEBHOOK_URL = "${org.webhook_url}"
+
+def log_to_sbx(event_type, message, severity="info"):
+    try:
+        requests.post(WEBHOOK_URL, json={
+            "type": event_type,
+            "message": message, 
+            "severity": severity
+        }, timeout=5)
+    except Exception as e:
+        rospy.logwarn(f"SBX log failed: {e}")
+
+def callback(data):
+    log_to_sbx("sensor_read", data.data)
+
+rospy.init_node('sbx_guardian_logger')
+rospy.Subscriber('/robot/status', String, callback)
+
+# Heartbeat
+while not rospy.is_shutdown():
+    log_to_sbx("heartbeat", "ROS node nominal")
+    rospy.sleep(30)</code></pre>
+        </div>
+      </div>`;
+  } catch(e) { toast('Failed to load webhook info','error'); }
+}
+
+function showSDK(lang, el) {
+  document.querySelectorAll('.sdk-example').forEach(e => e.style.display='none');
+  document.getElementById('sdk-'+lang).style.display='';
+  document.querySelectorAll('#sdk-tabs .tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+}
+
+async function loadAudit() {
+  document.getElementById('audit-content').innerHTML = `
+    <div class="grid grid-2">
+      <div class="card">
+        <div class="card-header"><div class="card-title">Generate Audit Export</div></div>
+        <p style="font-size:13px;color:var(--text2);margin-bottom:16px">Export a full tamper-proof audit trail. Includes chain integrity verification, all events, compliance status, and a certification hash.</p>
+        <div class="form-row">
+          <div class="form-field"><label>From Date</label><input type="date" id="audit-from"></div>
+          <div class="form-field"><label>To Date</label><input type="date" id="audit-to"></div>
+        </div>
+        <button class="btn btn-primary" onclick="generateAudit()" id="audit-btn">📋 Generate Audit Pack</button>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-title">What's Included</div></div>
+        <div style="font-size:13px;line-height:2;color:var(--text2)">
+          ✓ All events with SHA-256 hash chain<br>
+          ✓ Chain integrity verification result<br>
+          ✓ Full compliance status (EU AI Act, ISO, IEC)<br>
+          ✓ Fleet summary at time of export<br>
+          ✓ Unique certification ID<br>
+          ✓ Court-admissible tamper evidence<br>
+          ✓ JSON format for legal submission
+        </div>
+      </div>
+    </div>
+    <div id="audit-result" style="display:none;margin-top:16px"></div>`;
+
+  // Set default dates
+  const now = new Date();
+  const monthAgo = new Date(now - 30*86400000);
+  document.getElementById('audit-to').value = now.toISOString().split('T')[0];
+  document.getElementById('audit-from').value = monthAgo.toISOString().split('T')[0];
+}
+
+async function generateAudit() {
+  const from = new Date(document.getElementById('audit-from').value).getTime();
+  const to = new Date(document.getElementById('audit-to').value).getTime() + 86400000;
+  const btn = document.getElementById('audit-btn');
+  btn.disabled = true; btn.textContent = 'Generating...';
+  try {
+    const data = await api(`/audit/export?from=${from}&to=${to}`);
+    const el = document.getElementById('audit-result');
+    el.style.display = '';
+    el.innerHTML = `
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Audit Pack — ${data.certification}</div>
+          <div class="badge ${data.chain_integrity?.valid ? 'badge-green' : 'badge-red'}">${data.chain_integrity?.valid ? '✓ CHAIN VALID' : '✗ CHAIN BROKEN'}</div>
+        </div>
+        <div class="grid grid-4" style="margin-bottom:16px">
+          <div class="stat-card green card-sm"><div class="stat-label">Events Audited</div><div class="stat-value" style="font-size:24px;color:var(--accent)">${data.chain_integrity?.events_audited}</div></div>
+          <div class="stat-card blue card-sm"><div class="stat-label">Systems</div><div class="stat-value" style="font-size:24px;color:var(--blue)">${data.fleet_summary?.total_systems}</div></div>
+          <div class="stat-card ${data.compliance_score>=70?'green':'orange'} card-sm"><div class="stat-label">Compliance</div><div class="stat-value" style="font-size:24px;color:${data.compliance_score>=70?'var(--accent)':'var(--orange)'}">${data.compliance_score}%</div></div>
+          <div class="stat-card purple card-sm"><div class="stat-label">Cert ID</div><div class="mono" style="font-size:11px;color:var(--purple);margin-top:8px">${data.certification}</div></div>
+        </div>
+        <button class="btn btn-primary" onclick="downloadAudit(${JSON.stringify(data).replace(/"/g,'&quot;')})" style="margin-right:8px">⬇ Download JSON</button>
+        <button class="btn btn-ghost" onclick="toast('PDF export coming in next update','warning')">📄 Export PDF</button>
+      </div>`;
+    toast('Audit pack generated — Cert: ' + data.certification, 'success');
+  } catch(e) { toast(e.message,'error'); }
+  btn.disabled = false; btn.textContent = '📋 Generate Audit Pack';
+}
+
+function downloadAudit(data) {
+  const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `sbx-audit-${data.certification}.json`;
+  a.click();
+  toast('Audit pack downloaded','success');
+}
+
+function loadPricing() {
+  document.getElementById('pricing-content').innerHTML = `
+    <div style="text-align:center;margin-bottom:40px">
+      <div style="font-size:13px;color:var(--text2);margin-top:8px">The only platform purpose-built for EU AI Act compliance on physical robots</div>
+    </div>
+    <div class="grid grid-3" style="margin-bottom:40px">
+      <div class="card" style="border-color:var(--border);position:relative">
+        <div style="margin-bottom:20px"><div style="font-family:var(--mono);font-size:18px;font-weight:700">Starter</div><div style="font-size:13px;color:var(--text2);margin-top:4px">Small teams & pilots</div></div>
+        <div style="font-family:var(--mono);font-size:40px;font-weight:700;margin-bottom:4px">$499<span style="font-size:16px;color:var(--text2)">/mo</span></div>
+        <div style="font-size:12px;color:var(--text3);margin-bottom:20px">Up to 10 systems</div>
+        <div style="font-size:13px;line-height:2.2;color:var(--text2);margin-bottom:24px">
+          ✓ Tamper-proof event logging<br>✓ EU AI Act tracker<br>✓ Evidence report generation<br>✓ Webhook integration<br>✓ Email alerts<br>✗ Multi-tenant<br>✗ Priority support
+        </div>
+        <button class="btn btn-ghost" style="width:100%" onclick="toast('Contact us to start a pilot','success')">Start Pilot</button>
+      </div>
+      <div class="card" style="border-color:var(--accent);position:relative">
+        <div style="position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--accent);color:var(--bg);font-size:11px;font-weight:700;padding:4px 14px;border-radius:20px;letter-spacing:1px">MOST POPULAR</div>
+        <div style="margin-bottom:20px"><div style="font-family:var(--mono);font-size:18px;font-weight:700">Professional</div><div style="font-size:13px;color:var(--text2);margin-top:4px">Growing manufacturers</div></div>
+        <div style="font-family:var(--mono);font-size:40px;font-weight:700;margin-bottom:4px;color:var(--accent)">$1,999<span style="font-size:16px;color:var(--text2)">/mo</span></div>
+        <div style="font-size:12px;color:var(--text3);margin-bottom:20px">Up to 50 systems</div>
+        <div style="font-size:13px;line-height:2.2;color:var(--text2);margin-bottom:24px">
+          ✓ Everything in Starter<br>✓ Anomaly detection AI<br>✓ Multi-site management<br>✓ Audit export (court-ready)<br>✓ Risk prediction scoring<br>✓ API access<br>✓ Slack/PagerDuty alerts
+        </div>
+        <button class="btn btn-primary" style="width:100%" onclick="toast('Contact us to get started','success')">Get Started</button>
+      </div>
+      <div class="card" style="border-color:var(--purple);position:relative">
+        <div style="margin-bottom:20px"><div style="font-family:var(--mono);font-size:18px;font-weight:700">Enterprise</div><div style="font-size:13px;color:var(--text2);margin-top:4px">Large-scale operations</div></div>
+        <div style="font-family:var(--mono);font-size:40px;font-weight:700;margin-bottom:4px;color:var(--purple)">Custom</div>
+        <div style="font-size:12px;color:var(--text3);margin-bottom:20px">Unlimited systems</div>
+        <div style="font-size:13px;line-height:2.2;color:var(--text2);margin-bottom:24px">
+          ✓ Everything in Professional<br>✓ On-premise deployment<br>✓ SOC 2 Type II package<br>✓ Hardware black box units<br>✓ Custom compliance frameworks<br>✓ Dedicated account manager<br>✓ SLA guarantee
+        </div>
+        <button class="btn btn-ghost" style="width:100%;border-color:var(--purple);color:var(--purple)" onclick="toast('Email us: admin@sbxguardian.com','success')">Contact Sales</button>
+      </div>
+    </div>
+    <div class="card" style="text-align:center;background:rgba(0,255,136,0.04);border-color:rgba(0,255,136,0.2)">
+      <div style="font-family:var(--mono);font-size:16px;margin-bottom:8px">One robot incident avoided = your entire annual subscription paid for</div>
+      <div style="font-size:13px;color:var(--text2)">Industrial downtime costs up to $532,000/hour. One lawsuit settlement averages $2M+. SBX Guardian pays for itself on day one.</div>
+    </div>`;
+}
+
+// Hook new pages into showPage
+const _origShowPage = showPage;
+showPage = function(name) {
+  const newPages = { anomalies: loadAnomalies, 'alerts-page': loadAlertsPage, webhook: loadWebhook, audit: loadAudit, pricing: loadPricing };
+  if (newPages[name]) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    const page = document.getElementById('page-'+name);
+    if (page) { page.classList.add('active'); newPages[name](); return; }
+  }
+  _origShowPage(name);
+};
+
+// Enhanced dashboard with risk score
+const _origLoadDashboard = loadDashboard;
+loadDashboard = async function() {
+  await _origLoadDashboard();
+  try {
+    const d = await api('/dashboard');
+    if (d.fleet_risk) {
+      const statsEl = document.getElementById('dash-stats');
+      if (statsEl) {
+        statsEl.insertAdjacentHTML('beforeend', `
+          <div class="stat-card ${d.fleet_risk.avg_risk>70?'red':d.fleet_risk.avg_risk>40?'orange':'green'}">
+            <div class="stat-icon">◬</div>
+            <div class="stat-label">Fleet Risk Score</div>
+            <div class="stat-value" style="color:${d.fleet_risk.avg_risk>70?'var(--red)':d.fleet_risk.avg_risk>40?'var(--orange)':'var(--accent)'}">${d.fleet_risk.avg_risk}</div>
+            <div class="stat-sub">${d.fleet_risk.critical_systems} systems critical</div>
+          </div>
+          <div class="stat-card ${d.anomalies?.active>0?'red':'green'}">
+            <div class="stat-icon">⚡</div>
+            <div class="stat-label">Active Anomalies</div>
+            <div class="stat-value" style="color:${d.anomalies?.active>0?'var(--red)':'var(--accent)'}">${d.anomalies?.active||0}</div>
+            <div class="stat-sub">${d.alerts?.active||0} unresolved alerts</div>
+          </div>`);
+      }
+    }
+  } catch {}
+};
+</script>
+<script>
+// ===================== V4 ADDITIONS =====================
+
+// Patch showPage and nav after login
+const _v4OrigLogin = typeof doLogin === 'function' ? doLogin : null;
+document.addEventListener('DOMContentLoaded', () => {
+  // Wait for app to be ready then inject v4 pages
+  const observer = new MutationObserver(() => {
+    if (document.getElementById('app')?.classList.contains('active')) {
+      injectV4(); observer.disconnect();
+    }
+  });
+  observer.observe(document.getElementById('app') || document.body, { attributes: true, childList: true, subtree: true });
+});
+
+function injectV4() {
+  if (document.getElementById('v4-injected')) return;
+  document.body.insertAdjacentHTML('beforeend', '<div id="v4-injected"></div>');
+
+  // Add nav items
+  const sidebar = document.querySelector('.sidebar');
+  if (sidebar) {
+    const footer = sidebar.querySelector('.nav-footer');
+    footer?.insertAdjacentHTML('beforebegin', `
+      <div class="nav-section" style="margin-top:8px">
+        <div class="nav-label">AI Intelligence</div>
+        <div class="nav-item" onclick="v4ShowPage('ai-analyst')"><span class="nav-icon">◌</span> AI Fleet Analyst</div>
+        <div class="nav-item" onclick="v4ShowPage('failure-predict')"><span class="nav-icon">◬</span> Failure Prediction</div>
+      </div>
+      <div class="nav-section" style="margin-top:8px">
+        <div class="nav-label">Growth</div>
+        <div class="nav-item" onclick="v4ShowPage('marketing-agent')"><span class="nav-icon">◈</span> Marketing Agent</div>
+        <div class="nav-item" onclick="v4ShowPage('pitch-deck')"><span class="nav-icon">◫</span> Pitch Deck AI</div>
+        <div class="nav-item" onclick="v4ShowPage('cold-email')"><span class="nav-icon">⬡</span> Cold Email Generator</div>
+      </div>
+    `);
+  }
+
+  // Add pages to content
+  const content = document.querySelector('.content');
+  if (content) {
+    content.insertAdjacentHTML('beforeend', `
+
+      <!-- AI FLEET ANALYST -->
+      <div id="v4-page-ai-analyst" class="page" style="display:none">
+        <div class="page-header">
+          <div><div class="page-title">AI Fleet Analyst</div><div class="page-sub">Powered by Groq LLaMA 3.3 70B + Gemini 1.5 Flash — layered for maximum intelligence</div></div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <span class="badge badge-green" id="ai-model-badge">Groq + Gemini</span>
+            <button class="btn btn-ghost" onclick="v4ClearChat()">✕ Clear</button>
+          </div>
+        </div>
+        <div class="card">
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px">
+            ${['What systems are at highest risk?','Generate a risk summary','Which systems need maintenance?','Am I EU AI Act compliant?','What anomalies should I address first?'].map(q=>
+              `<button class="btn btn-ghost" onclick="v4QuickAsk('${q}')" style="padding:6px 12px;font-size:12px">${q}</button>`
+            ).join('')}
+          </div>
+          <div class="ai-messages" id="v4-ai-msgs" style="max-height:500px">
+            <div class="ai-msg"><div class="role">SBX AI Analyst</div><div class="text">I'm your AI fleet analyst powered by Groq LLaMA 3.3 70B with Gemini fallback. I have real-time access to your fleet, anomalies, compliance status, and risk scores. What would you like to analyze?</div></div>
+          </div>
+          <div class="ai-input-row" style="margin-top:12px">
+            <div class="form-field" style="margin:0;flex:1"><input type="text" id="v4-ai-input" placeholder="Ask anything about your fleet..." onkeydown="if(event.key==='Enter')v4SendAI()"></div>
+            <button class="btn btn-primary" onclick="v4SendAI()" id="v4-ai-btn">Ask AI</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- FAILURE PREDICTION -->
+      <div id="v4-page-failure-predict" class="page" style="display:none">
+        <div class="page-header">
+          <div><div class="page-title">AI Failure Prediction</div><div class="page-sub">7-day failure probability per system using AI analysis</div></div>
+        </div>
+        <div id="v4-failure-grid" class="grid grid-2"><div class="card"><div class="loading"><div class="spinner"></div> Loading systems...</div></div></div>
+      </div>
+
+      <!-- MARKETING AGENT -->
+      <div id="v4-page-marketing-agent" class="page" style="display:none">
+        <div class="page-header">
+          <div><div class="page-title">Marketing Agent</div><div class="page-sub">AI-generated LinkedIn posts, Twitter threads, and content — ready to copy and post</div></div>
+        </div>
+        <div class="grid grid-2">
+          <div class="card">
+            <div class="card-header"><div class="card-title">LinkedIn Post Generator</div></div>
+            <div class="form-field" style="margin-bottom:12px">
+              <label>Topic</label>
+              <select id="li-topic">
+                <option value="EU AI Act compliance deadline approaching">EU AI Act deadline urgency</option>
+                <option value="robot incident liability and tamper-proof logging">Robot incident liability</option>
+                <option value="how SBX Guardian works and what it does">Product explainer</option>
+                <option value="industrial downtime costs and prevention">Downtime cost prevention</option>
+                <option value="why insurers love tamper-proof robot logs">Insurance angle</option>
+              </select>
+            </div>
+            <button class="btn btn-primary" onclick="v4GenLinkedIn()" id="li-btn">⚡ Generate Post</button>
+            <div id="li-output" style="display:none;margin-top:16px">
+              <div class="report-output" id="li-text" style="max-height:300px"></div>
+              <button class="btn btn-ghost" onclick="navigator.clipboard.writeText(document.getElementById('li-text').textContent);toast('Copied!','success')" style="margin-top:8px;padding:7px 14px;font-size:12px">📋 Copy to Clipboard</button>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header"><div class="card-title">Twitter/X Thread Generator</div></div>
+            <div class="form-field" style="margin-bottom:12px">
+              <label>Topic</label>
+              <select id="tw-topic">
+                <option value="EU AI Act and what it means for robot operators">EU AI Act explainer</option>
+                <option value="why robot incidents cost millions and how to prevent them">Incident cost prevention</option>
+                <option value="what a tamper-proof black box for robots actually does">Product explainer</option>
+                <option value="5 things every robotics company needs to do before August 2026">Checklist thread</option>
+              </select>
+            </div>
+            <button class="btn btn-primary" onclick="v4GenTwitter()" id="tw-btn">⚡ Generate Thread</button>
+            <div id="tw-output" style="display:none;margin-top:16px">
+              <div class="report-output" id="tw-text" style="max-height:300px"></div>
+              <button class="btn btn-ghost" onclick="navigator.clipboard.writeText(document.getElementById('tw-text').textContent);toast('Copied!','success')" style="margin-top:8px;padding:7px 14px;font-size:12px">📋 Copy Thread</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PITCH DECK AI -->
+      <div id="v4-page-pitch-deck" class="page" style="display:none">
+        <div class="page-header">
+          <div><div class="page-title">Pitch Deck AI</div><div class="page-sub">AI-generated investor pitch content — slide by slide</div></div>
+        </div>
+        <div class="card">
+          <div class="tabs" id="pitch-tabs">
+            ${['problem','solution','market','traction','ask'].map((s,i)=>
+              `<div class="tab ${i===0?'active':''}" onclick="v4GenPitch('${s}',this)">${s.charAt(0).toUpperCase()+s.slice(1)}</div>`
+            ).join('')}
+          </div>
+          <div id="pitch-loading" style="display:none" class="loading"><div class="spinner"></div> Generating slide content...</div>
+          <div id="pitch-output" style="display:none">
+            <div class="report-output" id="pitch-text"></div>
+            <button class="btn btn-ghost" onclick="navigator.clipboard.writeText(document.getElementById('pitch-text').textContent);toast('Copied!','success')" style="margin-top:12px;padding:7px 14px;font-size:12px">📋 Copy Slide Content</button>
+          </div>
+          <div id="pitch-placeholder" style="text-align:center;padding:40px;color:var(--text3)">Click a slide tab above to generate investor pitch content</div>
+        </div>
+      </div>
+
+      <!-- COLD EMAIL GENERATOR -->
+      <div id="v4-page-cold-email" class="page" style="display:none">
+        <div class="page-header">
+          <div><div class="page-title">Cold Email Generator</div><div class="page-sub">AI-crafted outreach to real robotics companies — ready to send</div></div>
+        </div>
+        <div class="grid grid-2">
+          <div class="card">
+            <div class="card-header"><div class="card-title">Target Companies</div></div>
+            <div id="email-targets"></div>
+          </div>
+          <div class="card">
+            <div class="card-header"><div class="card-title">Generated Email</div><span id="email-target-name" class="badge badge-blue" style="display:none"></span></div>
+            <div id="email-placeholder" style="text-align:center;padding:40px;color:var(--text3)">Select a company to generate an email</div>
+            <div id="email-output" style="display:none">
+              <div class="report-output" id="email-text" style="max-height:350px"></div>
+              <div style="display:flex;gap:8px;margin-top:10px">
+                <button class="btn btn-ghost" onclick="navigator.clipboard.writeText(document.getElementById('email-text').textContent);toast('Copied!','success')" style="padding:7px 14px;font-size:12px">📋 Copy Email</button>
+                <button class="btn btn-ghost" onclick="v4GenEmail(currentEmailTarget+1)" style="padding:7px 14px;font-size:12px">Next Target →</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    `);
+  }
+
+  // Load initial data for new pages
+  v4LoadFailurePredictions();
+  v4LoadEmailTargets();
+}
+
+let v4AiHistory = [];
+let currentEmailTarget = 0;
+
+function v4ShowPage(name) {
+  document.querySelectorAll('.page, [id^="v4-page-"]').forEach(p => { p.classList.remove('active'); p.style.display = 'none'; });
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const page = document.getElementById('v4-page-' + name);
+  if (page) { page.style.display = 'block'; page.classList.add('active'); }
+  event?.target?.closest('.nav-item')?.classList.add('active');
+}
+
+// AI ANALYST
+async function v4SendAI() {
+  const input = document.getElementById('v4-ai-input');
+  const msg = input.value.trim();
+  if (!msg) return;
+  input.value = '';
+  const btn = document.getElementById('v4-ai-btn');
+  btn.disabled = true;
+  v4AiHistory.push({ role: 'user', content: msg });
+  v4RenderMsg('user', msg);
+  v4RenderMsg('assistant', '<div class="loading"><div class="spinner"></div> Analyzing with AI...</div>', true);
+  try {
+    const r = await api('/ai/chat', { method: 'POST', body: JSON.stringify({ messages: v4AiHistory }) });
+    document.querySelector('[data-v4pending]')?.remove();
+    v4AiHistory.push({ role: 'assistant', content: r.text });
+    v4RenderMsg('assistant', r.text, false, r.model);
+  } catch(e) {
+    document.querySelector('[data-v4pending]')?.remove();
+    v4RenderMsg('assistant', 'AI unavailable: ' + e.message + '. Add GROQ_API_KEY in Railway environment variables for free AI.');
+  }
+  btn.disabled = false;
+}
+
+function v4QuickAsk(q) { document.getElementById('v4-ai-input').value = q; v4SendAI(); }
+
+function v4RenderMsg(role, text, pending=false, model='') {
+  const msgs = document.getElementById('v4-ai-msgs');
+  const div = document.createElement('div');
+  div.className = 'ai-msg ' + role;
+  if (pending) div.setAttribute('data-v4pending', '1');
+  div.innerHTML = `<div class="role">${role==='user'?(currentUser?.name||'You'):'SBX AI'+( model?` <span style="font-size:10px;color:var(--text3)">[${model}]</span>`:'' )}</div><div class="text">${typeof text==='string'?text.replace(/\n/g,'<br>'):text}</div>`;
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function v4ClearChat() { v4AiHistory = []; document.getElementById('v4-ai-msgs').innerHTML = '<div class="ai-msg"><div class="role">SBX AI Analyst</div><div class="text">Chat cleared. Ready to analyze your fleet.</div></div>'; }
+
+// FAILURE PREDICTION
+async function v4LoadFailurePredictions() {
+  try {
+    const systems = await api('/systems');
+    const grid = document.getElementById('v4-failure-grid');
+    if (!grid) return;
+    grid.innerHTML = systems.map(s => `
+      <div class="card" id="fp-${s.id}">
+        <div class="card-header">
+          <div><div style="font-size:14px;font-weight:600">${s.name}</div><div class="mono" style="font-size:11px;color:var(--text3)">${s.location}</div></div>
+          <span class="badge ${s.status==='online'?'badge-green':s.status==='warning'?'badge-orange':'badge-gray'}">${s.status}</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+          <div style="text-align:center"><div class="mono" style="font-size:28px;color:${(s.risk_score||0)>70?'var(--red)':(s.risk_score||0)>40?'var(--orange)':'var(--accent)'}">${s.risk_score||0}</div><div style="font-size:10px;color:var(--text3)">Risk Score</div></div>
+          <div style="flex:1"><div class="risk-bar"><div class="risk-fill" style="width:${s.risk_score||0}%;background:${(s.risk_score||0)>70?'var(--red)':(s.risk_score||0)>40?'var(--orange)':'var(--accent)'}"></div></div><div style="font-size:11px;color:var(--text3);margin-top:4px">Health: ${s.health}% · Load: ${parseFloat(s.current_load||0).toFixed(1)}%</div></div>
+        </div>
+        <button class="btn btn-ghost" onclick="v4PredictFailure('${s.id}')" style="width:100%;padding:8px;font-size:12px" id="fpbtn-${s.id}">🤖 AI Failure Prediction</button>
+        <div id="fp-result-${s.id}" style="display:none;margin-top:12px"></div>
+      </div>
+    `).join('');
+  } catch {}
+}
+
+async function v4PredictFailure(systemId) {
+  const btn = document.getElementById('fpbtn-'+systemId);
+  btn.disabled = true; btn.textContent = 'Analyzing...';
+  try {
+    const r = await api('/ai/predict-failure', { method:'POST', body: JSON.stringify({ system_id: systemId }) });
+    const el = document.getElementById('fp-result-'+systemId);
+    el.style.display = '';
+    el.innerHTML = `<div style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:12px;font-size:12px;font-family:var(--mono);line-height:1.7;white-space:pre-wrap;max-height:200px;overflow-y:auto">${r.text}</div><div style="font-size:10px;color:var(--text3);margin-top:4px">Model: ${r.model}</div>`;
+    btn.textContent = '↻ Re-analyze';
+  } catch(e) { btn.textContent = 'Error — retry'; }
+  btn.disabled = false;
+}
+
+// MARKETING
+async function v4GenLinkedIn() {
+  const btn = document.getElementById('li-btn');
+  btn.disabled = true; btn.textContent = 'Generating...';
+  try {
+    const topic = document.getElementById('li-topic').value;
+    const r = await api('/marketing/linkedin', { method:'POST', body: JSON.stringify({ topic }) });
+    document.getElementById('li-text').textContent = r.text;
+    document.getElementById('li-output').style.display = '';
+    toast('LinkedIn post generated!', 'success');
+  } catch(e) { toast('Generation failed: '+e.message,'error'); }
+  btn.disabled = false; btn.textContent = '⚡ Generate Post';
+}
+
+async function v4GenTwitter() {
+  const btn = document.getElementById('tw-btn');
+  btn.disabled = true; btn.textContent = 'Generating...';
+  try {
+    const topic = document.getElementById('tw-topic').value;
+    const r = await api('/marketing/twitter', { method:'POST', body: JSON.stringify({ topic }) });
+    document.getElementById('tw-text').textContent = r.text;
+    document.getElementById('tw-output').style.display = '';
+    toast('Twitter thread generated!', 'success');
+  } catch(e) { toast('Generation failed: '+e.message,'error'); }
+  btn.disabled = false; btn.textContent = '⚡ Generate Thread';
+}
+
+async function v4GenPitch(slide, el) {
+  document.querySelectorAll('#pitch-tabs .tab').forEach(t=>t.classList.remove('active'));
+  el?.classList.add('active');
+  document.getElementById('pitch-loading').style.display = 'flex';
+  document.getElementById('pitch-output').style.display = 'none';
+  document.getElementById('pitch-placeholder').style.display = 'none';
+  try {
+    const r = await api('/marketing/pitch', { method:'POST', body: JSON.stringify({ slide }) });
+    document.getElementById('pitch-text').textContent = r.text;
+    document.getElementById('pitch-output').style.display = '';
+  } catch(e) { toast('Generation failed','error'); }
+  document.getElementById('pitch-loading').style.display = 'none';
+}
+
+async function v4LoadEmailTargets() {
+  try {
+    const targets = await api('/marketing/targets');
+    const el = document.getElementById('email-targets');
+    if (!el) return;
+    el.innerHTML = targets.map((t,i) => `
+      <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border2);cursor:pointer" onclick="v4GenEmail(${i})">
+        <div style="flex:1"><div style="font-size:13px;font-weight:600">${t.company}</div><div style="font-size:12px;color:var(--text2)">${t.contact} · ${t.type}</div><div style="font-size:11px;color:var(--text3)">${t.location}</div></div>
+        <button class="btn btn-ghost" style="padding:5px 10px;font-size:11px">Generate</button>
+      </div>`).join('');
+  } catch {}
+}
+
+async function v4GenEmail(index) {
+  currentEmailTarget = index;
+  document.getElementById('email-placeholder').style.display = 'none';
+  document.getElementById('email-output').style.display = 'none';
+  try {
+    const r = await api('/marketing/email', { method:'POST', body: JSON.stringify({ target_index: index }) });
+    const badge = document.getElementById('email-target-name');
+    badge.style.display = '';
+    badge.textContent = r.target?.company || 'Company';
+    document.getElementById('email-text').textContent = r.text;
+    document.getElementById('email-output').style.display = '';
+    toast('Email generated for ' + (r.target?.company||'company'), 'success');
+  } catch(e) { toast('Generation failed: '+e.message,'error'); }
+}
+</script>
+<script>
+// ============================================================
+// SBX GUARDIAN v5 — NEW PAGES: SLA, REGULATORY, TEAM, SETTINGS, WAITLIST ADMIN
+// ============================================================
+setTimeout(() => {
+  const content = document.querySelector('.content');
+  if (!content || document.getElementById('v5-injected')) return;
+  document.body.insertAdjacentHTML('beforeend','<span id="v5-injected"></span>');
+
+  // Inject nav
+  const sidebar = document.querySelector('.sidebar');
+  if (sidebar) {
+    const footer = sidebar.querySelector('.nav-footer');
+    footer?.insertAdjacentHTML('beforebegin', `
+      <div class="nav-section" style="margin-top:8px">
+        <div class="nav-label">Operations</div>
+        <div class="nav-item" onclick="v5Page('sla')"><span class="nav-icon">◎</span> SLA Dashboard</div>
+        <div class="nav-item" onclick="v5Page('regulatory')"><span class="nav-icon">⚖</span> Regulatory Intel</div>
+        <div class="nav-item" onclick="v5Page('team')"><span class="nav-icon">◯</span> Team & Access</div>
+        <div class="nav-item" onclick="v5Page('org-settings')"><span class="nav-icon">◈</span> Org Settings</div>
+        <div class="nav-item" onclick="v5Page('waitlist-admin')"><span class="nav-icon">⬡</span> Waitlist</div>
+      </div>
+    `);
+  }
+
+  content.insertAdjacentHTML('beforeend', `
+
+    <!-- SLA DASHBOARD -->
+    <div id="v5-sla" class="page" style="display:none">
+      <div class="page-header"><div><div class="page-title">SLA Dashboard</div><div class="page-sub">Service Level Agreement tracking — 30-day uptime and incident metrics</div></div></div>
+      <div id="sla-grid" class="grid grid-2"><div class="card"><div class="loading"><div class="spinner"></div> Loading SLA data...</div></div></div>
+    </div>
+
+    <!-- REGULATORY INTEL -->
+    <div id="v5-regulatory" class="page" style="display:none">
+      <div class="page-header"><div><div class="page-title">Regulatory Intelligence</div><div class="page-sub">Live updates on EU AI Act, ISO, and IEC regulatory changes</div></div></div>
+      <div id="reg-content"></div>
+    </div>
+
+    <!-- TEAM -->
+    <div id="v5-team" class="page" style="display:none">
+      <div class="page-header">
+        <div><div class="page-title">Team & Access</div><div class="page-sub">Manage users and permissions for your organization</div></div>
+        <button class="btn btn-primary" onclick="openInviteModal()">+ Invite User</button>
+      </div>
+      <div class="card"><div id="team-list"></div></div>
+    </div>
+
+    <!-- ORG SETTINGS -->
+    <div id="v5-org-settings" class="page" style="display:none">
+      <div class="page-header"><div><div class="page-title">Organization Settings</div><div class="page-sub">Configure your organization profile and integrations</div></div></div>
+      <div class="grid grid-2">
+        <div class="card" id="org-settings-form">
+          <div class="card-header"><div class="card-title">Organization Profile</div></div>
+          <div class="loading"><div class="spinner"></div> Loading...</div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">Webhook Integration</div></div>
+          <div id="org-webhook-info"><div class="loading"><div class="spinner"></div> Loading...</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- WAITLIST ADMIN -->
+    <div id="v5-waitlist-admin" class="page" style="display:none">
+      <div class="page-header"><div><div class="page-title">Waitlist</div><div class="page-sub">Companies interested in SBX Guardian</div></div></div>
+      <div class="card"><div id="waitlist-table"></div></div>
+    </div>
+
+  `);
+
+  // SLA Loader
+  async function loadSLA() {
+    try {
+      const data = await api('/sla');
+      const el = document.getElementById('sla-grid');
+      if (!data.length) { el.innerHTML = '<div class="empty"><p>No systems found</p></div>'; return; }
+      el.innerHTML = data.map(s => `
+        <div class="card">
+          <div class="card-header">
+            <div><div style="font-size:14px;font-weight:600">${s.name}</div><div class="mono" style="font-size:11px;color:var(--text3)">${s.location}</div></div>
+            <span class="badge ${s.sla_met?'badge-green':'badge-red'}">${s.sla_met?'SLA MET':'SLA BREACH'}</span>
+          </div>
+          <div class="grid grid-2" style="gap:12px;margin-bottom:12px">
+            <div style="text-align:center;background:var(--bg);padding:12px;border-radius:6px">
+              <div class="mono" style="font-size:24px;color:${s.avg_uptime>=99?'var(--accent)':'var(--orange)'}">${s.avg_uptime}%</div>
+              <div style="font-size:11px;color:var(--text3)">30-day uptime</div>
+            </div>
+            <div style="text-align:center;background:var(--bg);padding:12px;border-radius:6px">
+              <div class="mono" style="font-size:24px;color:${s.incident_count_30d>0?'var(--red)':'var(--accent)'}">${s.incident_count_30d}</div>
+              <div style="font-size:11px;color:var(--text3)">incidents (30d)</div>
+            </div>
+          </div>
+          <div style="font-size:12px;color:var(--text3)">Target: ${s.sla_uptime_target||99}% uptime · Status: ${s.status}</div>
+        </div>
+      `).join('');
+    } catch(e) { toast('Failed to load SLA','error'); }
+  }
+
+  // Regulatory Loader
+  async function loadRegulatory() {
+    try {
+      const data = await api('/regulatory');
+      const el = document.getElementById('reg-content');
+      if (!data.length) {
+        el.innerHTML = `
+          <div class="card" style="background:rgba(0,255,136,0.04);border-color:rgba(0,255,136,0.2);margin-bottom:16px">
+            <div style="display:flex;align-items:center;gap:16px">
+              <div style="font-size:40px">⚖</div>
+              <div><div style="font-size:16px;font-weight:600">EU AI Act Enforcement</div><div style="font-size:13px;color:var(--text2);margin-top:4px">August 2, 2026 — ${Math.ceil((new Date('2026-08-02')-Date.now())/86400000)} days remaining. All industrial robots with ML qualify as High-Risk AI.</div></div>
+              <div class="mono" style="font-size:32px;color:var(--orange);margin-left:auto">${Math.ceil((new Date('2026-08-02')-Date.now())/86400000)}</div>
+            </div>
+          </div>
+          <div class="empty"><p>No regulatory updates yet — check back soon</p></div>`;
+        return;
+      }
+      el.innerHTML = `
+        <div class="card" style="background:rgba(255,140,0,0.04);border-color:rgba(255,140,0,0.2);margin-bottom:16px">
+          <div style="display:flex;align-items:center;gap:16px">
+            <div style="font-size:36px">⚠</div>
+            <div><div style="font-size:15px;font-weight:600">EU AI Act Enforcement: ${Math.ceil((new Date('2026-08-02')-Date.now())/86400000)} days away</div><div style="font-size:13px;color:var(--text2);margin-top:2px">August 2, 2026. Industrial robots with ML = High-Risk AI. Penalty: €30M or 6% global revenue.</div></div>
+          </div>
+        </div>
+        ${data.map(u => `
+          <div class="card" style="margin-bottom:12px">
+            <div style="display:flex;align-items:flex-start;gap:12px">
+              <span class="badge badge-purple">${u.framework}</span>
+              <div style="flex:1">
+                <div style="font-size:14px;font-weight:600;margin-bottom:4px">${u.title}</div>
+                <div style="font-size:13px;color:var(--text2);margin-bottom:8px">${u.summary}</div>
+                <div style="font-size:12px;color:var(--orange)">⚡ Impact: ${u.impact}</div>
+                <div class="mono" style="font-size:11px;color:var(--text3);margin-top:4px">Effective: ${u.effective_date}</div>
+              </div>
+            </div>
+          </div>`).join('')}`;
+    } catch(e) { toast('Failed','error'); }
+  }
+
+  // Team Loader
+  async function loadTeam() {
+    try {
+      const users = await api('/org/users');
+      document.getElementById('team-list').innerHTML = users.map(u => `
+        <div style="display:flex;align-items:center;gap:14px;padding:14px 0;border-bottom:1px solid var(--border2)">
+          <div style="width:36px;height:36px;background:${u.role==='admin'?'var(--accent)':'var(--surface3)'};color:${u.role==='admin'?'var(--bg)':'var(--text)'};border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px">${u.name[0]}</div>
+          <div style="flex:1"><div style="font-size:14px;font-weight:600">${u.name}</div><div style="font-size:12px;color:var(--text2)">${u.email}</div></div>
+          <span class="badge ${u.role==='admin'?'badge-green':'badge-blue'}">${u.role}</span>
+          <div class="mono" style="font-size:11px;color:var(--text3)">${u.last_login?'Last: '+new Date(u.last_login).toLocaleDateString():'Never logged in'}</div>
+        </div>`).join('');
+    } catch(e) { toast('Failed to load team','error'); }
+  }
+
+  // Org Settings Loader
+  async function loadOrgSettings() {
+    try {
+      const org = await api('/org');
+      document.getElementById('org-settings-form').innerHTML = `
+        <div class="card-header"><div class="card-title">Organization Profile</div></div>
+        <div class="form-field" style="margin-bottom:12px"><label>Org Name</label><input type="text" id="org-name" value="${org.name||''}"></div>
+        <div class="form-row">
+          <div class="form-field"><label>Industry</label><input type="text" id="org-industry" value="${org.industry||''}"></div>
+          <div class="form-field"><label>Country</label><input type="text" id="org-country" value="${org.country||''}"></div>
+        </div>
+        <div class="form-field" style="margin-bottom:12px"><label>Alert Email</label><input type="email" id="org-email" value="${org.alert_email||''}"></div>
+        <div class="form-field" style="margin-bottom:12px"><label>VAT Number (EU)</label><input type="text" id="org-vat" value="${org.vat_number||''}"></div>
+        <div style="margin-bottom:12px">
+          <label style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.8px;color:var(--text2);display:block;margin-bottom:6px">SOC 2 Status</label>
+          <span class="badge ${org.soc2_status==='complete'?'badge-green':org.soc2_status==='in_progress'?'badge-orange':'badge-gray'}">${org.soc2_status?.replace('_',' ')||'Not started'}</span>
+        </div>
+        <button class="btn btn-primary" onclick="saveOrgSettings()" style="padding:10px 20px">Save Changes</button>`;
+      document.getElementById('org-webhook-info').innerHTML = `
+        <div style="font-size:13px;color:var(--text2);margin-bottom:12px">Your webhook URL — POST events from any device to this endpoint:</div>
+        <div style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:12px;font-family:var(--mono);font-size:11px;word-break:break-all;color:var(--accent);margin-bottom:10px">${org.webhook_url}</div>
+        <button class="btn btn-ghost" onclick="navigator.clipboard.writeText('${org.webhook_url}');toast('Copied!','success')" style="padding:7px 14px;font-size:12px">📋 Copy Webhook URL</button>`;
+    } catch(e) { toast('Failed','error'); }
+  }
+
+  async function saveOrgSettings() {
+    try {
+      await api('/org', { method:'PUT', body: JSON.stringify({
+        name: document.getElementById('org-name').value,
+        industry: document.getElementById('org-industry').value,
+        country: document.getElementById('org-country').value,
+        alert_email: document.getElementById('org-email').value,
+        vat_number: document.getElementById('org-vat').value,
+      })});
+      toast('Settings saved','success');
+    } catch(e) { toast(e.message,'error'); }
+  }
+
+  // Waitlist Admin
+  async function loadWaitlistAdmin() {
+    try {
+      const data = await api('/waitlist');
+      document.getElementById('waitlist-table').innerHTML = data.length
+        ? `<div style="margin-bottom:12px;color:var(--text2);font-size:13px">${data.length} companies interested</div>
+           <table><thead><tr><th>Email</th><th>Company</th><th>Role</th><th>Systems</th><th>Date</th></tr></thead>
+           <tbody>${data.map(w=>`<tr><td>${w.email}</td><td>${w.company||'—'}</td><td>${w.role||'—'}</td><td>${w.systems_count||'—'}</td><td class="mono" style="font-size:11px">${new Date(w.created_at*1000).toLocaleDateString()}</td></tr>`).join('')}</tbody></table>`
+        : '<div class="empty" style="padding:40px"><p>No waitlist signups yet — share your landing page to collect leads</p></div>';
+    } catch(e) { toast('Failed','error'); }
+  }
+
+  function openInviteModal() {
+    const name = prompt('New user name:');
+    const email = prompt('New user email:');
+    if (!name||!email) return;
+    api('/org/invite',{method:'POST',body:JSON.stringify({name,email,role:'operator'})}).then(r=>{
+      toast(`User created! Temp password: ${r.temp_password}`,'success');
+      loadTeam();
+    }).catch(e=>toast(e.message,'error'));
+  }
+
+  // Page router
+  window.v5Page = function(name) {
+    document.querySelectorAll('.page,[class*="v5-"],[id^="v5-"]').forEach(p=>{p.style.display='none';p.classList.remove('active');});
+    document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+    const p = document.getElementById('v5-'+name);
+    if(p){p.style.display='block';p.classList.add('active');}
+    event?.target?.closest('.nav-item')?.classList.add('active');
+    const loaders = {sla:loadSLA,regulatory:loadRegulatory,team:loadTeam,'org-settings':loadOrgSettings,'waitlist-admin':loadWaitlistAdmin};
+    if(loaders[name]) loaders[name]();
+  };
+
+}, 800);
+</script>
