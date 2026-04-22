@@ -1,0 +1,4 @@
+node_modules/
+sbx.db.json
+*.db
+.env
