@@ -487,3 +487,81 @@ getDB().then(() => {
 // Serve landing page at root, dashboard at /app
 app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'landing.html')));
 app.get('/app', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
+
+// ── WIRE NEW MODULES ──────────────────────────────────────────
+const { getMaintenanceScore, getFleetIntelligence, buildIncidentTimeline, getComplianceGapAnalysis } = require('./intelligence');
+const { dispatchIntegrations } = require('./integrations');
+const { startScheduler } = require('./scheduler');
+const { REPORT_TEMPLATES, buildReportContext, buildPromptForTemplate } = require('./reports');
+const apiV1 = require('./api');
+const { router: healthRouter } = require('./health');
+const { requestLogger, suspiciousActivityDetector, securityHeaders, apiVersionHeader } = require('./middleware');
+
+app.use(requestLogger);
+app.use(suspiciousActivityDetector);
+app.use(securityHeaders);
+app.use(apiVersionHeader);
+app.use('/api', apiV1);
+app.use('/', healthRouter);
+
+// ── INTELLIGENCE ROUTES ───────────────────────────────────────
+app.get('/api/intelligence/fleet', auth, (req, res) => {
+  res.json(getFleetIntelligence(req.user.org_id));
+});
+
+app.get('/api/intelligence/maintenance', auth, (req, res) => {
+  const systems = query('SELECT id FROM systems WHERE org_id=?',[req.user.org_id]);
+  res.json(systems.map(s=>getMaintenanceScore(s.id)).filter(Boolean).sort((a,b)=>a.maintenance_score-b.maintenance_score));
+});
+
+app.get('/api/intelligence/timeline/:system_id', auth, (req, res) => {
+  const { from, to } = req.query;
+  res.json(buildIncidentTimeline(req.params.system_id, req.user.org_id, from?parseInt(from):null, to?parseInt(to):null));
+});
+
+app.get('/api/intelligence/compliance-gaps', auth, (req, res) => {
+  res.json(getComplianceGapAnalysis(req.user.org_id));
+});
+
+// ── ADVANCED REPORT ROUTES ────────────────────────────────────
+app.get('/api/report-templates', auth, (req, res) => {
+  res.json(Object.entries(REPORT_TEMPLATES).map(([k,v])=>({key:k,...v})));
+});
+
+app.post('/api/ai/advanced-report', auth, async (req, res) => {
+  try {
+    const { template, description } = req.body;
+    const context = buildReportContext(req.user.org_id);
+    const prompt = buildPromptForTemplate(template||'eu_ai_act_conformity', context, description);
+    if (!prompt) return res.status(400).json({ error:'Invalid template' });
+    const { smartAI } = require('./ai');
+    const result = await smartAI('evidence_report', { prompt });
+    res.json({ ...result, template, context_snapshot:{ compliance_score:context.compliance.overall_score, eu_score:context.compliance.eu_ai_act_score, fleet_health:context.fleet.avg_health, chain_valid:context.events.chain_valid } });
+  } catch(e) { res.status(500).json({error:e.message}); }
+});
+
+// ── INTEGRATIONS ROUTES ───────────────────────────────────────
+app.get('/api/integrations', auth, (req, res) => {
+  res.json(query('SELECT id,type,enabled,last_sync,created_at FROM integrations WHERE org_id=?',[req.user.org_id]));
+});
+
+app.post('/api/integrations', auth, (req, res) => {
+  const { type, config, enabled } = req.body;
+  const id = uuidv4();
+  run('INSERT INTO integrations (id,org_id,type,config,enabled) VALUES (?,?,?,?,?)',[id,req.user.org_id,type,JSON.stringify(config||{}),enabled!==false?1:0]);
+  res.json({ id, message:'Integration added' });
+});
+
+app.put('/api/integrations/:id', auth, (req, res) => {
+  run('UPDATE integrations SET enabled=COALESCE(?,enabled),config=COALESCE(?,config),last_sync=? WHERE id=? AND org_id=?',
+    [req.body.enabled!==undefined?(req.body.enabled?1:0):null,req.body.config?JSON.stringify(req.body.config):null,Date.now(),req.params.id,req.user.org_id]);
+  res.json({success:true});
+});
+
+app.delete('/api/integrations/:id', auth, (req, res) => {
+  run('DELETE FROM integrations WHERE id=? AND org_id=?',[req.params.id,req.user.org_id]);
+  res.json({success:true});
+});
+
+// Start background scheduler
+setTimeout(() => startScheduler(app.locals.broadcast), 3000);
