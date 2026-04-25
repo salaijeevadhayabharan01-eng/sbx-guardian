@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Data Processing Agreement — SBX Guardian</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Libre+Franklin:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#030508;color:#e6edf3;font-family:'Libre Franklin',sans-serif;line-height:1.7;padding:80px 24px}
+.container{max-width:760px;margin:0 auto}
+nav{position:fixed;top:0;left:0;right:0;background:rgba(3,5,8,0.95);border-bottom:1px solid #1a1d28;padding:14px 40px;display:flex;align-items:center;justify-content:space-between;z-index:100}
+.logo{font-family:'IBM Plex Mono',monospace;font-size:15px;font-weight:700;color:#00e87a;text-decoration:none}
+.back{color:#8892a4;font-size:13px;text-decoration:none}.back:hover{color:#00e87a}
+h1{font-size:32px;font-weight:600;margin:40px 0 8px}
+.meta{color:#8892a4;font-size:13px;margin-bottom:40px}
+h2{font-size:18px;font-weight:600;margin:36px 0 12px;color:#f0f2f8}
+h3{font-size:15px;font-weight:600;margin:20px 0 8px;color:#f0f2f8}
+p{color:#8892a4;margin-bottom:16px;font-size:15px}
+ul{color:#8892a4;padding-left:20px;margin-bottom:16px}
+li{margin-bottom:8px;font-size:15px}
+a{color:#00e87a;text-decoration:none}
+.box{padding:20px;background:#08090f;border:1px solid #1a1d28;border-radius:8px;margin-bottom:20px}
+strong{color:#f0f2f8}
+table{width:100%;border-collapse:collapse;margin-bottom:20px}
+th{text-align:left;padding:10px;background:#08090f;color:#8892a4;font-size:12px;text-transform:uppercase;letter-spacing:0.5px;border-bottom:1px solid #1a1d28}
+td{padding:10px;color:#8892a4;font-size:14px;border-bottom:1px solid #0e1018;vertical-align:top}
+.sign-section{margin-top:40px;padding:24px;background:#08090f;border:1px solid rgba(0,232,122,0.2);border-radius:8px}
+.btn{display:inline-block;background:#00e87a;color:#030508;padding:14px 28px;border-radius:6px;font-weight:700;text-decoration:none;margin-top:16px}
+</style>
+</head>
+<body>
+<nav>
+  <a href="/" class="logo">⬢ SBX GUARDIAN</a>
+  <a href="/" class="back">← Back to Home</a>
+</nav>
+<div class="container">
+  <h1>Data Processing Agreement</h1>
+  <div class="meta">GDPR Article 28 Compliant · Last updated: April 25, 2026</div>
+
+  <div class="box">
+    <p>This Data Processing Agreement ("DPA") is entered into between <strong>SBX Guardian</strong> ("Processor") and the subscribing organization ("Controller") and forms part of the Terms of Service.</p>
+    <p>This DPA meets the requirements of GDPR Article 28, which mandates a written agreement when a data controller engages a data processor.</p>
+  </div>
+
+  <h2>Article 1 — Subject Matter and Duration</h2>
+  <p>SBX Guardian processes personal data on behalf of the Controller solely to provide the SBX Guardian compliance platform as described in the Terms of Service. Processing continues for the duration of the subscription and 90 days thereafter for data deletion procedures.</p>
+
+  <h2>Article 2 — Nature and Purpose of Processing</h2>
+  <p>SBX Guardian processes data for the following purposes:</p>
+  <ul>
+    <li>Storing and hash-chaining event logs from connected AI systems</li>
+    <li>Generating EU AI Act compliance assessments and reports</li>
+    <li>Providing anomaly detection and fleet monitoring</li>
+    <li>Sending alert notifications configured by the Controller</li>
+  </ul>
+
+  <h2>Article 3 — Types of Personal Data Processed</h2>
+  <table>
+    <tr><th>Data Type</th><th>Examples</th><th>Data Subjects</th></tr>
+    <tr><td>Account identifiers</td><td>Name, email, role</td><td>Controller's employees/operators</td></tr>
+    <tr><td>Operational logs</td><td>Operator commands, system interactions</td><td>Operators of AI systems</td></tr>
+    <tr><td>System telemetry</td><td>Robot sensor data, status updates</td><td>May incidentally include personnel location</td></tr>
+    <tr><td>Access logs</td><td>Login timestamps, IP addresses</td><td>Platform users</td></tr>
+  </table>
+
+  <h2>Article 4 — Obligations of the Processor (SBX Guardian)</h2>
+  <p>SBX Guardian shall:</p>
+  <ul>
+    <li>Process personal data only on documented instructions from the Controller</li>
+    <li>Ensure persons authorized to process data are under confidentiality obligations</li>
+    <li>Implement appropriate technical and organisational security measures (Article 32)</li>
+    <li>Assist the Controller in fulfilling data subject rights requests</li>
+    <li>Delete or return all personal data upon termination of services</li>
+    <li>Provide all information necessary to demonstrate compliance with GDPR Article 28</li>
+    <li>Notify the Controller within 72 hours of becoming aware of a personal data breach</li>
+  </ul>
+
+  <h2>Article 5 — Technical and Organisational Measures</h2>
+  <h3>Encryption</h3>
+  <p>All data at rest is protected with AES-256-GCM encryption. Data in transit is protected with TLS 1.2+. Event logs are protected by SHA-256 cryptographic hash chains.</p>
+
+  <h3>Access Controls</h3>
+  <p>Role-based access control (RBAC) restricts access by role. Multi-tenant isolation ensures each organization's data is accessible only to that organization. All access is logged in a tamper-evident audit trail.</p>
+
+  <h3>Availability</h3>
+  <p>Automated backups are performed every 6 hours. UptimeRobot monitoring ensures continuous availability checks. Render.com provides infrastructure-level redundancy.</p>
+
+  <h3>Incident Response</h3>
+  <p>Security incidents are logged automatically. The Controller is notified within 72 hours of any confirmed personal data breach via the alert email on file.</p>
+
+  <h2>Article 6 — Sub-processors</h2>
+  <p>SBX Guardian uses the following sub-processors. The Controller consents to these sub-processors upon execution of this DPA:</p>
+  <table>
+    <tr><th>Sub-processor</th><th>Location</th><th>Purpose</th><th>Safeguards</th></tr>
+    <tr><td>Render Inc.</td><td>United States</td><td>Cloud hosting and infrastructure</td><td>SCCs, SOC 2 Type II</td></tr>
+    <tr><td>Groq Inc.</td><td>United States</td><td>AI report generation (optional)</td><td>SCCs, data not used for training</td></tr>
+    <tr><td>Google LLC</td><td>United States</td><td>Gemini AI (optional)</td><td>SCCs, Google Cloud DPA</td></tr>
+  </table>
+  <p>SBX Guardian will notify the Controller of any intended changes to sub-processors with 14 days notice, giving the Controller opportunity to object.</p>
+
+  <h2>Article 7 — International Data Transfers</h2>
+  <p>Where personal data is transferred outside the EEA, SBX Guardian ensures appropriate safeguards through Standard Contractual Clauses (SCCs) approved by the European Commission under GDPR Article 46.</p>
+
+  <h2>Article 8 — Audit Rights</h2>
+  <p>The Controller may request an audit of SBX Guardian's data processing activities upon 30 days written notice, no more than once per year. SBX Guardian will provide documentation of its security practices and this DPA serves as the primary audit documentation.</p>
+
+  <h2>Article 9 — Data Breach Notification</h2>
+  <p>SBX Guardian will notify the Controller within 72 hours of becoming aware of any personal data breach affecting Controller data, including: nature of the breach, categories of data affected, estimated number of data subjects affected, likely consequences, and measures taken or proposed.</p>
+
+  <h2>Article 10 — Termination</h2>
+  <p>Upon termination of the subscription, SBX Guardian will, at the Controller's choice: return all personal data in JSON format, or certify permanent deletion within 90 days of termination.</p>
+
+  <h2>Article 11 — Governing Law</h2>
+  <p>This DPA is governed by the law applicable to the main Terms of Service and complies with GDPR Regulation (EU) 2016/679.</p>
+
+  <div class="sign-section">
+    <strong style="color:#00e87a">This DPA is incorporated into your Terms of Service</strong>
+    <p style="margin-top:8px">By using SBX Guardian, your organization accepts this DPA. For enterprise clients requiring a signed copy, contact us for a countersigned PDF version.</p>
+    <a href="mailto:legal@sbxguardian.com" class="btn">Request Signed DPA →</a>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>FRIA Wizard — SBX Guardian</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=IBM+Plex+Mono:wght@400;600&family=Libre+Franklin:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#030508;--s1:#08090f;--s2:#0e1018;--border:#1a1d28;--text:#f0f2f8;--text2:#8892a4;--text3:#3d4455;--green:#00e87a;--orange:#ff8800;--red:#ff4d4d;--mono:'IBM Plex Mono',monospace;--sans:'Libre Franklin',sans-serif;--syne:'Syne',sans-serif}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh;padding:80px 20px}
+nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:14px 40px;display:flex;align-items:center;justify-content:space-between;background:rgba(3,5,8,0.96);border-bottom:1px solid var(--border)}
+.logo{font-family:var(--mono);font-size:15px;font-weight:700;color:var(--green);text-decoration:none}
+.back{color:var(--text2);font-size:13px;text-decoration:none}.back:hover{color:var(--green)}
+.main{max-width:800px;margin:0 auto}
+.header{margin-bottom:40px}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--green);margin-bottom:12px}
+h1{font-family:var(--syne);font-size:36px;font-weight:800;letter-spacing:-1.5px;margin-bottom:12px}
+.sub{color:var(--text2);font-size:15px;line-height:1.6}
+.progress{display:flex;gap:4px;margin-bottom:32px}
+.prog-step{flex:1;height:4px;border-radius:2px;background:var(--border);transition:background 0.3s}
+.prog-step.done{background:var(--green)}
+.prog-step.active{background:rgba(0,232,122,0.4)}
+.step{display:none}.step.active{display:block}
+.step-header{margin-bottom:24px}
+.step-num{font-family:var(--mono);font-size:11px;color:var(--text3);letter-spacing:1px;margin-bottom:8px}
+.step-title{font-size:22px;font-weight:600}
+.step-desc{color:var(--text2);font-size:14px;margin-top:6px}
+.question{background:var(--s1);border:1px solid var(--border);border-radius:8px;padding:20px;margin-bottom:12px}
+.q-text{font-size:15px;font-weight:500;margin-bottom:14px}
+.q-sub{font-size:13px;color:var(--text2);margin-bottom:14px}
+.radio-group{display:flex;flex-direction:column;gap:8px}
+.radio-opt{display:flex;align-items:center;gap:10px;padding:10px 14px;border:1px solid var(--border);border-radius:6px;cursor:pointer;transition:all 0.15s;font-size:14px}
+.radio-opt:hover{border-color:var(--green);background:rgba(0,232,122,0.03)}
+.radio-opt.selected{border-color:var(--green);background:rgba(0,232,122,0.06);color:var(--text)}
+.radio-opt input{accent-color:var(--green)}
+textarea,input[type=text]{width:100%;padding:10px 14px;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:var(--sans);font-size:14px;outline:none;transition:border-color 0.2s;margin-top:8px}
+textarea{resize:vertical;min-height:80px;font-family:var(--mono);font-size:12px;line-height:1.6}
+textarea:focus,input:focus{border-color:var(--green)}
+.nav-row{display:flex;justify-content:space-between;align-items:center;margin-top:24px}
+.btn{padding:12px 24px;border-radius:6px;font-size:14px;font-weight:600;cursor:pointer;border:none;font-family:var(--sans);transition:all 0.15s}
+.btn-primary{background:var(--green);color:#030508}.btn-primary:hover{background:#00b85e}
+.btn-ghost{background:transparent;color:var(--text2);border:1px solid var(--border)}.btn-ghost:hover{border-color:var(--green);color:var(--green)}
+.report-output{background:var(--bg);border:1px solid rgba(0,232,122,0.2);border-radius:8px;padding:24px;font-family:var(--mono);font-size:12px;line-height:1.8;white-space:pre-wrap;max-height:600px;overflow-y:auto}
+.dl-btn{display:inline-flex;align-items:center;gap:8px;background:var(--green);color:#030508;padding:12px 24px;border-radius:6px;font-weight:700;cursor:pointer;border:none;font-family:var(--sans);font-size:14px;margin-top:16px}
+label{display:block;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.8px;color:var(--text2);margin-bottom:6px}
+</style>
+</head>
+<body>
+<nav>
+  <a href="/" class="logo">⬢ SBX GUARDIAN</a>
+  <a href="/app" class="back">← Dashboard</a>
+</nav>
+
+<div class="main">
+  <div class="header">
+    <div class="eyebrow">EU AI Act Tool</div>
+    <h1>FRIA Wizard</h1>
+    <p class="sub">Fundamental Rights Impact Assessment — required for high-risk AI systems under EU AI Act Article 27. Complete this 6-step wizard to generate a court-ready FRIA document.</p>
+  </div>
+
+  <div class="progress" id="progress"></div>
+
+  <!-- STEP 1 -->
+  <div class="step active" id="step-1">
+    <div class="step-header">
+      <div class="step-num">STEP 1 OF 6</div>
+      <div class="step-title">System Identification</div>
+      <div class="step-desc">Identify the AI system(s) covered by this FRIA</div>
+    </div>
+    <div class="question"><div class="q-text">System name and description</div><label>System Name</label><input type="text" id="s1-name" placeholder="e.g. KUKA KR 1000 — Assembly Bay A"><label style="margin-top:12px">System Description</label><textarea id="s1-desc" placeholder="Describe what the AI system does, where it operates, and its primary functions..."></textarea></div>
+    <div class="question"><div class="q-text">Who operates this system?</div><label>Operator / Deployer Organization</label><input type="text" id="s1-org" placeholder="e.g. Acme Manufacturing GmbH"><label style="margin-top:12px">Country of Operation</label><input type="text" id="s1-country" placeholder="e.g. Germany"></div>
+    <div class="question"><div class="q-text">EU AI Act risk classification</div><div class="radio-group">
+      <label class="radio-opt" onclick="select(this)"><input type="radio" name="risk-class" value="annex3"> Annex III — High-risk AI (e.g., employment, education, safety component)</label>
+      <label class="radio-opt" onclick="select(this)"><input type="radio" name="risk-class" value="annex1"> Annex I — Safety component in regulated product (e.g., machinery)</label>
+      <label class="radio-opt" onclick="select(this)"><input type="radio" name="risk-class" value="uncertain"> Uncertain — need classification guidance</label>
+    </div></div>
+    <div class="nav-row"><div></div><button class="btn btn-primary" onclick="nextStep()">Continue →</button></div>
+  </div>
+
+  <!-- STEP 2 -->
+  <div class="step" id="step-2">
+    <div class="step-header"><div class="step-num">STEP 2 OF 6</div><div class="step-title">Affected Persons</div><div class="step-desc">Identify who may be affected by this AI system's decisions or actions</div></div>
+    <div class="question"><div class="q-text">Who are the directly affected persons?</div><div class="radio-group">
+      <label class="radio-opt" onclick="toggleOpt(this)"><input type="checkbox" value="workers"> Workers / employees operating near the system</label>
+      <label class="radio-opt" onclick="toggleOpt(this)"><input type="checkbox" value="visitors"> Visitors, contractors, or third parties on-site</label>
+      <label class="radio-opt" onclick="toggleOpt(this)"><input type="checkbox" value="public"> General public (outdoor or public-facing deployment)</label>
+      <label class="radio-opt" onclick="toggleOpt(this)"><input type="checkbox" value="vulnerable"> Vulnerable groups (elderly, disabled, children)</label>
+      <label class="radio-opt" onclick="toggleOpt(this)"><input type="checkbox" value="consumers"> End consumers of products made by this system</label>
+    </div></div>
+    <div class="question"><div class="q-text">Estimated number of affected persons</div><div class="radio-group">
+      <label class="radio-opt" onclick="select(this)"><input type="radio" name="num-affected" value="small"> Fewer than 50 people</label>
+      <label class="radio-opt" onclick="select(this)"><input type="radio" name="num-affected" value="medium"> 50 – 500 people</label>
+      <label class="radio-opt" onclick="select(this)"><input type="radio" name="num-affected" value="large"> 500 – 10,000 people</label>
+      <label class="radio-opt" onclick="select(this)"><input type="radio" name="num-affected" value="very-large"> More than 10,000 people</label>
+    </div></div>
+    <div class="nav-row"><button class="btn btn-ghost" onclick="prevStep()">← Back</button><button class="btn btn-primary" onclick="nextStep()">Continue →</button></div>
+  </div>
+
+  <!-- STEP 3 -->
+  <div class="step" id="step-3">
+    <div class="step-header"><div class="step-num">STEP 3 OF 6</div><div class="step-title">Rights at Risk</div><div class="step-desc">Identify which fundamental rights may be affected</div></div>
+    <div class="question"><div class="q-text">Which fundamental rights could this system affect?</div><div class="q-sub">Check all that may apply. Be thorough — this is what regulators will scrutinize.</div><div class="radio-group">
+      <label class="radio-opt" onclick="toggleOpt(this)"><input type="checkbox" value="safety"> Right to physical safety and bodily integrity</label>
+      <label class="radio-opt" onclick="toggleOpt(this)"><input type="checkbox" value="dignity"> Human dignity</label>
+      <label class="radio-opt" onclick="toggleOpt(this)"><input type="checkbox" value="privacy"> Privacy and data protection</label>
+      <label class="radio-opt" onclick="toggleOpt(this)"><input type="checkbox" value="nondiscrim"> Non-discrimination and equal treatment</label>
+      <label class="radio-opt" onclick="toggleOpt(this)"><input type="checkbox" value="work"> Fair working conditions</label>
+      <label class="radio-opt" onclick="toggleOpt(this)"><input type="checkbox" value="oversight"> Right to human oversight of decisions</label>
+      <label class="radio-opt" onclick="toggleOpt(this)"><input type="checkbox" value="remedy"> Right to an effective remedy</label>
+    </div></div>
+    <div class="question"><div class="q-text">Severity of potential rights impact</div><div class="radio-group">
+      <label class="radio-opt" onclick="select(this)"><input type="radio" name="severity" value="low"> Low — minimal likelihood of harm, easily reversible</label>
+      <label class="radio-opt" onclick="select(this)"><input type="radio" name="severity" value="medium"> Medium — possible harm, partially reversible</label>
+      <label class="radio-opt" onclick="select(this)"><input type="radio" name="severity" value="high"> High — significant potential harm, difficult to reverse</label>
+      <label class="radio-opt" onclick="select(this)"><input type="radio" name="severity" value="critical"> Critical — irreversible harm possible (physical injury, death)</label>
+    </div></div>
+    <div class="nav-row"><button class="btn btn-ghost" onclick="prevStep()">← Back</button><button class="btn btn-primary" onclick="nextStep()">Continue →</button></div>
+  </div>
+
+  <!-- STEP 4 -->
+  <div class="step" id="step-4">
+    <div class="step-header"><div class="step-num">STEP 4 OF 6</div><div class="step-title">Existing Safeguards</div><div class="step-desc">Document the measures already in place to protect rights</div></div>
+    <div class="question"><div class="q-text">What technical safeguards are in place?</div><div class="radio-group">
+      <label class="radio-opt" onclick="toggleOpt(this)"><input type="checkbox" value="logging"> Tamper-evident logging (e.g. SBX Guardian)</label>
+      <label class="radio-opt" onclick="toggleOpt(this)"><input type="checkbox" value="estop"> Emergency stop mechanisms</label>
+      <label class="radio-opt" onclick="toggleOpt(this)"><input type="checkbox" value="fencing"> Physical safety barriers / fencing</label>
+      <label class="radio-opt" onclick="toggleOpt(this)"><input type="checkbox" value="sensors"> Collision detection / proximity sensors</label>
+      <label class="radio-opt" onclick="toggleOpt(this)"><input type="checkbox" value="oversight"> Human oversight controls</label>
+      <label class="radio-opt" onclick="toggleOpt(this)"><input type="checkbox" value="testing"> Regular safety testing and validation</label>
+    </div></div>
+    <div class="question"><div class="q-text">Are these safeguards sufficient for the identified risks?</div><textarea id="s4-assessment" placeholder="Describe your assessment of whether existing safeguards adequately address the rights risks identified in Step 3..."></textarea></div>
+    <div class="nav-row"><button class="btn btn-ghost" onclick="prevStep()">← Back</button><button class="btn btn-primary" onclick="nextStep()">Continue →</button></div>
+  </div>
+
+  <!-- STEP 5 -->
+  <div class="step" id="step-5">
+    <div class="step-header"><div class="step-num">STEP 5 OF 6</div><div class="step-title">Mitigation Measures</div><div class="step-desc">Document planned additional measures to mitigate identified risks</div></div>
+    <div class="question"><div class="q-text">What additional measures will you implement?</div><textarea id="s5-measures" placeholder="List specific, concrete measures planned to reduce risks to fundamental rights. Include timelines where possible..." style="min-height:120px"></textarea></div>
+    <div class="question"><div class="q-text">Residual risk after mitigation</div><div class="radio-group">
+      <label class="radio-opt" onclick="select(this)"><input type="radio" name="residual" value="acceptable"> Acceptable — residual risk is low and proportionate to benefits</label>
+      <label class="radio-opt" onclick="select(this)"><input type="radio" name="residual" value="monitored"> Requires ongoing monitoring — risks present but managed</label>
+      <label class="radio-opt" onclick="select(this)"><input type="radio" name="residual" value="unacceptable"> Unacceptable — deployment should not proceed until addressed</label>
+    </div></div>
+    <div class="question"><div class="q-text">Who conducted this assessment?</div><label>Assessor Name / Role</label><input type="text" id="s5-assessor" placeholder="e.g. Maria Schmidt, Chief Safety Officer"><label style="margin-top:12px">Date of Assessment</label><input type="text" id="s5-date" placeholder="e.g. April 25, 2026"></div>
+    <div class="nav-row"><button class="btn btn-ghost" onclick="prevStep()">← Back</button><button class="btn btn-primary" onclick="nextStep()">Continue →</button></div>
+  </div>
+
+  <!-- STEP 6 - GENERATE -->
+  <div class="step" id="step-6">
+    <div class="step-header"><div class="step-num">STEP 6 OF 6</div><div class="step-title">Generate Your FRIA</div><div class="step-desc">Review and download your completed Fundamental Rights Impact Assessment</div></div>
+    <div id="fria-output" style="display:none">
+      <div class="report-output" id="fria-text"></div>
+      <button class="dl-btn" onclick="downloadFRIA()">⬇ Download FRIA (JSON)</button>
+      <button class="dl-btn" style="background:var(--s1);color:var(--text);border:1px solid var(--border);margin-left:8px" onclick="copyFRIA()">📋 Copy Text</button>
+    </div>
+    <div id="fria-placeholder">
+      <div style="text-align:center;padding:40px;color:var(--text2)">
+        <div style="font-size:48px;margin-bottom:16px">📋</div>
+        <div style="font-size:16px;margin-bottom:8px">Ready to generate your FRIA</div>
+        <div style="font-size:13px;color:var(--text3)">Click below to generate your completed assessment document</div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="btn btn-ghost" onclick="prevStep()">← Back</button>
+      <button class="btn btn-primary" onclick="generateFRIA()">⚡ Generate FRIA Document</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let currentStep = 1;
+const totalSteps = 6;
+
+function updateProgress() {
+  const prog = document.getElementById('progress');
+  prog.innerHTML = '';
+  for(let i=1;i<=totalSteps;i++) {
+    const d = document.createElement('div');
+    d.className = 'prog-step' + (i<currentStep?' done':i===currentStep?' active':'');
+    prog.appendChild(d);
+  }
+}
+
+function showStep(n) {
+  document.querySelectorAll('.step').forEach(s=>s.classList.remove('active'));
+  document.getElementById('step-'+n).classList.add('active');
+  currentStep = n;
+  updateProgress();
+  window.scrollTo(0,0);
+}
+
+function nextStep() { if(currentStep<totalSteps) showStep(currentStep+1); }
+function prevStep() { if(currentStep>1) showStep(currentStep-1); }
+
+function select(el) {
+  const name = el.querySelector('input').name;
+  document.querySelectorAll(`[name="${name}"]`).forEach(r=>r.closest('.radio-opt')?.classList.remove('selected'));
+  el.classList.add('selected');
+  el.querySelector('input').checked=true;
+}
+
+function toggleOpt(el) {
+  el.classList.toggle('selected');
+}
+
+function getChecked(name) {
+  return [...document.querySelectorAll(`input[name="${name}"]:checked`)].map(i=>i.value);
+}
+
+function getCheckedBoxes(stepId) {
+  return [...document.querySelectorAll(`#${stepId} input[type=checkbox]:checked`)].map(i=>i.closest('.radio-opt').textContent.trim());
+}
+
+function generateFRIA() {
+  const date = document.getElementById('s5-date').value || new Date().toLocaleDateString();
+  const assessor = document.getElementById('s5-assessor').value || 'Not specified';
+  const sysName = document.getElementById('s1-name').value || 'Not specified';
+  const sysDesc = document.getElementById('s1-desc').value || 'Not specified';
+  const org = document.getElementById('s1-org').value || 'Not specified';
+  const country = document.getElementById('s1-country').value || 'Not specified';
+  const riskClass = document.querySelector('input[name="risk-class"]:checked')?.value || 'Not assessed';
+  const numAffected = document.querySelector('input[name="num-affected"]:checked')?.parentElement?.textContent.trim() || 'Not specified';
+  const severity = document.querySelector('input[name="severity"]:checked')?.value || 'Not assessed';
+  const residual = document.querySelector('input[name="residual"]:checked')?.value || 'Not assessed';
+  const safeguards = getCheckedBoxes('step-4');
+  const s4assess = document.getElementById('s4-assessment').value || 'Not provided';
+  const s5measures = document.getElementById('s5-measures').value || 'Not provided';
+
+  const fria = `FUNDAMENTAL RIGHTS IMPACT ASSESSMENT (FRIA)
+EU AI Act — Article 27
+═══════════════════════════════════════════════════════════
+
+DOCUMENT REFERENCE: FRIA-${Date.now().toString(36).toUpperCase()}
+DATE OF ASSESSMENT: ${date}
+CONDUCTED BY: ${assessor}
+GENERATED VIA: SBX Guardian Compliance Platform
+
+═══════════════════════════════════════════════════════════
+SECTION 1: SYSTEM IDENTIFICATION
+═══════════════════════════════════════════════════════════
+
+System Name: ${sysName}
+Deployer Organization: ${org}
+Country of Operation: ${country}
+EU AI Act Classification: ${riskClass}
+
+System Description:
+${sysDesc}
+
+═══════════════════════════════════════════════════════════
+SECTION 2: AFFECTED PERSONS
+═══════════════════════════════════════════════════════════
+
+Categories of Affected Persons:
+${getCheckedBoxes('step-2').map(s=>'• '+s).join('\n') || '• Not specified'}
+
+Estimated Number of Affected Persons: ${numAffected}
+
+═══════════════════════════════════════════════════════════
+SECTION 3: FUNDAMENTAL RIGHTS ANALYSIS
+═══════════════════════════════════════════════════════════
+
+Rights Identified as Potentially Affected:
+${getCheckedBoxes('step-3').map(s=>'• '+s).join('\n') || '• None identified'}
+
+Severity Assessment: ${severity.toUpperCase()}
+
+EU Charter References:
+• Article 1 — Human Dignity
+• Article 3 — Right to Integrity of the Person
+• Article 7 — Respect for Private Life
+• Article 21 — Non-discrimination
+• Article 31 — Fair and Just Working Conditions
+• Article 47 — Right to an Effective Remedy
+
+═══════════════════════════════════════════════════════════
+SECTION 4: EXISTING SAFEGUARDS
+═══════════════════════════════════════════════════════════
+
+Technical and Organisational Measures in Place:
+${safeguards.map(s=>'• '+s).join('\n') || '• None documented'}
+
+Assessment of Safeguard Adequacy:
+${s4assess}
+
+═══════════════════════════════════════════════════════════
+SECTION 5: MITIGATION MEASURES
+═══════════════════════════════════════════════════════════
+
+Additional Measures to be Implemented:
+${s5measures}
+
+═══════════════════════════════════════════════════════════
+SECTION 6: CONCLUSION
+═══════════════════════════════════════════════════════════
+
+Residual Risk Level: ${residual.toUpperCase()}
+
+This Fundamental Rights Impact Assessment has been conducted in accordance with:
+• EU AI Act Article 27 (Fundamental Rights Impact Assessment)
+• EU Charter of Fundamental Rights
+• GDPR Article 35 (Data Protection Impact Assessment)
+
+This assessment should be reviewed and updated:
+• Before any significant modification to the AI system
+• When the operational context changes materially
+• At minimum annually during the system's operational life
+• Following any incident involving the system
+
+═══════════════════════════════════════════════════════════
+CERTIFICATION
+═══════════════════════════════════════════════════════════
+
+I certify that this FRIA has been conducted to the best of my knowledge and represents an accurate assessment of the fundamental rights implications of deploying this AI system.
+
+Assessor: ${assessor}
+Date: ${date}
+Organization: ${org}
+
+[Signature line — print and sign for physical copy]
+
+Generated by SBX Guardian — EU AI Act Compliance Platform
+Document Reference: FRIA-${Date.now().toString(36).toUpperCase()}`;
+
+  document.getElementById('fria-text').textContent = fria;
+  document.getElementById('fria-placeholder').style.display = 'none';
+  document.getElementById('fria-output').style.display = 'block';
+  window._friaText = fria;
+  window._friaData = { system:sysName, org, date, assessor, severity, residual, generated_at:new Date().toISOString(), fria_text:fria };
+}
+
+function downloadFRIA() {
+  const blob = new Blob([JSON.stringify(window._friaData,null,2)],{type:'application/json'});
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+  a.download = `FRIA-${(document.getElementById('s1-name').value||'system').replace(/\s+/g,'-')}-${Date.now()}.json`;
+  a.click();
+}
+
+function copyFRIA() {
+  navigator.clipboard.writeText(window._friaText||'');
+  alert('FRIA copied to clipboard');
+}
+
+updateProgress();
+</script>
+</body>
+</html>

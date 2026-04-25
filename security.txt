@@ -1,0 +1,14 @@
+Contact: mailto:security@sbxguardian.com
+Expires: 2027-12-31T23:59:59.000Z
+Encryption: https://sbx-guardian.onrender.com/pgp-key.txt
+Acknowledgments: https://sbx-guardian.onrender.com/security.html
+Preferred-Languages: en, de, fr
+Canonical: https://sbx-guardian.onrender.com/.well-known/security.txt
+Policy: https://sbx-guardian.onrender.com/security.html
+
+# SBX Guardian Responsible Disclosure Policy
+# We appreciate security researchers who help keep our platform secure.
+# Please do not publicly disclose vulnerabilities before we have had 
+# the opportunity to address them (90-day coordinated disclosure).
+# We commit to: acknowledging reports within 48 hours, providing
+# status updates, and crediting researchers (if desired).
