@@ -148,3 +148,87 @@ function run(sql, params = []) {
 function get(sql, params = []) { return query(sql, params)[0] || null; }
 
 module.exports = { getDB, saveDB, query, run, get, computeHash };
+
+// Additional tables for marketing automation
+function addMarketingTables() {
+  try {
+    db.run(`
+      ALTER TABLE waitlist ADD COLUMN welcome_sent INTEGER DEFAULT 0;
+    `);
+  } catch {}
+  try {
+    db.run(`
+      CREATE TABLE IF NOT EXISTS outreach_log (
+        id TEXT PRIMARY KEY, company TEXT, contact TEXT, channel TEXT,
+        subject TEXT, status TEXT DEFAULT 'pending',
+        sent_at INTEGER DEFAULT (strftime('%s','now'))
+      );
+      CREATE TABLE IF NOT EXISTS generated_content (
+        id TEXT PRIMARY KEY, type TEXT, title TEXT, content TEXT,
+        status TEXT DEFAULT 'ready',
+        created_at INTEGER DEFAULT (strftime('%s','now'))
+      );
+    `);
+    saveDB();
+  } catch {}
+}
+
+const _origGetDB = getDB;
+module.exports.getDB = async function() {
+  const db = await _origGetDB();
+  addMarketingTables();
+  return db;
+};
+
+// Extended schema for CRM, nurture, security
+function extendSchema() {
+  const tables = [
+    `CREATE TABLE IF NOT EXISTS crm_prospects (
+      id TEXT PRIMARY KEY, org_id TEXT, company TEXT, contact_name TEXT,
+      email TEXT, phone TEXT, title TEXT, industry TEXT, country TEXT,
+      systems_count TEXT, source TEXT DEFAULT 'manual', notes TEXT,
+      stage TEXT DEFAULT 'lead', score INTEGER DEFAULT 0,
+      deal_value REAL DEFAULT 0, last_contacted INTEGER,
+      created_at INTEGER DEFAULT (strftime('%s','now')),
+      updated_at INTEGER DEFAULT (strftime('%s','now'))
+    )`,
+    `CREATE TABLE IF NOT EXISTS crm_activities (
+      id TEXT PRIMARY KEY, prospect_id TEXT, org_id TEXT,
+      type TEXT, description TEXT, outcome TEXT,
+      next_action TEXT, next_action_date INTEGER,
+      created_by TEXT, created_at INTEGER DEFAULT (strftime('%s','now'))
+    )`,
+    `CREATE TABLE IF NOT EXISTS nurture_queue (
+      id TEXT PRIMARY KEY, email TEXT UNIQUE, name TEXT, company TEXT,
+      org_id TEXT, email_index INTEGER DEFAULT 0, emails_sent INTEGER DEFAULT 0,
+      next_email_at INTEGER, last_sent_at INTEGER, enrolled_at INTEGER,
+      completed INTEGER DEFAULT 0
+    )`,
+    `CREATE TABLE IF NOT EXISTS security_audit (
+      id TEXT PRIMARY KEY, org_id TEXT, user_id TEXT, action TEXT,
+      resource TEXT, resource_id TEXT, details TEXT,
+      ip_address TEXT, created_at INTEGER DEFAULT (strftime('%s','now'))
+    )`,
+    `CREATE TABLE IF NOT EXISTS security_sessions (
+      id TEXT PRIMARY KEY, user_id TEXT, org_id TEXT,
+      ip_address TEXT, user_agent TEXT,
+      created_at INTEGER, last_active INTEGER, expires_at INTEGER
+    )`,
+    `CREATE TABLE IF NOT EXISTS api_keys (
+      id TEXT PRIMARY KEY, org_id TEXT, name TEXT, key_hash TEXT UNIQUE,
+      permissions TEXT, revoked INTEGER DEFAULT 0,
+      last_used INTEGER, created_at INTEGER DEFAULT (strftime('%s','now'))
+    )`
+  ];
+  tables.forEach(sql => { try { db.run(sql); } catch {} });
+  try { db.run('ALTER TABLE waitlist ADD COLUMN welcome_sent INTEGER DEFAULT 0'); } catch {}
+  saveDB();
+}
+
+// Auto-extend on DB load
+const _getDB = module.exports.getDB;
+module.exports.getDB = async function() {
+  const result = await _getDB();
+  extendSchema();
+  return result;
+};
