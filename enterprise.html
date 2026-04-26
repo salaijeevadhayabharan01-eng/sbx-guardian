@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Enterprise — SBX Guardian</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#020305;--s1:#07080d;--s2:#0c0e14;--border:#161924;
+  --text:#eef0f8;--text2:#7a849a;--text3:#353d52;
+  --gold:#c8a84b;--gold2:#e8c96b;--green:#00d97e;
+  --mono:'DM Mono',monospace;--sans:'DM Sans',sans-serif;--syne:'Syne',sans-serif
+}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);overflow-x:hidden}
+
+/* Grain texture overlay */
+body::before{content:'';position:fixed;inset:0;opacity:0.04;pointer-events:none;z-index:1;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size:200px}
+
+/* Gold line accent */
+body::after{content:'';position:fixed;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);z-index:200}
+
+nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:16px 48px;display:flex;align-items:center;justify-content:space-between;background:rgba(2,3,5,0.9);border-bottom:1px solid var(--border);backdrop-filter:blur(24px)}
+.logo{font-family:var(--syne);font-size:15px;font-weight:800;letter-spacing:2px;display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--text)}
+.logo-mark{width:24px;height:24px;background:var(--gold);border-radius:3px;display:flex;align-items:center;justify-content:center;color:#020305;font-size:9px;font-weight:800}
+.nav-links{display:flex;gap:32px;align-items:center}
+.nav-links a{color:var(--text2);text-decoration:none;font-size:13px;letter-spacing:0.3px;transition:color 0.2s}
+.nav-links a:hover{color:var(--text)}
+.nav-cta{background:var(--gold);color:#020305;padding:9px 20px;border-radius:3px;font-size:13px;font-weight:600;letter-spacing:0.3px;text-decoration:none;transition:background 0.2s}
+.nav-cta:hover{background:var(--gold2)}
+
+/* HERO */
+.hero{min-height:100vh;display:flex;align-items:center;padding:0 48px;position:relative;z-index:2}
+.hero::before{content:'';position:absolute;top:20%;left:50%;transform:translateX(-50%);width:600px;height:600px;background:radial-gradient(circle,rgba(200,168,75,0.04) 0%,transparent 70%);pointer-events:none}
+.hero-inner{max-width:1100px;margin:0 auto;width:100%}
+.hero-tag{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);border:1px solid rgba(200,168,75,0.2);padding:6px 14px;border-radius:2px;margin-bottom:32px}
+.hero-tag-dot{width:6px;height:6px;background:var(--gold);border-radius:50%}
+h1{font-family:var(--syne);font-size:clamp(52px,6vw,88px);font-weight:800;letter-spacing:-3px;line-height:0.95;margin-bottom:28px}
+h1 span{color:var(--gold)}
+.hero-sub{font-size:18px;color:var(--text2);max-width:560px;line-height:1.7;margin-bottom:48px;font-weight:300}
+.hero-actions{display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+.btn-gold{background:var(--gold);color:#020305;padding:14px 32px;border-radius:3px;font-size:15px;font-weight:600;text-decoration:none;letter-spacing:0.3px;transition:all 0.2s;display:inline-flex;align-items:center;gap:8px}
+.btn-gold:hover{background:var(--gold2);transform:translateY(-1px)}
+.btn-outline{border:1px solid var(--border);color:var(--text2);padding:14px 32px;border-radius:3px;font-size:15px;font-weight:500;text-decoration:none;transition:all 0.2s}
+.btn-outline:hover{border-color:var(--gold);color:var(--gold)}
+
+/* LOGOS */
+.logos{padding:60px 48px;border-top:1px solid var(--border);border-bottom:1px solid var(--border);position:relative;z-index:2}
+.logos-inner{max-width:1100px;margin:0 auto}
+.logos-label{font-family:var(--mono);font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--text3);text-align:center;margin-bottom:32px}
+.logos-row{display:flex;align-items:center;justify-content:center;gap:56px;flex-wrap:wrap}
+.logo-item{font-family:var(--syne);font-size:16px;font-weight:700;color:var(--text3);letter-spacing:1px;transition:color 0.2s}
+.logo-item:hover{color:var(--text2)}
+
+/* SECTION */
+section{padding:100px 48px;position:relative;z-index:2}
+.section-inner{max-width:1100px;margin:0 auto}
+.section-tag{font-family:var(--mono);font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:16px}
+.section-title{font-family:var(--syne);font-size:clamp(36px,4vw,56px);font-weight:800;letter-spacing:-2px;margin-bottom:16px;line-height:1.05}
+.section-sub{color:var(--text2);font-size:16px;max-width:520px;line-height:1.7;font-weight:300}
+
+/* STAKEHOLDER CARDS */
+.stakeholder-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border);border:1px solid var(--border);border-radius:4px;overflow:hidden;margin-top:48px}
+.stakeholder{background:var(--s1);padding:36px;transition:background 0.2s}
+.stakeholder:hover{background:var(--s2)}
+.sh-role{font-family:var(--mono);font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:12px}
+.sh-title{font-family:var(--syne);font-size:22px;font-weight:700;margin-bottom:12px}
+.sh-desc{color:var(--text2);font-size:14px;line-height:1.6;margin-bottom:20px}
+.sh-features{list-style:none}
+.sh-features li{display:flex;align-items:flex-start;gap:10px;padding:6px 0;font-size:13px;color:var(--text2);border-bottom:1px solid var(--border)}
+.sh-features li:last-child{border-bottom:none}
+.sh-features li::before{content:'✓';color:var(--gold);font-weight:700;flex-shrink:0;margin-top:1px}
+
+/* SECURITY GRID */
+.security-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:48px}
+.sec-card{background:var(--s1);border:1px solid var(--border);border-radius:4px;padding:28px;position:relative;overflow:hidden;transition:border-color 0.2s}
+.sec-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--gold);transform:scaleX(0);transition:transform 0.3s;transform-origin:left}
+.sec-card:hover::before{transform:scaleX(1)}
+.sec-card:hover{border-color:rgba(200,168,75,0.2)}
+.sec-icon{font-size:28px;margin-bottom:16px}
+.sec-name{font-family:var(--syne);font-size:16px;font-weight:700;margin-bottom:8px}
+.sec-desc{font-size:13px;color:var(--text2);line-height:1.6}
+.sec-status{margin-top:14px;font-family:var(--mono);font-size:10px;letter-spacing:1px;text-transform:uppercase;padding:4px 10px;border-radius:2px;display:inline-block}
+.ss-active{background:rgba(0,217,126,0.1);color:var(--green);border:1px solid rgba(0,217,126,0.2)}
+.ss-progress{background:rgba(200,168,75,0.1);color:var(--gold);border:1px solid rgba(200,168,75,0.2)}
+
+/* INTEGRATIONS */
+.int-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:48px}
+.int-card{background:var(--s1);border:1px solid var(--border);border-radius:4px;padding:20px;text-align:center;transition:all 0.2s}
+.int-card:hover{border-color:rgba(200,168,75,0.2);background:var(--s2)}
+.int-logo{font-size:28px;margin-bottom:10px}
+.int-name{font-size:13px;font-weight:600;margin-bottom:4px}
+.int-type{font-size:11px;color:var(--text3)}
+
+/* SLA TABLE */
+.sla-table{width:100%;border-collapse:collapse;margin-top:48px}
+.sla-table th{text-align:left;padding:14px 20px;font-family:var(--mono);font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);border-bottom:1px solid var(--border)}
+.sla-table td{padding:16px 20px;font-size:14px;border-bottom:1px solid var(--border);color:var(--text2)}
+.sla-table td:first-child{color:var(--text);font-weight:500}
+.sla-table tr:hover td{background:var(--s1)}
+.sla-highlight{color:var(--gold)!important;font-weight:600}
+
+/* PRICING */
+.pricing-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:48px}
+.plan{background:var(--s1);border:1px solid var(--border);border-radius:4px;padding:36px;transition:border-color 0.2s}
+.plan.featured{border-color:rgba(200,168,75,0.4);background:var(--s2);position:relative}
+.plan-badge{position:absolute;top:-1px;left:50%;transform:translateX(-50%);background:var(--gold);color:#020305;font-family:var(--mono);font-size:10px;letter-spacing:1.5px;text-transform:uppercase;padding:4px 16px;border-radius:0 0 4px 4px;font-weight:700}
+.plan-name{font-family:var(--syne);font-size:22px;font-weight:700;margin-bottom:8px}
+.plan-price{font-family:var(--syne);font-size:44px;font-weight:800;letter-spacing:-2px;margin-bottom:4px}
+.plan-price span{font-size:16px;color:var(--text3);font-weight:400;letter-spacing:0}
+.plan-desc{font-size:13px;color:var(--text2);margin-bottom:24px;padding-bottom:24px;border-bottom:1px solid var(--border)}
+.plan-features{list-style:none}
+.plan-features li{display:flex;align-items:center;gap:10px;padding:8px 0;font-size:13px;color:var(--text2);border-bottom:1px solid var(--border)}
+.plan-features li:last-child{border-bottom:none}
+.plan-features li::before{content:'✓';color:var(--gold);font-weight:700;flex-shrink:0}
+.plan-cta{display:block;text-align:center;margin-top:24px;padding:12px;border-radius:3px;font-size:14px;font-weight:600;text-decoration:none;transition:all 0.2s}
+.plan-cta-gold{background:var(--gold);color:#020305}.plan-cta-gold:hover{background:var(--gold2)}
+.plan-cta-outline{border:1px solid var(--border);color:var(--text2)}.plan-cta-outline:hover{border-color:var(--gold);color:var(--gold)}
+
+/* TESTIMONIAL */
+.testimonial{background:var(--s1);border:1px solid var(--border);border-radius:4px;padding:48px;position:relative;margin-top:48px}
+.testimonial::before{content:'"';position:absolute;top:24px;left:36px;font-family:var(--syne);font-size:120px;font-weight:800;color:var(--border);line-height:1}
+.test-text{font-size:20px;line-height:1.6;font-weight:300;color:var(--text);position:relative;z-index:1;max-width:700px;margin-bottom:24px}
+.test-attr{font-family:var(--mono);font-size:12px;color:var(--text3);letter-spacing:1px}
+
+/* FAQ */
+.faq{margin-top:48px}
+.faq-item{border-bottom:1px solid var(--border);padding:20px 0}
+.faq-q{font-size:16px;font-weight:500;cursor:pointer;display:flex;justify-content:space-between;align-items:center}
+.faq-q::after{content:'+';font-size:20px;color:var(--gold);font-weight:300}
+.faq-a{font-size:14px;color:var(--text2);line-height:1.7;max-height:0;overflow:hidden;transition:max-height 0.3s,padding 0.3s}
+.faq-item.open .faq-q::after{content:'−'}
+.faq-item.open .faq-a{max-height:200px;padding-top:12px}
+
+/* CTA */
+.cta-section{background:linear-gradient(135deg,var(--s1) 0%,var(--s2) 100%);border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:100px 48px;text-align:center;position:relative;z-index:2}
+.cta-section::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at center,rgba(200,168,75,0.06) 0%,transparent 70%)}
+
+footer{padding:48px;border-top:1px solid var(--border);position:relative;z-index:2}
+.footer-inner{max-width:1100px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:20px}
+.footer-links{display:flex;gap:24px;flex-wrap:wrap}
+.footer-links a{color:var(--text3);text-decoration:none;font-size:13px;transition:color 0.2s}
+.footer-links a:hover{color:var(--text2)}
+
+@media(max-width:900px){
+  .stakeholder-grid{grid-template-columns:1fr}
+  .security-grid,.int-grid,.pricing-grid{grid-template-columns:1fr}
+  nav .nav-links{display:none}
+  .hero,.logos,section{padding-left:24px;padding-right:24px}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="logo"><div class="logo-mark">SBX</div>SBX GUARDIAN</a>
+  <div class="nav-links">
+    <a href="/">Platform</a>
+    <a href="/security.html">Security</a>
+    <a href="/compare.html">Compare</a>
+    <a href="/api-docs.html">API</a>
+    <a href="/trust-center.html">Trust</a>
+  </div>
+  <a href="mailto:enterprise@sbxguardian.com" class="nav-cta">Contact Enterprise →</a>
+</nav>
+
+<div class="hero">
+  <div class="hero-inner">
+    <div class="hero-tag"><div class="hero-tag-dot"></div>Enterprise</div>
+    <h1>The compliance layer<br>enterprises <span>trust.</span></h1>
+    <p class="hero-sub">SBX Guardian gives your legal, IT, compliance, and operations teams a single platform for EU AI Act compliance across every physical AI system in your fleet — with the security controls Fortune 500 procurement requires.</p>
+    <div class="hero-actions">
+      <a href="mailto:enterprise@sbxguardian.com" class="btn-gold">Request Enterprise Demo →</a>
+      <a href="/trust-center.html" class="btn-outline">View Trust Center</a>
+    </div>
+  </div>
+</div>
+
+<div class="logos">
+  <div class="logos-inner">
+    <div class="logos-label">Target organizations we serve</div>
+    <div class="logos-row">
+      <div class="logo-item">AUTOMOTIVE</div>
+      <div class="logo-item">MANUFACTURING</div>
+      <div class="logo-item">LOGISTICS</div>
+      <div class="logo-item">AEROSPACE</div>
+      <div class="logo-item">PHARMA</div>
+      <div class="logo-item">ENERGY</div>
+    </div>
+  </div>
+</div>
+
+<!-- STAKEHOLDER SECTION -->
+<section>
+  <div class="section-inner">
+    <div class="section-tag">Built For Every Stakeholder</div>
+    <div class="section-title">One platform.<br>Every team covered.</div>
+    <p class="section-sub">Enterprise procurement involves IT, Legal, Finance, and Risk. We've built specific answers for each.</p>
+
+    <div class="stakeholder-grid">
+      <div class="stakeholder">
+        <div class="sh-role">IT & Security</div>
+        <div class="sh-title">API-first. Integrates with everything.</div>
+        <div class="sh-desc">Built for IT teams who need deep integration, enterprise SSO, and airtight security documentation before approving any vendor.</div>
+        <ul class="sh-features">
+          <li>REST API with OpenAPI 3.0 spec</li>
+          <li>SAML 2.0 / SSO ready (enterprise tier)</li>
+          <li>Webhook signature verification</li>
+          <li>AES-256 encryption at rest and in transit</li>
+          <li>SOC 2 Type II in progress (2026)</li>
+          <li>Penetration test summary available on request</li>
+          <li>Integrates with Azure IoT, AWS IoT, Siemens MindSphere</li>
+        </ul>
+      </div>
+      <div class="stakeholder">
+        <div class="sh-role">Legal & Compliance</div>
+        <div class="sh-title">EU AI Act compliance. Court-ready evidence.</div>
+        <div class="sh-desc">Legal teams need documentation that holds up in regulatory proceedings. SBX Guardian produces tamper-evident evidence chains and full compliance documentation.</div>
+        <ul class="sh-features">
+          <li>GDPR-compliant Data Processing Agreement</li>
+          <li>Standard Contractual Clauses for EU transfers</li>
+          <li>SHA-256 hash chain — mathematically tamper-evident</li>
+          <li>FRIA wizard (Fundamental Rights Impact Assessment)</li>
+          <li>Technical Documentation Generator (Annex IV)</li>
+          <li>One-click regulator submission packs</li>
+          <li>6-month minimum log retention (EU AI Act Art. 12)</li>
+        </ul>
+      </div>
+      <div class="stakeholder">
+        <div class="sh-role">Finance & Procurement</div>
+        <div class="sh-title">Clear ROI. No surprise costs.</div>
+        <div class="sh-desc">Finance needs predictable pricing, clear ROI, and evidence that the investment reduces risk exposure.</div>
+        <ul class="sh-features">
+          <li>Flat monthly pricing — no usage surprises</li>
+          <li>Annual contracts available (2 months free)</li>
+          <li>ROI: €15M fine risk vs $499-5,000/month</li>
+          <li>Insurance premium reductions (documented)</li>
+          <li>Audit cost reduction (evidence packs eliminate billable hours)</li>
+          <li>Custom enterprise pricing for large deployments</li>
+          <li>Net payment terms available (Net-30, Net-60)</li>
+        </ul>
+      </div>
+      <div class="stakeholder">
+        <div class="sh-role">Risk Management</div>
+        <div class="sh-title">Vendor risk. Addressed proactively.</div>
+        <div class="sh-desc">Risk teams need to assess vendor stability, data handling, and business continuity before approving a SaaS vendor.</div>
+        <ul class="sh-features">
+          <li>Pre-filled security questionnaire (SIG format)</li>
+          <li>Business continuity plan available on request</li>
+          <li>72-hour breach notification commitment</li>
+          <li>Multi-tenant data isolation verified</li>
+          <li>Sub-processor list maintained and updated</li>
+          <li>Uptime monitoring via UptimeRobot (public)</li>
+          <li>Responsible disclosure program active</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SECURITY -->
+<section style="background:var(--s1);border-top:1px solid var(--border);border-bottom:1px solid var(--border)">
+  <div class="section-inner">
+    <div class="section-tag">Security Architecture</div>
+    <div class="section-title">Defense in depth.<br>Not compliance theater.</div>
+    <div class="security-grid">
+      <div class="sec-card"><div class="sec-icon">🔐</div><div class="sec-name">AES-256-GCM Encryption</div><div class="sec-desc">All sensitive data encrypted at rest using AES-256 in GCM mode. Unique initialization vectors per record. Environment-isolated encryption keys.</div><span class="sec-status ss-active">Active</span></div>
+      <div class="sec-card"><div class="sec-icon">⛓</div><div class="sec-name">SHA-256 Hash Chain</div><div class="sec-desc">Every event cryptographically chained to the previous. Tamper-evident — any modification breaks the chain. Mathematically verifiable in court.</div><span class="sec-status ss-active">Active</span></div>
+      <div class="sec-card"><div class="sec-icon">🏢</div><div class="sec-name">Multi-tenant Isolation</div><div class="sec-desc">Row-level security enforced at every database query. No cross-tenant data access is architecturally possible. Verified in code review.</div><span class="sec-status ss-active">Active</span></div>
+      <div class="sec-card"><div class="sec-icon">🔑</div><div class="sec-name">JWT + RBAC Auth</div><div class="sec-desc">Role-based access control with signed JWT tokens. Organization-scoped tokens. Admin, operator, and read-only roles. 7-day token expiry.</div><span class="sec-status ss-active">Active</span></div>
+      <div class="sec-card"><div class="sec-icon">📋</div><div class="sec-name">Tamper-evident Audit Trail</div><div class="sec-desc">Every action logged with user identity, timestamp, and IP. Audit logs are append-only. Accessible to account admins. Exportable for compliance.</div><span class="sec-status ss-active">Active</span></div>
+      <div class="sec-card"><div class="sec-icon">⚡</div><div class="sec-name">Rate Limiting & DDoS</div><div class="sec-desc">Per-user and per-endpoint rate limiting. Webhook rate protection. Cloudflare-compatible architecture. API abuse detection and blocking.</div><span class="sec-status ss-active">Active</span></div>
+      <div class="sec-card"><div class="sec-icon">🛡</div><div class="sec-name">SOC 2 Type II</div><div class="sec-desc">Currently in preparation. SOC 2 audit planned for Q3 2026. Security controls documented against Trust Services Criteria. Report available to enterprise clients on NDA.</div><span class="sec-status ss-progress">In Progress</span></div>
+      <div class="sec-card"><div class="sec-icon">🌐</div><div class="sec-name">ISO 27001</div><div class="sec-desc">Information security management system being designed to ISO 27001 standards. Full certification on 2027 roadmap. ISMS documentation available on request.</div><span class="sec-status ss-progress">Roadmap 2027</span></div>
+      <div class="sec-card"><div class="sec-icon">🤖</div><div class="sec-name">ISO 42001 AI Governance</div><div class="sec-desc">The new AI management standard. SBX Guardian's AI features (Groq, Gemini) are documented against ISO 42001 principles. Full certification on 2027 roadmap.</div><span class="sec-status ss-progress">Roadmap 2027</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- INTEGRATIONS -->
+<section>
+  <div class="section-inner">
+    <div class="section-tag">Enterprise Integrations</div>
+    <div class="section-title">Fits into your<br>existing stack.</div>
+    <p class="section-sub">SBX Guardian connects to your existing industrial systems, cloud infrastructure, and ITSM tools via webhook and REST API.</p>
+    <div class="int-grid">
+      <div class="int-card"><div class="int-logo">☁</div><div class="int-name">Azure IoT Hub</div><div class="int-type">Cloud Platform</div></div>
+      <div class="int-card"><div class="int-logo">🌐</div><div class="int-name">AWS IoT Core</div><div class="int-type">Cloud Platform</div></div>
+      <div class="int-card"><div class="int-logo">⚙</div><div class="int-name">Siemens MindSphere</div><div class="int-type">Industrial IoT</div></div>
+      <div class="int-card"><div class="int-logo">🏭</div><div class="int-name">Rockwell FactoryTalk</div><div class="int-type">SCADA / MES</div></div>
+      <div class="int-card"><div class="int-logo">📊</div><div class="int-name">SAP ERP</div><div class="int-type">Enterprise Resource Planning</div></div>
+      <div class="int-card"><div class="int-logo">🔔</div><div class="int-name">PagerDuty</div><div class="int-type">Incident Management</div></div>
+      <div class="int-card"><div class="int-logo">💬</div><div class="int-name">Slack</div><div class="int-type">Communication</div></div>
+      <div class="int-card"><div class="int-logo">🎫</div><div class="int-name">ServiceNow</div><div class="int-type">ITSM</div></div>
+      <div class="int-card"><div class="int-logo">🤖</div><div class="int-name">ROS / ROS2</div><div class="int-type">Robotics OS</div></div>
+      <div class="int-card"><div class="int-logo">🔗</div><div class="int-name">Alias Robotics</div><div class="int-type">Hardware Black Box</div></div>
+      <div class="int-card"><div class="int-logo">📡</div><div class="int-name">MQTT Broker</div><div class="int-type">IoT Protocol</div></div>
+      <div class="int-card"><div class="int-logo">⚡</div><div class="int-name">Webhooks (any)</div><div class="int-type">Universal</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- SLA -->
+<section style="background:var(--s1);border-top:1px solid var(--border);border-bottom:1px solid var(--border)">
+  <div class="section-inner">
+    <div class="section-tag">Service Level Agreement</div>
+    <div class="section-title">We commit<br>in writing.</div>
+    <table class="sla-table">
+      <thead><tr><th>Commitment</th><th>Starter</th><th>Professional</th><th>Enterprise</th></tr></thead>
+      <tbody>
+        <tr><td>Uptime SLA</td><td>99%</td><td>99.5%</td><td class="sla-highlight">99.9%</td></tr>
+        <tr><td>Planned maintenance notice</td><td>24 hours</td><td>48 hours</td><td class="sla-highlight">7 days</td></tr>
+        <tr><td>Support response time</td><td>72 hours</td><td>24 hours</td><td class="sla-highlight">4 hours</td></tr>
+        <tr><td>Breach notification</td><td>72 hours</td><td>72 hours</td><td class="sla-highlight">48 hours</td></tr>
+        <tr><td>Data export on termination</td><td>30 days</td><td>30 days</td><td class="sla-highlight">60 days</td></tr>
+        <tr><td>Dedicated account manager</td><td>—</td><td>—</td><td class="sla-highlight">✓</td></tr>
+        <tr><td>Custom DPA</td><td>Standard</td><td>Standard</td><td class="sla-highlight">Negotiated</td></tr>
+        <tr><td>On-premise / private cloud</td><td>—</td><td>—</td><td class="sla-highlight">Available</td></tr>
+        <tr><td>SSO / SAML 2.0</td><td>—</td><td>—</td><td class="sla-highlight">✓</td></tr>
+        <tr><td>Security questionnaire support</td><td>—</td><td>—</td><td class="sla-highlight">✓ Dedicated</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section>
+  <div class="section-inner">
+    <div class="section-tag">Pricing</div>
+    <div class="section-title">Transparent pricing.<br>No surprises.</div>
+    <div class="pricing-grid">
+      <div class="plan">
+        <div class="plan-name">Starter</div>
+        <div class="plan-price">$499<span>/month</span></div>
+        <div class="plan-desc">For SMEs with up to 10 AI systems. Full EU AI Act compliance from day one.</div>
+        <ul class="plan-features">
+          <li>Up to 10 systems</li>
+          <li>All EU AI Act articles (9-16)</li>
+          <li>Tamper-evident hash chain</li>
+          <li>AI report generation</li>
+          <li>Anomaly detection</li>
+          <li>Email support (72hr)</li>
+          <li>Standard DPA</li>
+        </ul>
+        <a href="/#waitlist" class="plan-cta plan-cta-outline">Get Started</a>
+      </div>
+      <div class="plan featured">
+        <div class="plan-badge">Most Popular</div>
+        <div class="plan-name">Professional</div>
+        <div class="plan-price">$1,999<span>/month</span></div>
+        <div class="plan-desc">For mid-market manufacturers with up to 50 systems and compliance teams.</div>
+        <ul class="plan-features">
+          <li>Up to 50 systems</li>
+          <li>Everything in Starter</li>
+          <li>FRIA wizard</li>
+          <li>Technical documentation generator</li>
+          <li>Incident reporting workflow</li>
+          <li>CRM + nurture sequences</li>
+          <li>Priority support (24hr)</li>
+          <li>Dedicated onboarding</li>
+        </ul>
+        <a href="mailto:enterprise@sbxguardian.com" class="plan-cta plan-cta-gold">Start Free Trial</a>
+      </div>
+      <div class="plan">
+        <div class="plan-name">Enterprise</div>
+        <div class="plan-price">Custom</div>
+        <div class="plan-desc">For large manufacturers, OEMs, and organizations with 50+ systems and complex requirements.</div>
+        <ul class="plan-features">
+          <li>Unlimited systems</li>
+          <li>Everything in Professional</li>
+          <li>SSO / SAML 2.0</li>
+          <li>Custom DPA negotiation</li>
+          <li>Dedicated account manager</li>
+          <li>4-hour support SLA</li>
+          <li>On-premise option</li>
+          <li>Security questionnaire support</li>
+          <li>Custom integrations</li>
+          <li>Net-30 / Net-60 payment</li>
+        </ul>
+        <a href="mailto:enterprise@sbxguardian.com" class="plan-cta plan-cta-outline">Contact Sales</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section style="background:var(--s1);border-top:1px solid var(--border);border-bottom:1px solid var(--border)">
+  <div class="section-inner">
+    <div class="section-tag">Common Questions</div>
+    <div class="section-title">Enterprise FAQ</div>
+    <div class="faq">
+      <div class="faq-item"><div class="faq-q" onclick="this.parentElement.classList.toggle('open')">Do you have SOC 2 Type II certification?</div><div class="faq-a">SOC 2 Type II is currently in preparation with an audit planned for Q3 2026. We follow SOC 2 Trust Services Criteria as our design standard and can provide detailed security controls documentation. Enterprise clients can receive a pre-audit security report under NDA.</div></div>
+      <div class="faq-item"><div class="faq-q" onclick="this.parentElement.classList.toggle('open')">Can we get a custom Data Processing Agreement?</div><div class="faq-a">Yes. Enterprise clients receive custom DPA negotiation as standard. Our base DPA is GDPR Article 28 compliant. For enterprise, we work with your legal team to address specific requirements including sub-processor approval workflows, audit rights, and jurisdiction-specific clauses.</div></div>
+      <div class="faq-item"><div class="faq-q" onclick="this.parentElement.classList.toggle('open')">Where is our data stored? Can EU data stay in the EU?</div><div class="faq-a">Currently hosted on Render.com infrastructure. EU data residency is available as an enterprise option — contact us to discuss private cloud or EU-region deployment. Standard SCCs cover international transfers for all plans.</div></div>
+      <div class="faq-item"><div class="faq-q" onclick="this.parentElement.classList.toggle('open')">Can we deploy on our own infrastructure?</div><div class="faq-a">On-premise and private cloud deployment is available for enterprise clients. This requires a custom engagement — contact our enterprise team to discuss requirements and timeline.</div></div>
+      <div class="faq-item"><div class="faq-q" onclick="this.parentElement.classList.toggle('open')">How do we integrate with our existing systems?</div><div class="faq-a">SBX Guardian connects via webhook (any HTTP-capable system) and REST API (full OpenAPI 3.0 documentation). Pre-built connectors exist for Azure IoT Hub, AWS IoT Core, Siemens MindSphere, ROS/ROS2, and MQTT. Custom integrations are available for enterprise clients.</div></div>
+      <div class="faq-item"><div class="faq-q" onclick="this.parentElement.classList.toggle('open')">How long does procurement typically take?</div><div class="faq-a">For SME/Professional plans: procurement typically completes in 1-2 weeks with our standard legal documents. For enterprise: 4-12 weeks is typical, depending on your organization's vendor approval process. We actively support procurement by providing security questionnaire responses, executive briefings, and legal documentation.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<div class="cta-section">
+  <div style="max-width:600px;margin:0 auto;position:relative;z-index:1">
+    <div style="font-family:var(--mono);font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:20px">Enterprise Sales</div>
+    <h2 style="font-family:var(--syne);font-size:clamp(36px,4vw,52px);font-weight:800;letter-spacing:-2px;margin-bottom:16px">Ready to talk?</h2>
+    <p style="color:var(--text2);font-size:16px;margin-bottom:32px;font-weight:300">Our enterprise team will respond within one business day with a custom proposal, security documentation package, and demo availability.</p>
+    <a href="mailto:enterprise@sbxguardian.com" class="btn-gold" style="font-size:16px;padding:16px 36px">Contact Enterprise Team →</a>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-inner">
+    <div style="font-family:var(--syne);font-size:14px;font-weight:700;color:var(--text2)">⬢ SBX GUARDIAN</div>
+    <div class="footer-links">
+      <a href="/terms.html">Terms</a>
+      <a href="/privacy.html">Privacy</a>
+      <a href="/dpa.html">DPA</a>
+      <a href="/security.html">Security</a>
+      <a href="/trust-center.html">Trust Center</a>
+      <a href="/compare.html">Compare</a>
+      <a href="/api-docs.html">API Docs</a>
+    </div>
+    <div style="font-size:12px;color:var(--text3)">© 2026 SBX Guardian</div>
+  </div>
+</footer>
+
+</body>
+</html>

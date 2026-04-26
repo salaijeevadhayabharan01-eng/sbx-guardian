@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Trust Center — SBX Guardian</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#020305;--s1:#07080d;--s2:#0c0e14;--border:#161924;--text:#eef0f8;--text2:#7a849a;--text3:#353d52;--gold:#c8a84b;--green:#00d97e;--blue:#3b82f6;--red:#ef4444;--mono:'DM Mono',monospace;--sans:'DM Sans',sans-serif;--syne:'Syne',sans-serif}
+body{background:var(--bg);color:var(--text);font-family:var(--sans)}
+body::after{content:'';position:fixed;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);z-index:200}
+nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:14px 48px;display:flex;align-items:center;justify-content:space-between;background:rgba(2,3,5,0.95);border-bottom:1px solid var(--border);backdrop-filter:blur(24px)}
+.logo{font-family:var(--syne);font-size:14px;font-weight:800;letter-spacing:1.5px;text-decoration:none;color:var(--text)}
+.nav-links{display:flex;gap:24px;align-items:center}
+.nav-links a{color:var(--text2);text-decoration:none;font-size:13px;transition:color 0.2s}
+.nav-links a:hover{color:var(--text)}
+.nav-cta{background:var(--gold);color:#020305;padding:8px 18px;border-radius:3px;font-size:13px;font-weight:600;text-decoration:none}
+.main{max-width:1100px;margin:0 auto;padding:100px 48px 80px}
+.hero{text-align:center;margin-bottom:72px}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:16px}
+h1{font-family:var(--syne);font-size:clamp(48px,6vw,80px);font-weight:800;letter-spacing:-3px;line-height:0.95;margin-bottom:20px}
+.hero-sub{color:var(--text2);font-size:17px;max-width:560px;margin:0 auto;line-height:1.6;font-weight:300}
+
+/* DOWNLOAD CARDS */
+.download-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:64px}
+.dl-card{background:var(--s1);border:1px solid var(--border);border-radius:4px;padding:28px;transition:border-color 0.2s;position:relative;overflow:hidden}
+.dl-card::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:var(--gold);transform:scaleX(0);transition:transform 0.3s;transform-origin:left}
+.dl-card:hover::after{transform:scaleX(1)}
+.dl-card:hover{border-color:rgba(200,168,75,0.2)}
+.dl-icon{font-size:32px;margin-bottom:14px}
+.dl-name{font-family:var(--syne);font-size:18px;font-weight:700;margin-bottom:8px}
+.dl-desc{font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:18px}
+.dl-btn{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--gold);text-decoration:none;border:1px solid rgba(200,168,75,0.3);padding:7px 14px;border-radius:2px;transition:all 0.2s}
+.dl-btn:hover{background:rgba(200,168,75,0.08)}
+.dl-badge{position:absolute;top:16px;right:16px;font-family:var(--mono);font-size:10px;padding:3px 8px;border-radius:2px}
+.db-green{background:rgba(0,217,126,0.1);color:var(--green);border:1px solid rgba(0,217,126,0.2)}
+.db-gold{background:rgba(200,168,75,0.1);color:var(--gold);border:1px solid rgba(200,168,75,0.2)}
+
+/* SECTION */
+.section-header{margin-bottom:32px}
+.section-tag{font-family:var(--mono);font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:12px}
+.section-title{font-family:var(--syne);font-size:clamp(28px,3vw,40px);font-weight:800;letter-spacing:-1.5px}
+section{margin-bottom:72px}
+
+/* COMPLIANCE MATRIX */
+.matrix{width:100%;border-collapse:collapse}
+.matrix th{text-align:left;padding:12px 16px;font-family:var(--mono);font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--text3);border-bottom:1px solid var(--border)}
+.matrix th:not(:first-child){text-align:center}
+.matrix td{padding:14px 16px;border-bottom:1px solid var(--border);font-size:14px;color:var(--text2);vertical-align:middle}
+.matrix td:first-child{color:var(--text);font-weight:500}
+.matrix td:not(:first-child){text-align:center}
+.matrix tr:hover td{background:var(--s1)}
+.check{color:var(--green);font-size:18px}
+.cross{color:var(--text3);font-size:16px}
+.prog{color:var(--gold);font-size:12px;font-family:var(--mono)}
+
+/* SUBPROCESSORS */
+.sp-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.sp-card{background:var(--s1);border:1px solid var(--border);border-radius:4px;padding:18px}
+.sp-name{font-size:14px;font-weight:600;margin-bottom:4px}
+.sp-location{font-family:var(--mono);font-size:11px;color:var(--text3);margin-bottom:8px}
+.sp-purpose{font-size:12px;color:var(--text2);margin-bottom:8px}
+.sp-safeguard{font-family:var(--mono);font-size:10px;color:var(--gold);padding:3px 8px;background:rgba(200,168,75,0.08);border-radius:2px;display:inline-block}
+
+/* CONTACT */
+.contact-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.contact-card{background:var(--s1);border:1px solid var(--border);border-radius:4px;padding:24px}
+.contact-role{font-family:var(--mono);font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--gold);margin-bottom:8px}
+.contact-name{font-size:16px;font-weight:600;margin-bottom:6px}
+.contact-desc{font-size:13px;color:var(--text2);margin-bottom:14px;line-height:1.5}
+.contact-email{font-family:var(--mono);font-size:12px;color:var(--green);text-decoration:none}
+.contact-email:hover{text-decoration:underline}
+
+@media(max-width:900px){.download-grid,.sp-grid,.contact-grid{grid-template-columns:1fr}.main{padding:100px 24px 60px}nav .nav-links{display:none}}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="logo">⬢ SBX GUARDIAN — Trust Center</a>
+  <div class="nav-links">
+    <a href="/enterprise.html">Enterprise</a>
+    <a href="/security.html">Security</a>
+    <a href="/api-docs.html">API</a>
+  </div>
+  <a href="mailto:enterprise@sbxguardian.com" class="nav-cta">Request Documents</a>
+</nav>
+
+<div class="main">
+  <div class="hero">
+    <div class="eyebrow">Trust Center</div>
+    <h1>Security. Privacy.<br>Compliance.</h1>
+    <p class="hero-sub">Every document your procurement team needs. Every security control documented. Every compliance question answered.</p>
+  </div>
+
+  <!-- DOWNLOADS -->
+  <section>
+    <div class="section-header">
+      <div class="section-tag">Documentation</div>
+      <div class="section-title">Download everything.</div>
+    </div>
+    <div class="download-grid">
+      <div class="dl-card">
+        <span class="dl-badge db-green">Live</span>
+        <div class="dl-icon">⚖</div>
+        <div class="dl-name">Terms of Service</div>
+        <div class="dl-desc">Governing terms for using SBX Guardian. Covers service description, liability, IP, termination.</div>
+        <a href="/terms.html" class="dl-btn">View Document →</a>
+      </div>
+      <div class="dl-card">
+        <span class="dl-badge db-green">GDPR</span>
+        <div class="dl-icon">🔒</div>
+        <div class="dl-name">Privacy Policy</div>
+        <div class="dl-desc">GDPR-compliant privacy policy. Covers data collection, legal basis, retention, and your rights.</div>
+        <a href="/privacy.html" class="dl-btn">View Document →</a>
+      </div>
+      <div class="dl-card">
+        <span class="dl-badge db-green">Art. 28</span>
+        <div class="dl-icon">📋</div>
+        <div class="dl-name">Data Processing Agreement</div>
+        <div class="dl-desc">GDPR Article 28 compliant DPA. Required for EU B2B customers. Custom version available for enterprise.</div>
+        <a href="/dpa.html" class="dl-btn">View Document →</a>
+      </div>
+      <div class="dl-card">
+        <span class="dl-badge db-gold">In Progress</span>
+        <div class="dl-icon">🛡</div>
+        <div class="dl-name">SOC 2 Type II Report</div>
+        <div class="dl-desc">Audit planned for Q3 2026. Pre-audit security controls documentation available under NDA.</div>
+        <a href="mailto:enterprise@sbxguardian.com?subject=SOC2 Documentation Request" class="dl-btn">Request Under NDA →</a>
+      </div>
+      <div class="dl-card">
+        <span class="dl-badge db-green">Live</span>
+        <div class="dl-icon">🔐</div>
+        <div class="dl-name">Security Overview</div>
+        <div class="dl-desc">7-layer security architecture, certifications, responsible disclosure, and security controls.</div>
+        <a href="/security.html" class="dl-btn">View Document →</a>
+      </div>
+      <div class="dl-card">
+        <span class="dl-badge db-gold">On Request</span>
+        <div class="dl-icon">📊</div>
+        <div class="dl-name">Security Questionnaire (SIG)</div>
+        <div class="dl-desc">Pre-filled Standardized Information Gathering questionnaire for enterprise vendor assessment.</div>
+        <a href="mailto:enterprise@sbxguardian.com?subject=Security Questionnaire Request" class="dl-btn">Request SIG →</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- COMPLIANCE MATRIX -->
+  <section>
+    <div class="section-header">
+      <div class="section-tag">Compliance Coverage</div>
+      <div class="section-title">What we cover.</div>
+    </div>
+    <table class="matrix">
+      <thead>
+        <tr>
+          <th>Framework / Standard</th>
+          <th>Status</th>
+          <th>Documentation</th>
+          <th>Self-Certified</th>
+          <th>Third-Party Audit</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>GDPR (EU) 2016/679</td><td><span style="color:var(--green);font-size:12px;font-family:var(--mono)">✓ Implemented</span></td><td><a href="/privacy.html" style="color:var(--gold);font-size:12px;font-family:var(--mono)">Privacy Policy</a></td><td><span class="check">✓</span></td><td><span class="cross">—</span></td></tr>
+        <tr><td>EU AI Act (2024/1689)</td><td><span style="color:var(--green);font-size:12px;font-family:var(--mono)">✓ Platform compliant</span></td><td><a href="/fria-wizard.html" style="color:var(--gold);font-size:12px;font-family:var(--mono)">FRIA Wizard</a></td><td><span class="check">✓</span></td><td><span class="cross">—</span></td></tr>
+        <tr><td>SOC 2 Type II (AICPA)</td><td><span class="prog">In progress</span></td><td>Available under NDA</td><td><span class="cross">—</span></td><td><span class="prog">Q3 2026</span></td></tr>
+        <tr><td>ISO 27001</td><td><span class="prog">Roadmap</span></td><td>ISMS documentation on request</td><td><span class="cross">—</span></td><td><span class="prog">2027</span></td></tr>
+        <tr><td>ISO 42001 (AI Management)</td><td><span class="prog">Roadmap</span></td><td>In preparation</td><td><span class="cross">—</span></td><td><span class="prog">2027</span></td></tr>
+        <tr><td>NIS2 Directive</td><td><span style="color:var(--green);font-size:12px;font-family:var(--mono)">✓ Aligned</span></td><td>Security controls documented</td><td><span class="check">✓</span></td><td><span class="cross">—</span></td></tr>
+        <tr><td>Standard Contractual Clauses</td><td><span style="color:var(--green);font-size:12px;font-family:var(--mono)">✓ Implemented</span></td><td><a href="/dpa.html" style="color:var(--gold);font-size:12px;font-family:var(--mono)">DPA Article 7</a></td><td><span class="check">✓</span></td><td><span class="cross">—</span></td></tr>
+        <tr><td>Penetration Testing</td><td><span class="prog">Planned</span></td><td>Summary available on request</td><td><span class="cross">—</span></td><td><span class="prog">Q4 2026</span></td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- SUBPROCESSORS -->
+  <section>
+    <div class="section-header">
+      <div class="section-tag">Sub-processors</div>
+      <div class="section-title">Who touches your data.</div>
+    </div>
+    <p style="color:var(--text2);font-size:15px;margin-bottom:24px;max-width:600px">We maintain a complete, up-to-date list of all sub-processors. You will be notified 14 days before any changes. Last updated: April 25, 2026.</p>
+    <div class="sp-grid">
+      <div class="sp-card">
+        <div class="sp-name">Render Inc.</div>
+        <div class="sp-location">United States (primary)</div>
+        <div class="sp-purpose">Cloud hosting and infrastructure. All application processing and storage occurs on Render's infrastructure.</div>
+        <span class="sp-safeguard">SOC 2 Type II · SCCs</span>
+      </div>
+      <div class="sp-card">
+        <div class="sp-name">Groq Inc.</div>
+        <div class="sp-location">United States</div>
+        <div class="sp-purpose">Optional AI report generation. Data sent only when you explicitly generate a report. Not used for model training.</div>
+        <span class="sp-safeguard">SCCs · No training use</span>
+      </div>
+      <div class="sp-card">
+        <div class="sp-name">Google LLC (Gemini)</div>
+        <div class="sp-location">United States</div>
+        <div class="sp-purpose">Optional AI report generation fallback. Only used when Groq is unavailable. Data not used for training.</div>
+        <span class="sp-safeguard">Google Cloud DPA · SCCs</span>
+      </div>
+      <div class="sp-card">
+        <div class="sp-name">UptimeRobot</div>
+        <div class="sp-location">United States</div>
+        <div class="sp-purpose">Uptime monitoring. Only sends HTTP requests to health endpoint — no user data accessed.</div>
+        <span class="sp-safeguard">No data access</span>
+      </div>
+      <div class="sp-card">
+        <div class="sp-name">Gmail SMTP (Google)</div>
+        <div class="sp-location">United States</div>
+        <div class="sp-purpose">Transactional email delivery when configured by the account holder. Only used when SMTP credentials are provided.</div>
+        <span class="sp-safeguard">Optional · SCCs</span>
+      </div>
+      <div class="sp-card">
+        <div class="sp-name">Cloudflare (DNS/CDN)</div>
+        <div class="sp-location">Global edge network</div>
+        <div class="sp-purpose">Domain resolution and DDoS protection at infrastructure level. No application-level data access.</div>
+        <span class="sp-safeguard">GDPR compliant · SCCs</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTACTS -->
+  <section>
+    <div class="section-header">
+      <div class="section-tag">Security Contacts</div>
+      <div class="section-title">Talk to the right person.</div>
+    </div>
+    <div class="contact-grid">
+      <div class="contact-card">
+        <div class="contact-role">Security Team</div>
+        <div class="contact-name">Vulnerability Reports</div>
+        <div class="contact-desc">Report security vulnerabilities. We commit to acknowledging within 48 hours and coordinating disclosure within 90 days.</div>
+        <a href="mailto:security@sbxguardian.com" class="contact-email">security@sbxguardian.com</a>
+      </div>
+      <div class="contact-card">
+        <div class="contact-role">Privacy / DPO</div>
+        <div class="contact-name">Data Protection Inquiries</div>
+        <div class="contact-desc">GDPR rights requests, data subject access requests, DPA negotiations, and privacy compliance questions.</div>
+        <a href="mailto:privacy@sbxguardian.com" class="contact-email">privacy@sbxguardian.com</a>
+      </div>
+      <div class="contact-card">
+        <div class="contact-role">Legal</div>
+        <div class="contact-name">Contract & Compliance</div>
+        <div class="contact-desc">Terms of Service questions, custom contract negotiations, and compliance certification requests.</div>
+        <a href="mailto:legal@sbxguardian.com" class="contact-email">legal@sbxguardian.com</a>
+      </div>
+      <div class="contact-card">
+        <div class="contact-role">Enterprise Sales</div>
+        <div class="contact-name">Procurement Support</div>
+        <div class="contact-desc">Security questionnaire responses, executive briefings, custom DPA, and procurement process support.</div>
+        <a href="mailto:enterprise@sbxguardian.com" class="contact-email">enterprise@sbxguardian.com</a>
+      </div>
+    </div>
+  </section>
+
+</div>
+</body>
+</html>

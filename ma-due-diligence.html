@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>M&A AI Due Diligence — SBX Guardian</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800;900&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#020305;--s1:#07080d;--s2:#0c0e14;--border:#161924;--text:#eef0f8;--text2:#7a849a;--text3:#353d52;--gold:#c8a84b;--gold2:#e8c96b;--green:#00d97e;--red:#ef4444;--orange:#f59e0b;--blue:#3b82f6;--mono:'DM Mono',monospace;--sans:'DM Sans',sans-serif;--syne:'Syne',sans-serif}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh}
+body::before{content:'';position:fixed;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent);z-index:300}
+nav{position:fixed;top:0;left:0;right:0;z-index:200;padding:14px 48px;display:flex;align-items:center;justify-content:space-between;background:rgba(2,3,5,0.96);border-bottom:1px solid var(--border);backdrop-filter:blur(24px)}
+.logo{font-family:var(--syne);font-size:14px;font-weight:800;letter-spacing:1.5px;text-decoration:none;color:var(--text);display:flex;align-items:center;gap:10px}
+.logo-mark{width:22px;height:22px;background:var(--gold);border-radius:3px;display:flex;align-items:center;justify-content:center;color:#020305;font-size:9px;font-weight:900}
+.nav-right{display:flex;gap:12px;align-items:center}
+.nav-right a{color:var(--text2);text-decoration:none;font-size:13px}.nav-right a:hover{color:var(--gold)}
+.nav-btn{background:var(--gold);color:#020305;padding:8px 18px;border-radius:3px;font-size:13px;font-weight:600}
+
+.main{max-width:1000px;margin:0 auto;padding:90px 48px 60px}
+.eyebrow{font-family:var(--mono);font-size:10px;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);margin-bottom:16px}
+h1{font-family:var(--syne);font-size:clamp(40px,5vw,64px);font-weight:900;letter-spacing:-2px;line-height:0.95;margin-bottom:16px}
+h1 em{font-style:normal;color:var(--gold)}
+.hero-sub{color:var(--text2);font-size:16px;max-width:580px;line-height:1.7;font-weight:300;margin-bottom:40px}
+.value-row{display:flex;gap:24px;margin-bottom:48px;flex-wrap:wrap}
+.value-item{font-size:13px;color:var(--text2);display:flex;align-items:center;gap:6px}
+.value-item::before{content:'✓';color:var(--gold);font-weight:700}
+
+/* FORM */
+label{display:block;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.8px;color:var(--text3);margin-bottom:6px}
+input,select,textarea{width:100%;padding:10px 14px;background:var(--bg);border:1px solid var(--border);border-radius:4px;color:var(--text);font-family:var(--sans);font-size:14px;outline:none;transition:border-color 0.2s;margin-bottom:12px}
+input:focus,select:focus,textarea:focus{border-color:var(--gold)}
+textarea{resize:vertical;min-height:80px;font-family:var(--mono);font-size:12px;line-height:1.6;margin-bottom:0}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+.card{background:var(--s1);border:1px solid var(--border);border-radius:6px;padding:24px;margin-bottom:16px}
+.card-title{font-family:var(--mono);font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--gold);margin-bottom:18px}
+
+/* CHECKLIST */
+.checklist{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px}
+.check-item{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text2);padding:8px;background:var(--s2);border:1px solid var(--border);border-radius:3px;cursor:pointer;transition:all 0.15s}
+.check-item:hover{border-color:rgba(200,168,75,0.2)}
+.check-item.checked{border-color:rgba(0,217,126,0.3);background:rgba(0,217,126,0.05);color:var(--text)}
+.check-item input{display:none}
+.check-box{width:16px;height:16px;border:1px solid var(--border);border-radius:2px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:10px}
+.check-item.checked .check-box{background:var(--green);border-color:var(--green);color:#020305}
+
+/* RISK SLIDER */
+.risk-slider-wrap{margin-bottom:16px}
+.risk-labels{display:flex;justify-content:space-between;font-size:11px;color:var(--text3);margin-top:4px;font-family:var(--mono)}
+input[type=range]{accent-color:var(--gold);margin-bottom:0}
+
+/* GENERATE */
+.gen-btn{background:var(--gold);color:#020305;padding:16px 40px;border-radius:4px;font-size:16px;font-weight:700;border:none;cursor:pointer;font-family:var(--sans);transition:all 0.2s;display:inline-flex;align-items:center;gap:10px}
+.gen-btn:hover{background:var(--gold2);transform:translateY(-1px)}
+.gen-btn:disabled{opacity:0.5;cursor:not-allowed;transform:none}
+
+/* OUTPUT */
+#dd-output{display:none;margin-top:32px}
+.dd-report{background:var(--s1);border:1px solid rgba(200,168,75,0.2);border-radius:6px;overflow:hidden}
+.dd-header{background:var(--s2);padding:28px 36px;border-bottom:1px solid var(--border)}
+.dd-title{font-family:var(--syne);font-size:22px;font-weight:800;letter-spacing:-0.5px;margin-bottom:4px}
+.dd-sub{font-family:var(--mono);font-size:11px;color:var(--text3);letter-spacing:1px}
+.dd-body{padding:36px}
+
+.risk-score-display{text-align:center;padding:32px;background:var(--s2);border-radius:4px;margin-bottom:28px}
+.score-circle{width:120px;height:120px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-direction:column;margin:0 auto 12px;border:3px solid}
+.score-num{font-family:var(--syne);font-size:40px;font-weight:900;line-height:1}
+.score-label{font-family:var(--mono);font-size:10px;letter-spacing:1px;text-transform:uppercase;margin-top:4px}
+.score-desc{font-size:14px;color:var(--text2)}
+.score-recommendation{margin-top:12px;font-size:16px;font-weight:600}
+
+.finding-row{display:flex;align-items:flex-start;gap:12px;padding:14px 0;border-bottom:1px solid var(--border)}
+.finding-row:last-child{border-bottom:none}
+.finding-severity{width:80px;flex-shrink:0;font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:0.5px;padding:3px 8px;border-radius:2px;text-align:center}
+.fs-critical{background:rgba(239,68,68,0.15);color:var(--red);border:1px solid rgba(239,68,68,0.2)}
+.fs-high{background:rgba(245,158,11,0.15);color:var(--orange);border:1px solid rgba(245,158,11,0.2)}
+.fs-medium{background:rgba(200,168,75,0.15);color:var(--gold);border:1px solid rgba(200,168,75,0.2)}
+.fs-low{background:rgba(0,217,126,0.1);color:var(--green);border:1px solid rgba(0,217,126,0.2)}
+.finding-content{flex:1}
+.finding-title{font-size:14px;font-weight:600;margin-bottom:4px}
+.finding-desc{font-size:13px;color:var(--text2);line-height:1.5}
+.finding-impact{font-family:var(--mono);font-size:11px;color:var(--text3);margin-top:4px}
+
+.ai-section{font-size:14px;line-height:1.8;color:var(--text);white-space:pre-wrap;font-weight:300}
+.dd-section{margin-bottom:28px;padding-bottom:28px;border-bottom:1px solid var(--border)}
+.dd-section:last-child{border-bottom:none}
+.dd-section-title{font-family:var(--syne);font-size:18px;font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.section-num{width:24px;height:24px;background:rgba(200,168,75,0.1);border:1px solid rgba(200,168,75,0.2);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:10px;color:var(--gold);flex-shrink:0}
+
+.spinner{width:14px;height:14px;border:2px solid var(--border);border-top-color:var(--gold);border-radius:50%;animation:spin 0.8s linear infinite;display:inline-block;vertical-align:middle;margin-right:6px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.action-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:24px}
+.ab{display:inline-flex;align-items:center;gap:6px;padding:10px 18px;border-radius:4px;font-size:13px;font-weight:600;cursor:pointer;border:none;font-family:var(--sans);text-decoration:none;transition:all 0.15s}
+.ab-gold{background:var(--gold);color:#020305}.ab-gold:hover{background:var(--gold2)}
+.ab-ghost{background:transparent;color:var(--text2);border:1px solid var(--border)}.ab-ghost:hover{border-color:var(--gold);color:var(--gold)}
+
+@media(max-width:700px){.form-grid,.checklist,.value-row{grid-template-columns:1fr;flex-direction:column}.main{padding:90px 24px 60px}}
+</style>
+</head>
+<body>
+<nav>
+  <a href="/" class="logo"><div class="logo-mark">SBX</div>GUARDIAN</a>
+  <div class="nav-right">
+    <a href="/enterprise.html">Enterprise</a>
+    <a href="/board-report.html">Board Report</a>
+    <a href="/app" class="nav-btn">Login →</a>
+  </div>
+</nav>
+
+<div class="main">
+  <div class="eyebrow">M&A Intelligence</div>
+  <h1>AI Due Diligence<br>for <em>Acquisitions.</em></h1>
+  <p class="hero-sub">When acquiring a company with industrial AI systems, you inherit their EU AI Act liability. Assess it before you sign. One report. All the risk. Zero surprises.</p>
+  <div class="value-row">
+    <div class="value-item">AI liability risk score</div>
+    <div class="value-item">Unlogged system detection</div>
+    <div class="value-item">Compliance gap analysis</div>
+    <div class="value-item">Remediation cost estimate</div>
+    <div class="value-item">Deal price adjustment guidance</div>
+  </div>
+
+  <!-- TARGET INFO -->
+  <div class="card">
+    <div class="card-title">Target Company Information</div>
+    <div class="form-grid">
+      <div>
+        <label>Target Company Name</label>
+        <input type="text" id="target-name" placeholder="e.g. RoboTech GmbH">
+      </div>
+      <div>
+        <label>Acquirer Company Name</label>
+        <input type="text" id="acquirer-name" placeholder="e.g. Global Industries AG">
+      </div>
+      <div>
+        <label>Target Industry</label>
+        <select id="target-industry">
+          <option>Automotive Manufacturing</option>
+          <option>Industrial Automation</option>
+          <option>Logistics & Warehousing</option>
+          <option>Aerospace & Defense</option>
+          <option>Pharmaceutical Manufacturing</option>
+          <option>Energy & Utilities</option>
+          <option>Food & Beverage Production</option>
+        </select>
+      </div>
+      <div>
+        <label>Target Headquarters</label>
+        <select id="target-hq">
+          <option>Germany (EU)</option>
+          <option>France (EU)</option>
+          <option>Netherlands (EU)</option>
+          <option>Italy (EU)</option>
+          <option>Other EU Member State</option>
+          <option>United Kingdom</option>
+          <option>United States</option>
+          <option>Other (sells to EU)</option>
+        </select>
+      </div>
+      <div>
+        <label>Deal Type</label>
+        <select id="deal-type">
+          <option>Full Acquisition</option>
+          <option>Majority Stake (&gt;50%)</option>
+          <option>Minority Investment</option>
+          <option>Asset Purchase</option>
+          <option>Merger</option>
+        </select>
+      </div>
+      <div>
+        <label>Estimated Deal Value</label>
+        <input type="text" id="deal-value" placeholder="e.g. €180M">
+      </div>
+    </div>
+  </div>
+
+  <!-- AI SYSTEMS ASSESSMENT -->
+  <div class="card">
+    <div class="card-title">Target AI Systems Assessment</div>
+    <div class="form-grid">
+      <div>
+        <label>Number of AI/Robot Systems</label>
+        <input type="number" id="t-systems" placeholder="e.g. 120" min="0">
+      </div>
+      <div>
+        <label>Types of Systems Present</label>
+        <select id="t-types">
+          <option>Industrial robots only</option>
+          <option>Cobots + industrial robots</option>
+          <option>AGVs + cobots + robots</option>
+          <option>Full mix including drones</option>
+          <option>Unknown / under assessment</option>
+        </select>
+      </div>
+    </div>
+    <label style="margin-bottom:12px;display:block">AI Governance Evidence Found (check all confirmed)</label>
+    <div class="checklist" id="checklist">
+      <div class="check-item" onclick="toggle(this)"><div class="check-box"></div>Event logging system exists</div>
+      <div class="check-item" onclick="toggle(this)"><div class="check-box"></div>Tamper-evident logs confirmed</div>
+      <div class="check-item" onclick="toggle(this)"><div class="check-box"></div>Technical documentation (Annex IV)</div>
+      <div class="check-item" onclick="toggle(this)"><div class="check-box"></div>Risk management system (Art. 9)</div>
+      <div class="check-item" onclick="toggle(this)"><div class="check-box"></div>FRIA completed (Art. 27)</div>
+      <div class="check-item" onclick="toggle(this)"><div class="check-box"></div>Conformity assessment done</div>
+      <div class="check-item" onclick="toggle(this)"><div class="check-box"></div>EU database registration</div>
+      <div class="check-item" onclick="toggle(this)"><div class="check-box"></div>Cybersecurity assessment (Art. 15)</div>
+      <div class="check-item" onclick="toggle(this)"><div class="check-box"></div>Human oversight controls</div>
+      <div class="check-item" onclick="toggle(this)"><div class="check-box"></div>Prior regulatory incidents: None</div>
+      <div class="check-item" onclick="toggle(this)"><div class="check-box"></div>Insurance coverage in place</div>
+      <div class="check-item" onclick="toggle(this)"><div class="check-box"></div>GDPR compliance for AI data</div>
+    </div>
+    <div class="risk-slider-wrap" style="margin-top:16px">
+      <label>Estimated Compliance Level of Target (your assessment)</label>
+      <input type="range" min="0" max="100" value="40" id="t-compliance" oninput="document.getElementById('t-comp-val').textContent=this.value+'%'">
+      <div class="risk-labels"><span>0% — No compliance</span><span id="t-comp-val">40%</span><span>100% — Fully compliant</span></div>
+    </div>
+    <div style="margin-top:16px">
+      <label>Key Red Flags Identified (describe what you found)</label>
+      <textarea id="red-flags" placeholder="e.g. No logging system found, multiple near-miss incidents in past 18 months, no technical documentation for any system, compliance responsibility unclear..."></textarea>
+    </div>
+  </div>
+
+  <button class="gen-btn" onclick="generateDD()" id="dd-btn">⚡ Generate Due Diligence Report</button>
+
+  <!-- OUTPUT -->
+  <div id="dd-output">
+    <div class="dd-report" id="dd-report-container"></div>
+    <div class="action-row">
+      <button class="ab ab-gold" onclick="window.print()">🖨 Print / PDF</button>
+      <button class="ab ab-ghost" onclick="navigator.clipboard.writeText(document.getElementById('dd-report-container').innerText)">📋 Copy</button>
+      <button class="ab ab-ghost" onclick="generateDD()">↻ Regenerate</button>
+    </div>
+  </div>
+</div>
+
+<script>
+function toggle(el) {
+  el.classList.toggle('checked');
+  const box = el.querySelector('.check-box');
+  box.textContent = el.classList.contains('checked') ? '✓' : '';
+}
+
+async function generateDD() {
+  const btn = document.getElementById('dd-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spinner"></div> Analyzing AI liability...';
+
+  const target = document.getElementById('target-name').value || 'Target Company';
+  const acquirer = document.getElementById('acquirer-name').value || 'Acquirer';
+  const industry = document.getElementById('target-industry').value;
+  const hq = document.getElementById('target-hq').value;
+  const dealType = document.getElementById('deal-type').value;
+  const dealValue = document.getElementById('deal-value').value || 'Undisclosed';
+  const systems = document.getElementById('t-systems').value || '50';
+  const types = document.getElementById('t-types').value;
+  const compliance = parseInt(document.getElementById('t-compliance').value);
+  const redFlags = document.getElementById('red-flags').value;
+  const checkedItems = [...document.querySelectorAll('.check-item.checked')].map(el => el.textContent.trim());
+  const missingItems = [...document.querySelectorAll('.check-item:not(.checked)')].map(el => el.textContent.trim());
+
+  const riskScore = Math.round(100 - compliance - (missingItems.length * 3) + (checkedItems.length * 2));
+  const clampedScore = Math.max(5, Math.min(95, riskScore));
+  const riskLevel = clampedScore > 70 ? 'HIGH' : clampedScore > 40 ? 'MEDIUM' : 'LOW';
+  const riskColor = clampedScore > 70 ? 'var(--red)' : clampedScore > 40 ? 'var(--orange)' : 'var(--green)';
+  const maxFine = Math.min(15, Math.round(parseFloat(dealValue.replace(/[^0-9.]/g,'')) * 0.03 || 15));
+
+  document.getElementById('dd-output').style.display = 'block';
+  document.getElementById('dd-report-container').innerHTML = buildDDReport(target, acquirer, dealType, dealValue, industry, hq, systems, types, compliance, checkedItems, missingItems, clampedScore, riskLevel, riskColor, maxFine);
+
+  // Generate AI narrative
+  await generateAINarrative('dd-narrative', `Write an M&A AI due diligence assessment for the acquisition of ${target} (${industry}, ${hq}) by ${acquirer}. Deal: ${dealType}, ${dealValue}. Target has ${systems} AI systems (${types}). EU AI Act compliance level: approximately ${compliance}%. Confirmed governance controls: ${checkedItems.join(', ') || 'none confirmed'}. Missing: ${missingItems.join(', ')}. Red flags found: ${redFlags || 'standard gaps for compliance level'}. EU enforcement: 99 days away. Max fine exposure: €${maxFine}M. Write 3 paragraphs covering: (1) overall AI liability assessment, (2) specific deal risks and how they affect valuation, (3) recommended conditions/price adjustments. Tone: investment bank deal memo. Formal, precise.`);
+
+  await generateAINarrative('dd-remediation', `Write remediation guidance for ${acquirer} acquiring ${target}. Target has ${compliance}% AI compliance. Missing: ${missingItems.join(', ')}. Estimate months and cost range to achieve full EU AI Act compliance. Give specific action items with rough timelines. Format as 3 paragraphs. Tone: management consulting recommendation.`);
+
+  btn.disabled = false;
+  btn.innerHTML = '⚡ Generate Due Diligence Report';
+}
+
+function buildDDReport(target, acquirer, dealType, dealValue, industry, hq, systems, types, compliance, checkedItems, missingItems, score, level, color, maxFine) {
+  const today = new Date().toLocaleDateString('en-GB', {day:'numeric',month:'long',year:'numeric'});
+  const borderColor = score > 70 ? 'rgba(239,68,68,0.3)' : score > 40 ? 'rgba(245,158,11,0.3)' : 'rgba(0,217,126,0.3)';
+  const recommendation = score > 70 ? 'RENEGOTIATE OR DECLINE' : score > 40 ? 'PROCEED WITH CONDITIONS' : 'PROCEED WITH MONITORING';
+  const recColor = score > 70 ? 'var(--red)' : score > 40 ? 'var(--orange)' : 'var(--green)';
+
+  return `
+<div class="dd-header">
+  <div>
+    <div class="dd-title">AI Due Diligence Report — ${target}</div>
+    <div class="dd-sub">Acquirer: ${acquirer} · ${dealType} · ${dealValue} · ${today}</div>
+  </div>
+</div>
+<div class="dd-body">
+
+  <div class="risk-score-display">
+    <div class="score-circle" style="border-color:${color};color:${color}">
+      <div class="score-num">${score}</div>
+      <div class="score-label">Risk</div>
+    </div>
+    <div class="score-desc">AI Liability Risk Score — <strong style="color:${color}">${level} RISK</strong></div>
+    <div class="score-recommendation" style="color:${recColor}">Recommendation: ${recommendation}</div>
+  </div>
+
+  <div class="dd-section">
+    <div class="dd-section-title"><div class="section-num">1</div>AI Liability Summary</div>
+    <div class="ai-section" id="dd-narrative"><div class="spinner"></div> Generating AI liability assessment...</div>
+  </div>
+
+  <div class="dd-section">
+    <div class="dd-section-title"><div class="section-num">2</div>Key Findings</div>
+    <div class="finding-row">
+      <span class="finding-severity ${score > 60 ? 'fs-critical' : 'fs-high'}">${score > 60 ? 'Critical' : 'High'}</span>
+      <div class="finding-content">
+        <div class="finding-title">EU AI Act Compliance Gap — ${compliance}% Ready</div>
+        <div class="finding-desc">${target} operates ${systems} AI systems classified as high-risk under EU AI Act Annex III. Current compliance level is ${compliance}%, with ${missingItems.length} governance controls absent or unconfirmed. Enforcement begins in 99 days.</div>
+        <div class="finding-impact">Financial impact: Potential inherited liability up to €${maxFine}M</div>
+      </div>
+    </div>
+    ${missingItems.slice(0,3).map(item => `
+    <div class="finding-row">
+      <span class="finding-severity fs-high">High</span>
+      <div class="finding-content">
+        <div class="finding-title">Missing: ${item}</div>
+        <div class="finding-desc">This control is required for EU AI Act compliance. Its absence creates direct regulatory exposure and must be remediated post-acquisition.</div>
+        <div class="finding-impact">Required by: EU AI Act Article 9-16</div>
+      </div>
+    </div>`).join('')}
+    ${checkedItems.length > 0 ? `
+    <div class="finding-row">
+      <span class="finding-severity fs-low">Positive</span>
+      <div class="finding-content">
+        <div class="finding-title">Confirmed Controls: ${checkedItems.length} of 12</div>
+        <div class="finding-desc">The following governance controls are confirmed: ${checkedItems.join(', ')}.</div>
+        <div class="finding-impact">Reduces remediation scope and timeline</div>
+      </div>
+    </div>` : ''}
+  </div>
+
+  <div class="dd-section">
+    <div class="dd-section-title"><div class="section-num">3</div>Deal Conditions & Price Adjustment</div>
+    <div style="background:var(--s2);border:1px solid var(--border);border-radius:4px;padding:16px;margin-bottom:16px;font-size:13px;color:var(--text2);line-height:1.7">
+      <strong style="color:var(--text)">Recommended deal conditions based on ${level} risk assessment:</strong><br><br>
+      ${score > 70 ? `① Escrow 15-20% of deal value pending EU AI Act compliance achievement within 12 months<br>② Price reduction of €${Math.round(maxFine * 0.3)}M-€${Math.round(maxFine * 0.5)}M to cover remediation costs<br>③ Representations & warranties on AI compliance status<br>④ Material adverse change clause triggered by regulatory action<br>⑤ Require FRIA and technical documentation completion before close` : score > 40 ? `① Representations & warranties on EU AI Act compliance<br>② 90-day compliance remediation plan agreed before close<br>③ Compliance escrow of €${Math.round(maxFine * 0.1)}M held for 12 months<br>④ Integration of SBX Guardian monitoring within 60 days of close` : `① Standard AI compliance R&W<br>② Monitoring integration within 90 days of close<br>③ Annual compliance report to acquirer board`}
+    </div>
+  </div>
+
+  <div class="dd-section">
+    <div class="dd-section-title"><div class="section-num">4</div>Post-Acquisition Remediation Plan</div>
+    <div class="ai-section" id="dd-remediation"><div class="spinner"></div> Generating remediation guidance...</div>
+  </div>
+
+  <div style="background:var(--s2);border:1px solid rgba(200,168,75,0.15);border-radius:4px;padding:16px;font-family:var(--mono);font-size:12px;color:var(--text3);line-height:1.8">
+    Report: MADD-${Date.now().toString(36).toUpperCase()} · ${today} · SBX Guardian M&A Intelligence<br>
+    This report constitutes preliminary due diligence guidance, not legal advice. Engage qualified EU AI Act counsel for binding assessments.
+  </div>
+</div>`;
+}
+
+async function generateAINarrative(id, prompt) {
+  const el = document.getElementById(id);
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514', max_tokens: 600,
+        system: 'You are a senior M&A advisor at a top investment bank specializing in AI governance and EU regulatory risk. Write in formal deal memo style. Precise, specific, no filler language.',
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+    const d = await res.json();
+    el.className = 'ai-section';
+    el.textContent = d.content?.[0]?.text || 'AI analysis unavailable.';
+  } catch {
+    el.className = 'ai-section';
+    el.innerHTML = '<em style="color:var(--text3)">AI narrative requires API configuration. Configure GROQ_API_KEY to enable.</em>';
+  }
+}
+</script>
+</body>
+</html>
