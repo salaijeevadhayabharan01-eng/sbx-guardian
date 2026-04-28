@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AI Systems Inventory — SBX Guardian</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800;900&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#020305;--s1:#07080d;--s2:#0c0e14;--border:#161924;--text:#eef0f8;--text2:#7a849a;--text3:#353d52;--gold:#c8a84b;--gold2:#e8c96b;--green:#00d97e;--red:#ef4444;--orange:#f59e0b;--blue:#3b82f6;--purple:#a855f7;--mono:'DM Mono',monospace;--sans:'DM Sans',sans-serif;--syne:'Syne',sans-serif}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh}
+body::before{content:'';position:fixed;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent);z-index:300}
+nav{position:fixed;top:0;left:0;right:0;z-index:200;padding:14px 48px;display:flex;align-items:center;justify-content:space-between;background:rgba(2,3,5,0.96);border-bottom:1px solid var(--border);backdrop-filter:blur(24px)}
+.logo{font-family:var(--syne);font-size:14px;font-weight:800;letter-spacing:1.5px;text-decoration:none;color:var(--text);display:flex;align-items:center;gap:10px}
+.logo-mark{width:22px;height:22px;background:var(--gold);border-radius:3px;display:flex;align-items:center;justify-content:center;color:#020305;font-size:9px;font-weight:900}
+.nav-right{display:flex;gap:12px;align-items:center}
+.nav-right a{color:var(--text2);text-decoration:none;font-size:13px}.nav-right a:hover{color:var(--gold)}
+.nav-btn{background:var(--gold);color:#020305;padding:8px 18px;border-radius:3px;font-size:13px;font-weight:600}
+
+.main{max-width:1100px;margin:0 auto;padding:90px 48px 60px}
+
+/* HERO */
+.eyebrow{font-family:var(--mono);font-size:10px;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);margin-bottom:16px}
+h1{font-family:var(--syne);font-size:clamp(44px,5vw,72px);font-weight:900;letter-spacing:-2.5px;line-height:0.95;margin-bottom:20px}
+h1 em{font-style:normal;color:var(--gold)}
+.hero-sub{color:var(--text2);font-size:16px;max-width:560px;line-height:1.7;font-weight:300;margin-bottom:40px}
+.alert-box{display:flex;align-items:flex-start;gap:14px;background:rgba(239,68,68,0.07);border:1px solid rgba(239,68,68,0.2);border-radius:4px;padding:16px;margin-bottom:40px;max-width:680px}
+.alert-icon{font-size:20px;flex-shrink:0;margin-top:2px}
+.alert-text{font-size:14px;color:var(--text2);line-height:1.6}
+.alert-text strong{color:var(--text)}
+
+/* WIZARD */
+.wizard{background:var(--s1);border:1px solid var(--border);border-radius:6px;overflow:hidden;margin-bottom:32px}
+.wizard-progress{display:flex;background:var(--s2);border-bottom:1px solid var(--border)}
+.wp-step{flex:1;padding:14px;text-align:center;font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--text3);border-right:1px solid var(--border);transition:all 0.2s;cursor:pointer}
+.wp-step:last-child{border-right:none}
+.wp-step.active{color:var(--gold);background:rgba(200,168,75,0.05)}
+.wp-step.done{color:var(--green)}
+.wizard-body{padding:32px}
+.wizard-step{display:none}.wizard-step.active{display:block}
+.step-title{font-family:var(--syne);font-size:22px;font-weight:700;margin-bottom:6px}
+.step-desc{color:var(--text2);font-size:14px;margin-bottom:24px}
+
+/* FORM ELEMENTS */
+label{display:block;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.8px;color:var(--text3);margin-bottom:6px}
+input,select,textarea{width:100%;padding:10px 14px;background:var(--bg);border:1px solid var(--border);border-radius:4px;color:var(--text);font-family:var(--sans);font-size:14px;outline:none;transition:border-color 0.2s;margin-bottom:14px}
+input:focus,select:focus,textarea:focus{border-color:var(--gold)}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+
+/* SYSTEM BUILDER */
+.system-list{margin-bottom:20px}
+.system-item{display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--s2);border:1px solid var(--border);border-radius:4px;margin-bottom:8px;font-size:14px}
+.system-item-type{font-family:var(--mono);font-size:10px;padding:3px 8px;border-radius:2px;text-transform:uppercase;letter-spacing:0.5px;flex-shrink:0}
+.t-robot{background:rgba(59,130,246,0.15);color:var(--blue);border:1px solid rgba(59,130,246,0.2)}
+.t-cobot{background:rgba(168,85,247,0.15);color:var(--purple);border:1px solid rgba(168,85,247,0.2)}
+.t-agv{background:rgba(0,217,126,0.12);color:var(--green);border:1px solid rgba(0,217,126,0.2)}
+.t-drone{background:rgba(245,158,11,0.12);color:var(--orange);border:1px solid rgba(245,158,11,0.2)}
+.t-software{background:rgba(200,168,75,0.12);color:var(--gold);border:1px solid rgba(200,168,75,0.2)}
+.t-unknown{background:rgba(53,61,82,0.5);color:var(--text3);border:1px solid var(--border)}
+.system-name{flex:1;font-weight:500}
+.system-risk{font-family:var(--mono);font-size:10px}
+.risk-high{color:var(--red)}.risk-medium{color:var(--orange)}.risk-low{color:var(--green)}
+.remove-btn{background:none;border:none;color:var(--text3);cursor:pointer;font-size:16px;padding:4px;transition:color 0.15s}
+.remove-btn:hover{color:var(--red)}
+
+/* CHECKBOXES */
+.check-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:20px}
+.check-opt{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--s2);border:1px solid var(--border);border-radius:4px;cursor:pointer;font-size:13px;color:var(--text2);transition:all 0.15s}
+.check-opt:hover{border-color:rgba(200,168,75,0.3)}
+.check-opt.selected{border-color:rgba(0,217,126,0.3);background:rgba(0,217,126,0.05);color:var(--text)}
+.check-opt input{display:none}
+.cb{width:16px;height:16px;border:1px solid var(--border);border-radius:2px;display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0;transition:all 0.15s}
+.check-opt.selected .cb{background:var(--green);border-color:var(--green);color:#020305}
+
+/* NAV BUTTONS */
+.btn-row{display:flex;gap:12px;margin-top:8px}
+.btn-primary{background:var(--gold);color:#020305;padding:12px 28px;border-radius:4px;font-size:14px;font-weight:700;border:none;cursor:pointer;font-family:var(--sans);transition:all 0.2s}
+.btn-primary:hover{background:var(--gold2)}
+.btn-ghost{background:transparent;color:var(--text2);border:1px solid var(--border);padding:12px 28px;border-radius:4px;font-size:14px;font-weight:600;cursor:pointer;font-family:var(--sans);transition:all 0.2s}
+.btn-ghost:hover{border-color:var(--gold);color:var(--gold)}
+.btn-sm{padding:8px 16px;font-size:12px}
+.btn-add{background:var(--s2);color:var(--text2);border:1px solid var(--border);padding:10px 20px;border-radius:4px;font-size:13px;cursor:pointer;font-family:var(--sans);transition:all 0.2s;display:flex;align-items:center;gap:6px}
+.btn-add:hover{border-color:var(--gold);color:var(--gold)}
+
+/* RESULTS */
+.results-container{display:none}
+.results-header{background:var(--s2);border:1px solid var(--border);border-radius:4px;padding:24px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:16px}
+.results-title{font-family:var(--syne);font-size:22px;font-weight:700}
+.results-date{font-family:var(--mono);font-size:11px;color:var(--text3)}
+.score-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
+.score-card{background:var(--s1);border:1px solid var(--border);border-radius:4px;padding:16px;text-align:center}
+.score-num{font-family:var(--syne);font-size:32px;font-weight:800;line-height:1}
+.score-label{font-size:11px;color:var(--text3);margin-top:6px;text-transform:uppercase;letter-spacing:0.5px;font-family:var(--mono)}
+
+/* SYSTEM RESULT CARDS */
+.sys-result{background:var(--s1);border:1px solid var(--border);border-radius:4px;padding:20px;margin-bottom:12px;display:flex;align-items:flex-start;gap:16px}
+.sys-result.shadow{border-left:3px solid var(--red)}
+.sys-result.partial{border-left:3px solid var(--orange)}
+.sys-result.compliant{border-left:3px solid var(--green)}
+.sys-icon{width:44px;height:44px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.si-red{background:rgba(239,68,68,0.1)}
+.si-orange{background:rgba(245,158,11,0.1)}
+.si-green{background:rgba(0,217,126,0.1)}
+.sys-body{flex:1}
+.sys-name{font-size:15px;font-weight:600;margin-bottom:4px}
+.sys-meta{font-size:12px;color:var(--text3);font-family:var(--mono);margin-bottom:10px}
+.sys-issues{display:flex;gap:6px;flex-wrap:wrap}
+.issue-tag{font-family:var(--mono);font-size:10px;padding:2px 8px;border-radius:2px;text-transform:uppercase;letter-spacing:0.5px}
+.it-red{background:rgba(239,68,68,0.1);color:var(--red);border:1px solid rgba(239,68,68,0.2)}
+.it-orange{background:rgba(245,158,11,0.1);color:var(--orange);border:1px solid rgba(245,158,11,0.2)}
+.it-green{background:rgba(0,217,126,0.1);color:var(--green);border:1px solid rgba(0,217,126,0.2)}
+.sys-action{flex-shrink:0}
+.ai-analysis{background:var(--s1);border:1px solid rgba(200,168,75,0.2);border-radius:4px;padding:20px;margin-bottom:16px}
+.ai-analysis-title{font-family:var(--mono);font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--gold);margin-bottom:12px}
+.ai-analysis-content{font-size:14px;color:var(--text2);line-height:1.7;white-space:pre-wrap}
+.spinner{width:14px;height:14px;border:2px solid var(--border);border-top-color:var(--gold);border-radius:50%;animation:spin 0.8s linear infinite;display:inline-block;vertical-align:middle;margin-right:6px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+@media(max-width:700px){.form-grid,.check-grid,.score-row{grid-template-columns:1fr}.main{padding:90px 24px 60px}.wizard-progress{flex-wrap:wrap}}
+</style>
+</head>
+<body>
+<nav>
+  <a href="/" class="logo"><div class="logo-mark">SBX</div>GUARDIAN</a>
+  <div class="nav-right">
+    <a href="/app">Dashboard</a>
+    <a href="/enterprise.html">Enterprise</a>
+    <a href="/app" class="nav-btn">Login →</a>
+  </div>
+</nav>
+
+<div class="main">
+  <div class="eyebrow">AI Systems Inventory</div>
+  <h1>Find every AI system.<br><em>Before regulators do.</em></h1>
+  <p class="hero-sub">Shadow AI is the #1 compliance risk in 2026. 29% of employees use unsanctioned AI in your operations. This inventory wizard discovers, classifies, and risk-scores every physical AI system across your facilities.</p>
+
+  <div class="alert-box">
+    <div class="alert-icon">⚠</div>
+    <div class="alert-text"><strong>You cannot comply with what you haven't discovered.</strong> EU AI Act Article 9 requires a complete inventory of all high-risk AI systems before a risk management system can be established. Most companies are missing 20-40% of their AI systems.</div>
+  </div>
+
+  <!-- WIZARD -->
+  <div class="wizard">
+    <div class="wizard-progress">
+      <div class="wp-step active" id="wp-1">1. Organization</div>
+      <div class="wp-step" id="wp-2">2. Discover Systems</div>
+      <div class="wp-step" id="wp-3">3. Classify Risk</div>
+      <div class="wp-step" id="wp-4">4. Review Inventory</div>
+    </div>
+    <div class="wizard-body">
+
+      <!-- STEP 1 -->
+      <div class="wizard-step active" id="ws-1">
+        <div class="step-title">Organization Profile</div>
+        <div class="step-desc">Basic information to configure your inventory scan</div>
+        <div class="form-grid">
+          <div>
+            <label>Organization Name</label>
+            <input type="text" id="org" placeholder="e.g. Acme Manufacturing GmbH">
+          </div>
+          <div>
+            <label>Primary Country of Operation</label>
+            <select id="country">
+              <option>Germany</option><option>France</option><option>Netherlands</option>
+              <option>Italy</option><option>Spain</option><option>Austria</option>
+              <option>Other EU Member State</option><option>United Kingdom</option>
+              <option>United States</option><option>Global (Multi-jurisdiction)</option>
+            </select>
+          </div>
+          <div>
+            <label>Industry</label>
+            <select id="industry">
+              <option>Automotive Manufacturing</option><option>Industrial Automation</option>
+              <option>Logistics & Warehousing</option><option>Aerospace & Defense</option>
+              <option>Pharmaceutical Manufacturing</option><option>Energy & Utilities</option>
+              <option>Food & Beverage Production</option><option>Construction & Mining</option>
+            </select>
+          </div>
+          <div>
+            <label>Number of Facilities</label>
+            <input type="number" id="facilities" placeholder="e.g. 3" min="1">
+          </div>
+        </div>
+        <div class="btn-row">
+          <button class="btn-primary" onclick="nextStep(1)">Continue →</button>
+        </div>
+      </div>
+
+      <!-- STEP 2 -->
+      <div class="wizard-step" id="ws-2">
+        <div class="step-title">Discover Your AI Systems</div>
+        <div class="step-desc">Add every AI system you know about. Don't worry about ones you've missed — we'll help you find those too.</div>
+
+        <div id="system-list" class="system-list">
+          <!-- Dynamic -->
+        </div>
+
+        <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:24px">
+          <div style="flex:1;min-width:200px">
+            <label>System Name</label>
+            <input type="text" id="new-sys-name" placeholder="e.g. KUKA KR 500 — Assembly Bay A">
+          </div>
+          <div>
+            <label>Type</label>
+            <select id="new-sys-type">
+              <option value="robot">Industrial Robot</option>
+              <option value="cobot">Collaborative Robot</option>
+              <option value="agv">AGV / AMR</option>
+              <option value="drone">Drone</option>
+              <option value="software">Software AI</option>
+              <option value="unknown">Unknown / Under Investigation</option>
+            </select>
+          </div>
+          <div>
+            <label>Location</label>
+            <input type="text" id="new-sys-loc" placeholder="e.g. Facility 1, Line B" style="margin-bottom:0">
+          </div>
+          <div style="align-self:flex-end;padding-bottom:14px">
+            <button class="btn-add" onclick="addSystem()">+ Add System</button>
+          </div>
+        </div>
+
+        <div style="background:var(--s2);border:1px solid var(--border);border-radius:4px;padding:16px;margin-bottom:20px">
+          <div style="font-family:var(--mono);font-size:11px;color:var(--gold);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">Shadow AI Checklist — Systems people often forget</div>
+          <div class="check-grid" id="shadow-checklist">
+            <div class="check-opt" onclick="toggleCheck(this)"><div class="cb"></div>Quality inspection cameras with ML</div>
+            <div class="check-opt" onclick="toggleCheck(this)"><div class="cb"></div>Predictive maintenance algorithms on PLCs</div>
+            <div class="check-opt" onclick="toggleCheck(this)"><div class="cb"></div>Vision systems on conveyor belts</div>
+            <div class="check-opt" onclick="toggleCheck(this)"><div class="cb"></div>AI-powered safety sensors</div>
+            <div class="check-opt" onclick="toggleCheck(this)"><div class="cb"></div>Automated guided vehicles (AGVs)</div>
+            <div class="check-opt" onclick="toggleCheck(this)"><div class="cb"></div>Warehouse management system AI</div>
+            <div class="check-opt" onclick="toggleCheck(this)"><div class="cb"></div>Cobots without formal registration</div>
+            <div class="check-opt" onclick="toggleCheck(this)"><div class="cb"></div>Drone inspection systems</div>
+            <div class="check-opt" onclick="toggleCheck(this)"><div class="cb"></div>AI-powered welding systems</div>
+            <div class="check-opt" onclick="toggleCheck(this)"><div class="cb"></div>Autonomous palletizing robots</div>
+            <div class="check-opt" onclick="toggleCheck(this)"><div class="cb"></div>CNC machines with ML optimization</div>
+            <div class="check-opt" onclick="toggleCheck(this)"><div class="cb"></div>AI-driven energy management</div>
+          </div>
+        </div>
+
+        <div class="btn-row">
+          <button class="btn-ghost" onclick="prevStep(2)">← Back</button>
+          <button class="btn-primary" onclick="nextStep(2)">Continue →</button>
+        </div>
+      </div>
+
+      <!-- STEP 3 -->
+      <div class="wizard-step" id="ws-3">
+        <div class="step-title">Classify Risk Level</div>
+        <div class="step-desc">Answer these questions to determine EU AI Act risk classification for your fleet</div>
+
+        <div style="display:flex;flex-direction:column;gap:16px;margin-bottom:24px">
+          ${[
+            ['Do any systems make autonomous decisions affecting human safety?','q1'],
+            ['Are any systems used in employment or workforce decisions?','q2'],
+            ['Do any systems control critical infrastructure (power, water, transport)?','q3'],
+            ['Have any systems been involved in a safety incident in the past 3 years?','q4'],
+            ['Are any systems operating in the EU or processing EU citizen data?','q5'],
+            ['Do any systems interact with or work near humans without barriers?','q6'],
+          ].map(([q,id])=>`
+            <div style="background:var(--s2);border:1px solid var(--border);border-radius:4px;padding:16px">
+              <div style="font-size:14px;margin-bottom:12px">${q}</div>
+              <div style="display:flex;gap:8px">
+                <button class="btn-ghost btn-sm" id="${id}-yes" onclick="setAnswer('${id}','yes',this)">Yes</button>
+                <button class="btn-ghost btn-sm" id="${id}-no" onclick="setAnswer('${id}','no',this)">No</button>
+                <button class="btn-ghost btn-sm" id="${id}-unknown" onclick="setAnswer('${id}','unknown',this)">Unsure</button>
+              </div>
+            </div>`).join('')}
+        </div>
+
+        <div class="btn-row">
+          <button class="btn-ghost" onclick="prevStep(3)">← Back</button>
+          <button class="btn-primary" onclick="nextStep(3)">Generate Inventory →</button>
+        </div>
+      </div>
+
+      <!-- STEP 4 -->
+      <div class="wizard-step" id="ws-4">
+        <div class="step-title">Generating Your AI Inventory...</div>
+        <div id="generating-msg" style="color:var(--text2);font-size:14px;margin-bottom:20px">Analyzing systems and classifying EU AI Act risk levels...</div>
+        <div id="ws4-output"></div>
+        <div class="btn-row" id="ws4-actions" style="display:none">
+          <button class="btn-primary" onclick="window.print()">🖨 Export Inventory</button>
+          <a href="/app" class="btn-ghost" style="text-decoration:none;padding:12px 28px;border-radius:4px;font-size:14px;font-weight:600;border:1px solid var(--border);color:var(--text2)">Connect to Dashboard →</a>
+          <button class="btn-ghost" onclick="location.reload()">Start Over</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+let currentStep = 1;
+const systems = [];
+const answers = {};
+
+function nextStep(from) {
+  if(from === 2 && systems.length === 0) {
+    // Add shadow systems that were checked
+    document.querySelectorAll('.check-opt.selected').forEach(el => {
+      systems.push({ name: el.textContent.trim(), type: 'unknown', location: 'TBD', shadow: true });
+    });
+  }
+  if(from === 3) { generateInventory(); }
+  showStep(from + 1);
+}
+
+function prevStep(from) { showStep(from - 1); }
+
+function showStep(n) {
+  document.querySelectorAll('.wizard-step').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.wp-step').forEach(s => s.classList.remove('active'));
+  document.getElementById('ws-'+n).classList.add('active');
+  document.getElementById('wp-'+n).classList.add('active');
+  for(let i=1;i<n;i++) document.getElementById('wp-'+i).classList.add('done');
+  currentStep = n;
+}
+
+function addSystem() {
+  const name = document.getElementById('new-sys-name').value.trim();
+  const type = document.getElementById('new-sys-type').value;
+  const loc = document.getElementById('new-sys-loc').value.trim();
+  if(!name) return;
+  systems.push({ name, type, location: loc || 'Unknown', shadow: false });
+  renderSystems();
+  document.getElementById('new-sys-name').value = '';
+  document.getElementById('new-sys-loc').value = '';
+}
+
+function removeSystem(i) { systems.splice(i,1); renderSystems(); }
+
+function renderSystems() {
+  const list = document.getElementById('system-list');
+  const typeLabels = {robot:'Robot',cobot:'Cobot',agv:'AGV',drone:'Drone',software:'Software AI',unknown:'Unknown'};
+  list.innerHTML = systems.map((s,i) => `
+    <div class="system-item">
+      <span class="system-item-type t-${s.type}">${typeLabels[s.type]||s.type}</span>
+      <span class="system-name">${s.name}</span>
+      <span style="font-size:12px;color:var(--text3);font-family:var(--mono)">${s.location}</span>
+      ${s.shadow ? '<span style="font-family:var(--mono);font-size:10px;color:var(--orange);padding:2px 6px;border-radius:2px;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.2)">SHADOW</span>' : ''}
+      <button class="remove-btn" onclick="removeSystem(${i})">✕</button>
+    </div>`).join('') || '<div style="color:var(--text3);font-size:14px;padding:16px 0">No systems added yet — add above or check the shadow AI list</div>';
+}
+
+function toggleCheck(el) { el.classList.toggle('selected'); el.querySelector('.cb').textContent = el.classList.contains('selected') ? '✓' : ''; }
+
+function setAnswer(id, val, btn) {
+  document.querySelectorAll(`[id^="${id}-"]`).forEach(b => { b.style.background='transparent'; b.style.color='var(--text2)'; b.style.borderColor='var(--border)'; });
+  btn.style.background = val==='yes' ? 'rgba(239,68,68,0.15)' : val==='no' ? 'rgba(0,217,126,0.15)' : 'rgba(200,168,75,0.15)';
+  btn.style.color = val==='yes' ? 'var(--red)' : val==='no' ? 'var(--green)' : 'var(--gold)';
+  btn.style.borderColor = val==='yes' ? 'rgba(239,68,68,0.3)' : val==='no' ? 'rgba(0,217,126,0.3)' : 'rgba(200,168,75,0.3)';
+  answers[id] = val;
+}
+
+function classifySystem(sys) {
+  const isHighRisk = answers.q1==='yes' || answers.q5==='yes' || answers.q6==='yes';
+  const isIncident = answers.q4==='yes';
+  const isCritical = answers.q2==='yes' || answers.q3==='yes';
+  if(sys.shadow) return { level:'shadow', color:'var(--red)', label:'SHADOW AI', issues:['Not registered','No compliance documentation','Unknown logging status','Immediate attention required'] };
+  if(isCritical || (isHighRisk && isIncident)) return { level:'critical', color:'var(--red)', label:'HIGH RISK', issues:['Annex III classification','Full conformity assessment needed','Technical documentation required','FRIA required'] };
+  if(isHighRisk) return { level:'partial', color:'var(--orange)', label:'HIGH RISK', issues:['Annex III classification','Compliance documentation needed','Logging coverage required'] };
+  return { level:'compliant', color:'var(--green)', label:'MONITOR', issues:['Regular review recommended','Logging recommended'] };
+}
+
+async function generateInventory() {
+  const org = document.getElementById('org').value || 'Your Organization';
+  const shadowItems = [...document.querySelectorAll('.check-opt.selected')].map(el => el.textContent.trim());
+  const allSystems = [...systems, ...shadowItems.filter(s => !systems.find(sys => sys.name === s)).map(s => ({name: s, type:'unknown', location:'TBD', shadow:true}))];
+
+  const shadowCount = allSystems.filter(s=>s.shadow).length;
+  const highRiskCount = allSystems.filter(s=>!s.shadow).length;
+  const totalCount = allSystems.length;
+
+  document.getElementById('generating-msg').innerHTML = '<div class="spinner"></div> Analyzing ' + totalCount + ' systems...';
+
+  const output = document.getElementById('ws4-output');
+  output.innerHTML = `
+    <div class="score-row" style="margin-bottom:20px">
+      <div class="score-card"><div class="score-num" style="color:var(--blue)">${totalCount}</div><div class="score-label">Total AI Systems</div></div>
+      <div class="score-card"><div class="score-num" style="color:var(--red)">${shadowCount}</div><div class="score-label">Shadow AI Found</div></div>
+      <div class="score-card"><div class="score-num" style="color:var(--orange)">${highRiskCount}</div><div class="score-label">Need Assessment</div></div>
+      <div class="score-card"><div class="score-num" style="color:var(--gold)">99</div><div class="score-label">Days to Deadline</div></div>
+    </div>
+    ${allSystems.map(s => {
+      const c = classifySystem(s);
+      const icons = {robot:'🦾',cobot:'🤖',agv:'🚛',drone:'🚁',software:'💻',unknown:'❓'};
+      const iconBg = c.level==='shadow'||c.level==='critical' ? 'si-red' : c.level==='partial' ? 'si-orange' : 'si-green';
+      return `
+      <div class="sys-result ${c.level}">
+        <div class="sys-icon ${iconBg}">${icons[s.type]||'❓'}</div>
+        <div class="sys-body">
+          <div class="sys-name">${s.name}</div>
+          <div class="sys-meta">${s.location} · ${s.type.toUpperCase()}</div>
+          <div class="sys-issues">${c.issues.map(i=>`<span class="issue-tag ${c.level==='compliant'?'it-green':c.level==='partial'?'it-orange':'it-red'}">${i}</span>`).join('')}</div>
+        </div>
+        <div class="sys-action">
+          <span style="font-family:var(--mono);font-size:11px;padding:4px 10px;border-radius:2px;background:rgba(0,0,0,0.3);border:1px solid var(--border);color:${c.color}">${c.label}</span>
+        </div>
+      </div>`}).join('') || '<div style="color:var(--text3);padding:20px;text-align:center">No systems to analyze — go back and add systems or select from the shadow AI checklist</div>'}
+  `;
+
+  // Generate AI analysis
+  const aiBox = document.createElement('div');
+  aiBox.className = 'ai-analysis';
+  aiBox.innerHTML = `<div class="ai-analysis-title">⚡ AI Analysis — ${org}</div><div class="ai-analysis-content"><div class="spinner"></div> Generating compliance assessment...</div>`;
+  output.insertBefore(aiBox, output.firstChild);
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        model:'claude-sonnet-4-20250514', max_tokens:600,
+        system:'You are an EU AI Act compliance expert. Write concise, direct compliance assessments for industrial AI system inventories.',
+        messages:[{role:'user',content:`Write a 3-paragraph compliance assessment for ${org} based on this AI systems inventory: ${totalCount} total systems, ${shadowCount} shadow AI systems discovered, ${highRiskCount} systems requiring EU AI Act assessment. Questions answered: ${JSON.stringify(answers)}. Days until EU AI Act enforcement: 99. Focus on: (1) immediate actions required, (2) regulatory exposure level, (3) recommended priority order. Boardroom tone, specific and actionable.`}]
+      })
+    });
+    const d = await res.json();
+    aiBox.querySelector('.ai-analysis-content').textContent = d.content?.[0]?.text || 'Analysis unavailable.';
+  } catch { aiBox.querySelector('.ai-analysis-content').textContent = 'Configure API key for AI analysis. Your inventory has been generated above.'; }
+
+  document.getElementById('generating-msg').textContent = 'Inventory complete — ' + totalCount + ' systems classified';
+  document.getElementById('ws4-actions').style.display = 'flex';
+}
+</script>
+</body>
+</html>

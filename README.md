@@ -1,15 +1,12 @@
-<div align="center">
-
 # ⬢ SBX Guardian
-### The Black Box for Industrial AI Systems
+### The compliance operating system for physical AI systems.
 
-**Tamper-proof logging · EU AI Act compliance · One-click insurer evidence**
+**Tamper-proof logging · EU AI Act compliance · Board reporting · Regulatory intelligence · Insurance evidence**
 
-[![License: Proprietary](https://img.shields.io/badge/License-Proprietary-red.svg)]()
-[![Node.js](https://img.shields.io/badge/Node.js-18%2B-green.svg)]()
-[![Status](https://img.shields.io/badge/Status-Active%20Development-brightgreen.svg)]()
-
-</div>
+[![Status](https://img.shields.io/badge/status-live-00d97e)](https://sbx-guardian.onrender.com)
+[![License](https://img.shields.io/badge/license-Proprietary-c8a84b)](LICENSE)
+[![EU AI Act](https://img.shields.io/badge/EU%20AI%20Act-Compliant-00d97e)](https://sbx-guardian.onrender.com/security.html)
+[![Node.js](https://img.shields.io/badge/Node.js-v20-339933)](package.json)
 
 ---
 
@@ -17,116 +14,260 @@
 
 When an industrial robot causes an incident — a collision, an unexpected stop, an injury — **nobody can prove what actually happened.**
 
-Logs are messy, incomplete, or tampered with. Insurance claims get denied. Regulatory fines hit. Liability drags through courts for years.
+Logs are messy, incomplete, or easily tampered. Insurance claims get denied. Regulatory fines hit. Liability drags through courts for years.
 
-And starting **August 2, 2026**, every industrial robot running ML software in the EU is legally classified as a **High-Risk AI System** under the EU AI Act — with penalties up to **€30 million or 6% of global annual revenue** for non-compliance.
+**Starting August 2, 2026**, every industrial robot running ML software in the EU is legally classified as a **High-Risk AI System** under the EU AI Act — with penalties up to **€15M or 3% of global annual revenue** for non-compliance.
 
-**78% of senior leaders currently cannot pass an AI governance audit.**
-
-Zero products on the market solve this specifically for physical robots.
+- 78% of senior leaders cannot pass an AI governance audit
+- Only 14% of companies with AI risk committees are actually deployment-ready
+- Zero products on the market solve this specifically for physical robots
 
 ---
 
 ## The Solution
 
-SBX Guardian is a plug-in platform that gives every AI system a **tamper-proof black box** — like flight recorders on aircraft, but for robots.
+SBX Guardian is a **full-stack compliance operating system** for industrial AI. Not just logging — the entire lifecycle:
 
-| Feature | What it does |
-|---------|-------------|
-| 🔐 **Hash Chain Logging** | Every event cryptographically signed in a SHA-256 chain. Tamper-evident, court-admissible. |
-| ⚖️ **EU AI Act Compliance** | Tracks all 9 legal requirements (Art. 9–16) with live pass/fail status. |
-| 📄 **Evidence Reports** | AI-generated insurer and regulator packs in one click. |
-| ⚡ **Circuit Breakers** | Automatic system isolation on overload or anomaly. |
-| 🛡️ **Command Firewall** | Rule-based command filtering with mandatory human oversight gates. |
-| 📊 **Risk Prediction** | Predictive failure scoring across your entire fleet. |
-| 🤖 **AI Analyst** | Ask anything about your fleet in plain English. |
+```
+Risk Classification → AI Inventory Discovery → Technical Documentation →
+Conformity Assessment → Tamper-proof Logging → Incident Response →
+Board Reporting → Regulatory Intelligence → Insurance Evidence → M&A Due Diligence
+```
 
 ---
 
-## Market
+## Core Features
 
-| Metric | Data |
-|--------|------|
-| EU AI Act enforcement | **August 2, 2026** |
-| Non-compliance penalty | Up to **€30M or 6% global revenue** |
-| Robotics safety market (2024) | **$7.4 billion** |
-| Robotics safety market (2034) | **$17.2 billion** |
-| Industrial downtime cost | Up to **$532,000/hour** |
-| Leaders who can pass AI audit today | **22%** |
-| Products doing this for physical robots | **0** |
+| Feature | What it does |
+|---|---|
+| 🔐 **SHA-256 Hash Chain** | Every event cryptographically signed. Tamper-evident, court-admissible |
+| ⚖ **EU AI Act Tracker** | All articles (Art. 9–16) with live pass/fail status |
+| 📊 **Board Report Generator** | One-click AI-written board governance report in 60 seconds |
+| 📰 **Regulatory Intelligence** | 47 regulations across 12 jurisdictions monitored live |
+| 🔍 **AI Inventory Scanner** | Discover shadow AI systems across your facilities |
+| 🚨 **Incident Response Playbook** | 72-hour legal response guide with interactive checklists |
+| 📋 **FRIA Wizard** | Fundamental Rights Impact Assessment generator (Art. 27) |
+| 📄 **Technical Documentation** | Annex IV documentation auto-generator |
+| 💼 **M&A Due Diligence** | AI liability risk scoring for acquisition targets |
+| 🏢 **White-label Partner Portal** | For law firms, Big 4, and management consultancies |
+| 🛡 **Insurance Integration** | Certified audit exports for insurer claims teams |
+| ⚡ **Anomaly Detection** | Per-robot baseline learning, predictive failure scoring |
+| 🤖 **AI Fleet Analyst** | Plain-English fleet analysis via Groq + Gemini |
+| 📈 **Built-in CRM** | Prospect tracking, pipeline management, nurture sequences |
+| 📧 **Marketing Automation** | Email, Telegram, Discord, Reddit — 24/7 automated |
+
+---
+
+## Enterprise Trust Stack
+
+| Document | Status | URL |
+|---|---|---|
+| Terms of Service | ✅ Live | `/terms.html` |
+| Privacy Policy (GDPR) | ✅ Live | `/privacy.html` |
+| Data Processing Agreement (Art. 28) | ✅ Live | `/dpa.html` |
+| Security Overview | ✅ Live | `/security.html` |
+| Trust Center | ✅ Live | `/trust-center.html` |
+| API Documentation | ✅ Live | `/api-docs.html` |
+| Status Page | ✅ Live | `/status.html` |
+| Security Questionnaire (SIG) | ✅ Live | `/vendor-questionnaire.html` |
+| Responsible Disclosure | ✅ Live | `/.well-known/security.txt` |
+| SOC 2 Type II | 🔄 Q3 2026 | Under NDA on request |
+
+---
+
+## Security Architecture
+
+- **Encryption at rest**: AES-256-GCM with unique IVs per record
+- **Tamper evidence**: SHA-256 cryptographic hash chain (all events)
+- **Authentication**: JWT tokens (organization-scoped), webhook secret auth
+- **Authorization**: Row-level security — every query filtered by org_id
+- **Transport**: TLS 1.2+ enforced on all endpoints
+- **Audit trail**: Every action logged with timestamp, user, IP, and resource
+- **Rate limiting**: Per-endpoint and per-user rate limiting
+- **GDPR**: Data export, deletion, DPA, SCCs — all implemented
 
 ---
 
 ## Tech Stack
 
-- **Backend:** Node.js + Express + WebSocket
-- **Database:** SQL with SHA-256 tamper-evident hash chain
-- **Auth:** JWT (JSON Web Tokens)
-- **AI:** Claude (Anthropic) for report generation and fleet analysis
-- **Frontend:** Vanilla JS single-page app, no framework dependencies
-- **Deploy:** Railway / Render / any Node.js host
+```
+Backend:   Node.js + Express + WebSocket
+Database:  SQLite (sql.js) with SHA-256 hash chain
+Auth:      JWT (jsonwebtoken) + bcryptjs
+AI:        Groq LLaMA 3.3 70B + Google Gemini 1.5 Flash (failover)
+Frontend:  Vanilla JS SPA — no framework dependencies
+Deploy:    Render (primary) · Railway (secondary)
+Marketing: Gmail SMTP · Telegram Bot API · Discord Webhooks · Reddit API
+```
 
 ---
 
 ## Quick Start
 
 ```bash
-# Clone the repo
+# Clone
 git clone https://github.com/YOUR_USERNAME/sbx-guardian.git
 cd sbx-guardian
 
-# Install dependencies
+# Install
 npm install
 
-# Seed demo database
-node scripts/seed.js
+# Seed demo data (12 robots, compliance items, sample events)
+node seed.js
 
-# Start the server
-node src/server.js
+# Start
+npm start
 
 # Open http://localhost:3000
-# Login: admin@sbxguardian.com / sbx2026
+# Demo: admin@sbxguardian.com / sbx2026
 ```
 
 ---
 
-## API Overview
+## Environment Variables
+
+```env
+# Required
+PORT=3000
+JWT_SECRET=your-secure-random-string
+
+# AI (get free at console.groq.com and aistudio.google.com)
+GROQ_API_KEY=gsk_...
+GEMINI_API_KEY=AI...
+
+# Email automation (Gmail App Password from myaccount.google.com/apppasswords)
+SMTP_USER=your@gmail.com
+SMTP_PASS=xxxx-xxxx-xxxx-xxxx
+
+# App URL (your deployment URL)
+APP_URL=https://your-app.onrender.com
+
+# Optional — automated marketing channels
+TELEGRAM_BOT_TOKEN=...
+TELEGRAM_CHANNEL_ID=...
+DISCORD_WEBHOOK_URL=...
+```
+
+---
+
+## API Reference
 
 ```
-POST /api/auth/login           Login, receive JWT
-GET  /api/systems              List all AI systems
-POST /api/events               Log event (auto hash-chained)
-GET  /api/events/verify        Verify entire chain integrity
-GET  /api/safety/compliance    EU AI Act compliance status
-POST /api/safety/reports       Save evidence report
-GET  /api/dashboard            Live fleet summary
+POST /api/auth/login                JWT token authentication
+GET  /api/dashboard                 Live fleet summary + compliance
+GET  /api/systems                   All AI systems with risk scores
+POST /api/systems                   Add new system (returns webhook URL)
+POST /api/events                    Log event (auto hash-chained)
+GET  /api/events/verify             Verify entire chain integrity
+GET  /api/safety/compliance         EU AI Act article status
+POST /api/safety/reports            Generate AI evidence report
+GET  /api/audit/export              Certified audit package (regulator-ready)
+GET  /api/security/report           Security posture report
+POST /api/marketing/trigger-generate  Trigger content generation
+GET  /api/launch/hn                 Hacker News launch content
+GET  /api/v1/chain/verify           Public chain verification (insurers/auditors)
 ```
+
+Full docs: `/api-docs.html`
+
+---
+
+## Webhook SDK
+
+Any robot, any language, any platform — 3 lines:
+
+```python
+import requests
+requests.post("YOUR_WEBHOOK_URL", json={
+    "system_id": "robot-arm-01",
+    "type": "ai_decision",
+    "severity": "info",
+    "message": "Obstacle detected — rerouting",
+    "health": 95, "load": 42.5,
+    "data": {"obstacle_distance": 0.3, "confidence": 0.97}
+})
+```
+
+Supported: Python · Node.js · ROS/ROS2 · Arduino · any HTTP client
+
+---
+
+## Services & Pages
+
+| Page | Purpose |
+|---|---|
+| `/` | Landing page |
+| `/app` | Main compliance dashboard |
+| `/enterprise.html` | Fortune 500 enterprise page |
+| `/trust-center.html` | All security documentation |
+| `/regulatory-intelligence.html` | Live regulatory feed |
+| `/board-report.html` | Board governance report generator |
+| `/ma-due-diligence.html` | M&A AI liability assessment |
+| `/consulting-partners.html` | White-label partner program |
+| `/fria-wizard.html` | FRIA generator (EU AI Act Art. 27) |
+| `/roi-calculator.html` | Fine exposure vs compliance cost calculator |
+| `/ai-inventory.html` | Shadow AI discovery wizard |
+| `/incident-playbook.html` | 72-hour incident response guide |
+| `/insurance.html` | For insurers and risk managers |
+| `/compare.html` | vs Alias Robotics, Credo AI, IBM |
+| `/client-portal.html` | Client onboarding portal |
+| `/api-docs.html` | Full API reference |
+| `/status.html` | Live system status |
+
+---
+
+## Pricing
+
+| Plan | Price | Systems | Key Features |
+|---|---|---|---|
+| **Starter** | $499/mo | Up to 10 | Full compliance, logging, reports |
+| **Professional** | $1,999/mo | Up to 50 | + FRIA, Annex IV docs, board reports |
+| **Enterprise** | Custom | Unlimited | + SSO, custom DPA, dedicated support |
+| **Regulatory Intelligence** | $299/mo | Standalone | 47 regulations, 12 jurisdictions |
+| **Consulting Partner** | From $999/mo | White-label | For law firms, Big 4, SIs |
 
 ---
 
 ## Roadmap
 
-- [x] Tamper-evident event logging with SHA-256 hash chain
+- [x] Tamper-evident SHA-256 hash chain logging
 - [x] EU AI Act compliance tracker (Art. 9–16)
-- [x] AI-generated insurer evidence packs
-- [x] Command firewall with mandatory oversight gates
-- [x] Circuit breaker / system isolation
+- [x] AI evidence report generation
+- [x] Command firewall + circuit breakers
 - [x] Real-time WebSocket fleet dashboard
-- [ ] Physical device SDK (npm package for robots)
-- [ ] Custom domain + marketing site
+- [x] Board governance report generator
+- [x] Regulatory intelligence feed (47 regulations)
+- [x] FRIA wizard (Art. 27)
+- [x] M&A due diligence tool
+- [x] White-label consulting portal
+- [x] Insurance integration layer
+- [x] AI systems inventory scanner
+- [x] Incident response playbook
+- [x] Full enterprise legal documents
+- [ ] Supabase migration (persistent database)
 - [ ] Stripe billing integration
+- [ ] SOC 2 Type II certification (Q3 2026)
 - [ ] Mobile app (React Native)
-- [ ] Hardware black box unit (tamper-proof physical device)
+- [ ] Hardware black box device
+- [ ] ISO 27001 certification (2027)
 
 ---
 
 ## Contact
 
-**SBX Guardian**
-For partnerships, pilots, and investment inquiries: admin@sbxguardian.com
+| Purpose | Contact |
+|---|---|
+| Enterprise sales | enterprise@sbxguardian.com |
+| Insurance partnerships | insurance@sbxguardian.com |
+| Consulting partners | partners@sbxguardian.com |
+| Security | security@sbxguardian.com |
+| Legal / DPA | legal@sbxguardian.com |
+| Privacy / GDPR | privacy@sbxguardian.com |
+
+**Live demo**: [sbx-guardian.onrender.com](https://sbx-guardian.onrender.com)
 
 ---
 
-<div align="center">
-<sub>© 2026 SBX Guardian. All rights reserved. Proprietary software — see LICENSE.</sub>
-</div>
+© 2026 SBX Guardian. Proprietary software. All rights reserved.
+
+*The compliance operating system for the age of Physical AI.*

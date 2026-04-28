@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Consulting Partner Portal — SBX Guardian</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800;900&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#020305;--s1:#07080d;--s2:#0c0e14;--border:#161924;--text:#eef0f8;--text2:#7a849a;--text3:#353d52;--gold:#c8a84b;--gold2:#e8c96b;--green:#00d97e;--red:#ef4444;--orange:#f59e0b;--blue:#3b82f6;--purple:#a855f7;--mono:'DM Mono',monospace;--sans:'DM Sans',sans-serif;--syne:'Syne',sans-serif}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh}
+body::before{content:'';position:fixed;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent);z-index:300}
+nav{position:fixed;top:0;left:0;right:0;z-index:200;padding:14px 48px;display:flex;align-items:center;justify-content:space-between;background:rgba(2,3,5,0.96);border-bottom:1px solid var(--border);backdrop-filter:blur(24px)}
+.logo{font-family:var(--syne);font-size:14px;font-weight:800;letter-spacing:1.5px;text-decoration:none;color:var(--text);display:flex;align-items:center;gap:10px}
+.logo-mark{width:22px;height:22px;background:var(--gold);border-radius:3px;display:flex;align-items:center;justify-content:center;color:#020305;font-size:9px;font-weight:900}
+.nav-right{display:flex;gap:12px;align-items:center}
+.nav-right a{color:var(--text2);text-decoration:none;font-size:13px}.nav-right a:hover{color:var(--gold)}
+.nav-btn{background:var(--gold);color:#020305;padding:8px 18px;border-radius:3px;font-size:13px;font-weight:600}
+
+/* HERO */
+.hero{padding:120px 48px 80px;max-width:1100px;margin:0 auto}
+.eyebrow{font-family:var(--mono);font-size:10px;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);margin-bottom:20px;display:flex;align-items:center;gap:10px}
+.eyebrow::after{content:'';flex:1;max-width:40px;height:1px;background:rgba(200,168,75,0.3)}
+h1{font-family:var(--syne);font-size:clamp(48px,6vw,80px);font-weight:900;letter-spacing:-3px;line-height:0.95;margin-bottom:20px}
+h1 em{font-style:normal;color:var(--gold)}
+.hero-sub{color:var(--text2);font-size:17px;max-width:580px;line-height:1.7;font-weight:300;margin-bottom:40px}
+.hero-stats{display:flex;gap:40px;flex-wrap:wrap;margin-bottom:48px}
+.hero-stat{border-left:2px solid rgba(200,168,75,0.3);padding-left:16px}
+.hero-stat-num{font-family:var(--syne);font-size:32px;font-weight:800;color:var(--gold);line-height:1}
+.hero-stat-label{font-size:12px;color:var(--text3);margin-top:4px}
+.hero-actions{display:flex;gap:14px;flex-wrap:wrap}
+.btn-gold{background:var(--gold);color:#020305;padding:15px 36px;border-radius:3px;font-size:15px;font-weight:700;text-decoration:none;transition:all 0.2s}
+.btn-gold:hover{background:var(--gold2);transform:translateY(-1px)}
+.btn-ghost{border:1px solid var(--border);color:var(--text2);padding:15px 36px;border-radius:3px;font-size:15px;text-decoration:none;transition:all 0.2s}
+.btn-ghost:hover{border-color:var(--gold);color:var(--gold)}
+
+/* SECTIONS */
+section{padding:80px 48px;position:relative;z-index:1}
+.section-inner{max-width:1100px;margin:0 auto}
+.section-tag{font-family:var(--mono);font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:14px}
+.section-title{font-family:var(--syne);font-size:clamp(32px,4vw,52px);font-weight:800;letter-spacing:-2px;margin-bottom:16px}
+.section-sub{color:var(--text2);font-size:16px;max-width:560px;line-height:1.7;font-weight:300;margin-bottom:40px}
+
+/* HOW IT WORKS */
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border);border:1px solid var(--border);border-radius:4px;overflow:hidden}
+.step{background:var(--s1);padding:28px;position:relative}
+.step-num{font-family:var(--syne);font-size:48px;font-weight:900;color:rgba(200,168,75,0.15);position:absolute;top:16px;right:20px;line-height:1}
+.step-icon{font-size:28px;margin-bottom:14px}
+.step-title{font-size:15px;font-weight:600;margin-bottom:8px}
+.step-desc{font-size:13px;color:var(--text2);line-height:1.6}
+
+/* FEATURES GRID */
+.features-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.feature-card{background:var(--s1);border:1px solid var(--border);border-radius:4px;padding:24px;transition:border-color 0.2s}
+.feature-card:hover{border-color:rgba(200,168,75,0.2)}
+.feature-icon{font-size:24px;margin-bottom:14px}
+.feature-title{font-size:14px;font-weight:600;margin-bottom:8px}
+.feature-desc{font-size:13px;color:var(--text2);line-height:1.6}
+
+/* PRICING */
+.partner-plans{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+.plan{background:var(--s1);border:1px solid var(--border);border-radius:4px;padding:28px;position:relative}
+.plan.featured{border-color:rgba(200,168,75,0.3);background:var(--s2)}
+.plan-badge{position:absolute;top:-1px;left:50%;transform:translateX(-50%);background:var(--gold);color:#020305;font-family:var(--mono);font-size:9px;letter-spacing:1.5px;text-transform:uppercase;padding:3px 14px;border-radius:0 0 3px 3px;font-weight:700}
+.plan-name{font-family:var(--syne);font-size:18px;font-weight:700;margin-bottom:6px}
+.plan-price{font-family:var(--syne);font-size:40px;font-weight:800;letter-spacing:-1.5px;margin-bottom:4px;line-height:1}
+.plan-price span{font-size:14px;color:var(--text3);font-weight:400;letter-spacing:0}
+.plan-desc{font-size:13px;color:var(--text2);margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid var(--border);line-height:1.5}
+.plan-features li{display:flex;align-items:center;gap:8px;padding:7px 0;font-size:13px;color:var(--text2);border-bottom:1px solid var(--border)}
+.plan-features li:last-child{border-bottom:none}
+.plan-features li::before{content:'✓';color:var(--gold);font-weight:700;flex-shrink:0}
+.plan-cta{display:block;text-align:center;margin-top:20px;padding:11px;border-radius:3px;font-size:14px;font-weight:600;text-decoration:none;transition:all 0.2s}
+.pc-gold{background:var(--gold);color:#020305}.pc-gold:hover{background:var(--gold2)}
+.pc-out{border:1px solid var(--border);color:var(--text2)}.pc-out:hover{border-color:var(--gold);color:var(--gold)}
+
+/* COMPARISON */
+.comp-table{width:100%;border-collapse:collapse}
+.comp-table th{text-align:left;padding:12px 16px;font-family:var(--mono);font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--text3);border-bottom:1px solid var(--border)}
+.comp-table th:not(:first-child){text-align:center}
+.comp-table td{padding:14px 16px;border-bottom:1px solid var(--border);font-size:13px;color:var(--text2)}
+.comp-table td:first-child{color:var(--text);font-weight:500}
+.comp-table td:not(:first-child){text-align:center}
+.comp-table tr:hover td{background:var(--s1)}
+.yes{color:var(--green);font-weight:700}.no{color:var(--text3)}.partial{color:var(--gold)}
+
+/* CTA */
+.cta-section{background:var(--s1);border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:100px 48px;text-align:center}
+.cta-inner{max-width:600px;margin:0 auto}
+
+footer{padding:40px 48px;border-top:1px solid var(--border);text-align:center;color:var(--text3);font-size:12px}
+footer a{color:var(--text3);text-decoration:none;margin:0 10px}footer a:hover{color:var(--gold)}
+
+@media(max-width:900px){.steps,.features-grid,.partner-plans{grid-template-columns:1fr}.hero,.section{padding-left:24px;padding-right:24px}nav .nav-right a:not(.nav-btn){display:none}}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="logo"><div class="logo-mark">SBX</div>GUARDIAN</a>
+  <div class="nav-right">
+    <a href="/enterprise.html">Enterprise</a>
+    <a href="/trust-center.html">Trust</a>
+    <a href="/regulatory-intelligence.html">Reg Intel</a>
+    <a href="mailto:partners@sbxguardian.com" class="nav-btn">Partner Inquiry</a>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="eyebrow">Partner Program</div>
+  <h1>White-label AI<br>compliance for<br><em>your clients.</em></h1>
+  <p class="hero-sub">SBX Guardian's consulting partner program lets advisory firms, law firms, and system integrators deliver world-class EU AI Act compliance to their clients — under your brand, with your pricing.</p>
+  <div class="hero-stats">
+    <div class="hero-stat"><div class="hero-stat-num">€500+</div><div class="hero-stat-label">Average legal fee per hour for manual compliance</div></div>
+    <div class="hero-stat"><div class="hero-stat-num">78%</div><div class="hero-stat-label">Of manufacturers not ready for EU AI Act</div></div>
+    <div class="hero-stat"><div class="hero-stat-num">99</div><div class="hero-stat-label">Days until enforcement — your clients need this now</div></div>
+  </div>
+  <div class="hero-actions">
+    <a href="mailto:partners@sbxguardian.com" class="btn-gold">Apply to Partner Program →</a>
+    <a href="#how-it-works" class="btn-ghost">See How It Works ↓</a>
+  </div>
+</div>
+
+<!-- HOW IT WORKS -->
+<section id="how-it-works" style="background:var(--s1);border-top:1px solid var(--border);border-bottom:1px solid var(--border)">
+  <div class="section-inner">
+    <div class="section-tag">Partner Process</div>
+    <div class="section-title">Four steps to a new<br>revenue stream.</div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-icon">📝</div>
+        <div class="step-title">Apply & Onboard</div>
+        <div class="step-desc">Submit your firm profile. We onboard qualified consulting, legal, and SI firms within 5 business days. Includes platform training and certification.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-icon">🎨</div>
+        <div class="step-title">White-Label Setup</div>
+        <div class="step-desc">Upload your logo, brand colors, and domain. Your clients see your brand everywhere — not SBX Guardian. Custom URL optional.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-icon">🏭</div>
+        <div class="step-title">Onboard Your Clients</div>
+        <div class="step-desc">Create client workspaces from your partner portal. Each client is isolated. You manage access, they see only their data.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-icon">💰</div>
+        <div class="step-title">Price as You Want</div>
+        <div class="step-desc">You pay our wholesale rate. You charge clients whatever you like. Partners typically mark up 3-5x and bundle with advisory services.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section>
+  <div class="section-inner">
+    <div class="section-tag">Partner Features</div>
+    <div class="section-title">Everything you need<br>to deliver compliance.</div>
+    <p class="section-sub">Every tool built for the toughest enterprise requirements — now available under your brand.</p>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">🏢</div>
+        <div class="feature-title">Multi-Client Dashboard</div>
+        <div class="feature-desc">Manage all your clients from a single partner portal. See every client's compliance score, active alerts, and upcoming deadlines at a glance.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🎨</div>
+        <div class="feature-title">Full White-Labeling</div>
+        <div class="feature-desc">Your logo, colors, domain. Custom email footers. Your clients never see SBX Guardian branding unless you choose to disclose.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📊</div>
+        <div class="feature-title">Board Report Generator</div>
+        <div class="feature-desc">Generate branded board-level AI governance reports for each client in 60 seconds. Export as PDF with your firm's cover page.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">⚖</div>
+        <div class="feature-title">FRIA & Documentation</div>
+        <div class="feature-desc">Guide clients through FRIA wizard and Annex IV technical documentation. Export completed documents on your letterhead.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📰</div>
+        <div class="feature-title">Regulatory Intelligence</div>
+        <div class="feature-desc">Auto-delivered regulatory updates specific to each client's systems. You look like an expert who never misses a change.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🔍</div>
+        <div class="feature-title">M&A Due Diligence</div>
+        <div class="feature-desc">Run AI due diligence reports on acquisition targets. Export branded M&A assessment documents for deal teams.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🔑</div>
+        <div class="feature-title">Client API Access</div>
+        <div class="feature-desc">Each client gets their own API credentials. Your integration team can build directly on SBX Guardian's REST API.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📋</div>
+        <div class="feature-title">Consolidated Reporting</div>
+        <div class="feature-desc">Roll up compliance scores across all your clients for portfolio-level reporting. Ideal for PE firms managing multiple portfolio companies.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🎓</div>
+        <div class="feature-title">Partner Certification</div>
+        <div class="feature-desc">Become a Certified SBX Guardian Partner. Use the badge in proposals. Differentiates you from competitors in RFPs.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- WHO BENEFITS -->
+<section style="background:var(--s1);border-top:1px solid var(--border);border-bottom:1px solid var(--border)">
+  <div class="section-inner">
+    <div class="section-tag">Ideal Partners</div>
+    <div class="section-title">Who this is built for.</div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px">
+      ${[
+        ['⚖','Law Firms','EU AI Act advisory is the fastest-growing practice area. White-label SBX Guardian to deliver technical compliance alongside your legal counsel. Bill clients for both. Stop referring clients elsewhere for the technical implementation.'],
+        ['📊','Management Consulting','Your clients ask "are we EU AI Act compliant?" You need a platform answer, not just a slide deck. SBX Guardian gives you a live platform to demonstrate compliance progress — not just recommendations.'],
+        ['🏭','System Integrators','You install the robots. Now you can also ensure they\'re compliant. Add SBX Guardian as a value-add service to every robotics installation. Recurring revenue long after the integration project ends.'],
+        ['🏦','Private Equity','Monitor EU AI Act compliance across your entire portfolio. Get alerted when a portfolio company\'s AI systems are at risk. Eliminate hidden AI liability in deals.'],
+        ['💼','Big 4 Firms','Deloitte, KPMG, EY, PwC are all building EU AI Act practices. White-label SBX Guardian as your technical delivery platform. Scale to hundreds of clients without building the platform in-house.'],
+        ['🔒','Cybersecurity Consultancies','EU AI Act cybersecurity requirements (Art. 15) are a natural extension of your work. SBX Guardian's security layer + your assessment services = a complete offering.']
+      ].map(([icon,title,desc]) => `
+        <div style="background:var(--s2);border:1px solid var(--border);border-radius:4px;padding:24px">
+          <div style="font-size:28px;margin-bottom:12px">${icon}</div>
+          <div style="font-size:15px;font-weight:600;margin-bottom:8px">${title}</div>
+          <div style="font-size:13px;color:var(--text2);line-height:1.6">${desc}</div>
+        </div>`).join('')}
+    </div>
+  </div>
+</section>
+
+<!-- COMPARISON -->
+<section>
+  <div class="section-inner">
+    <div class="section-tag">Build vs Buy vs Partner</div>
+    <div class="section-title">Why partner beats<br>building in-house.</div>
+    <table class="comp-table">
+      <thead>
+        <tr>
+          <th>Capability</th>
+          <th>Build in-house</th>
+          <th>No platform</th>
+          <th class="th-main" style="color:var(--gold)">SBX Guardian Partner</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>Time to deliver to clients</td><td class="partial">18-24 months</td><td class="no">Manual only</td><td class="yes">5 business days</td></tr>
+        <tr><td>Technical build cost</td><td class="no">€500K-2M</td><td class="yes">€0</td><td class="yes">Wholesale rate</td></tr>
+        <tr><td>Tamper-evident hash chain</td><td class="partial">Complex to build</td><td class="no">Not possible</td><td class="yes">✓ Included</td></tr>
+        <tr><td>EU AI Act updates automatic</td><td class="no">Manual tracking</td><td class="no">Manual tracking</td><td class="yes">✓ Automated</td></tr>
+        <tr><td>Board report generation</td><td class="partial">Build yourself</td><td class="no">PowerPoint</td><td class="yes">✓ 60 seconds</td></tr>
+        <tr><td>Your brand on platform</td><td class="yes">Yes</td><td class="no">N/A</td><td class="yes">✓ Full white-label</td></tr>
+        <tr><td>M&A due diligence tool</td><td class="partial">Custom build</td><td class="no">Manual</td><td class="yes">✓ Included</td></tr>
+        <tr><td>Multi-client management</td><td class="partial">Build portal</td><td class="no">Spreadsheets</td><td class="yes">✓ Partner portal</td></tr>
+        <tr><td>Revenue model</td><td class="partial">One-time</td><td class="partial">Hourly</td><td class="yes">✓ Recurring SaaS</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section style="background:var(--s1);border-top:1px solid var(--border);border-bottom:1px solid var(--border)">
+  <div class="section-inner">
+    <div class="section-tag">Partner Pricing</div>
+    <div class="section-title">Wholesale rates.<br>Your margin.</div>
+    <div class="partner-plans">
+      <div class="plan">
+        <div class="plan-name">Boutique</div>
+        <div class="plan-price">$999<span>/mo</span></div>
+        <div class="plan-desc">For small law firms and boutique consultancies. Up to 5 client accounts.</div>
+        <ul class="plan-features">
+          <li>5 client workspaces</li>
+          <li>Your logo + colors</li>
+          <li>All compliance tools</li>
+          <li>Board report generator</li>
+          <li>Partner certification</li>
+          <li>Email support</li>
+        </ul>
+        <a href="mailto:partners@sbxguardian.com" class="plan-cta pc-out">Apply</a>
+      </div>
+      <div class="plan featured">
+        <div class="plan-badge">Most Popular</div>
+        <div class="plan-name">Advisory</div>
+        <div class="plan-price">$3,999<span>/mo</span></div>
+        <div class="plan-desc">For mid-size consultancies and Big 4 teams. Up to 25 client accounts.</div>
+        <ul class="plan-features">
+          <li>25 client workspaces</li>
+          <li>Full white-labeling + custom domain</li>
+          <li>All tools including M&A DD</li>
+          <li>Regulatory intelligence feed</li>
+          <li>Portfolio-level reporting</li>
+          <li>Dedicated partner success manager</li>
+          <li>Co-marketing opportunities</li>
+          <li>Priority support (4hr)</li>
+        </ul>
+        <a href="mailto:partners@sbxguardian.com" class="plan-cta pc-gold">Apply Now</a>
+      </div>
+      <div class="plan">
+        <div class="plan-name">Enterprise</div>
+        <div class="plan-price">Custom</div>
+        <div class="plan-desc">For Big 4 firms, global consultancies, and PE firms with large portfolios.</div>
+        <ul class="plan-features">
+          <li>Unlimited client workspaces</li>
+          <li>Everything in Advisory</li>
+          <li>API access for custom integrations</li>
+          <li>Co-branded marketing materials</li>
+          <li>Joint go-to-market programs</li>
+          <li>Revenue share options</li>
+          <li>Custom SLA & DPA</li>
+          <li>Dedicated engineering support</li>
+        </ul>
+        <a href="mailto:partners@sbxguardian.com" class="plan-cta pc-out">Contact Sales</a>
+      </div>
+    </div>
+    <div style="text-align:center;margin-top:24px;color:var(--text3);font-size:13px">
+      You pay the wholesale rate. You charge clients what you decide. Partners typically bill 3-5x wholesale + advisory fees on top.
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<div class="cta-section">
+  <div class="cta-inner">
+    <div style="font-family:var(--mono);font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:16px">Apply Today</div>
+    <h2 style="font-family:var(--syne);font-size:clamp(36px,4vw,52px);font-weight:800;letter-spacing:-2px;margin-bottom:16px">Your clients need this.<br>You can deliver it.</h2>
+    <p style="color:var(--text2);font-size:16px;margin-bottom:32px;font-weight:300;line-height:1.7">EU AI Act enforcement in 99 days. Every manufacturer with robots is a potential client. You have the relationships. We have the platform. Together, this is a significant revenue opportunity.</p>
+    <a href="mailto:partners@sbxguardian.com?subject=Partner Program Application" class="btn-gold" style="font-size:16px;padding:16px 40px;display:inline-block">Apply for Partner Access →</a>
+    <div style="margin-top:16px;font-size:13px;color:var(--text3)">Response within 1 business day · partners@sbxguardian.com</div>
+  </div>
+</div>
+
+<footer>
+  <a href="/">Home</a><a href="/enterprise.html">Enterprise</a><a href="/trust-center.html">Trust</a><a href="/terms.html">Terms</a><a href="/privacy.html">Privacy</a>
+  <div style="margin-top:12px">© 2026 SBX Guardian Consulting Partner Program</div>
+</footer>
+
+</body>
+</html>

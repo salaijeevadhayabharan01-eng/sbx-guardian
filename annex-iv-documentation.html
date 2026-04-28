@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Annex IV Technical Documentation — SBX Guardian</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800;900&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#020305;--s1:#07080d;--s2:#0c0e14;--border:#161924;--text:#eef0f8;--text2:#7a849a;--text3:#353d52;--gold:#c8a84b;--gold2:#e8c96b;--green:#00d97e;--orange:#f59e0b;--red:#ef4444;--mono:'DM Mono',monospace;--sans:'DM Sans',sans-serif;--syne:'Syne',sans-serif}
+body{background:var(--bg);color:var(--text);font-family:var(--sans)}
+body::before{content:'';position:fixed;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent);z-index:300}
+nav{position:fixed;top:0;left:0;right:0;z-index:200;padding:14px 48px;display:flex;align-items:center;justify-content:space-between;background:rgba(2,3,5,0.96);border-bottom:1px solid var(--border);backdrop-filter:blur(24px)}
+.logo{font-family:var(--syne);font-size:14px;font-weight:800;letter-spacing:1.5px;text-decoration:none;color:var(--text);display:flex;align-items:center;gap:10px}
+.logo-mark{width:22px;height:22px;background:var(--gold);border-radius:3px;display:flex;align-items:center;justify-content:center;color:#020305;font-size:9px;font-weight:900}
+.nav-right{display:flex;gap:12px;align-items:center}
+.nav-right a{color:var(--text2);text-decoration:none;font-size:13px}.nav-right a:hover{color:var(--gold)}
+.nav-btn{background:var(--gold);color:#020305;padding:8px 18px;border-radius:3px;font-size:13px;font-weight:600}
+.layout{display:flex;min-height:100vh;padding-top:52px}
+/* SIDEBAR */
+.sidebar{width:260px;background:var(--s1);border-right:1px solid var(--border);flex-shrink:0;position:fixed;top:52px;bottom:0;overflow-y:auto;padding:20px 12px}
+.sb-label{font-family:var(--mono);font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);padding:8px;margin-bottom:4px}
+.sb-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:4px;cursor:pointer;font-size:13px;color:var(--text2);transition:all 0.15s;margin-bottom:2px;border-left:2px solid transparent}
+.sb-item:hover{background:var(--s2);color:var(--text)}
+.sb-item.active{background:rgba(200,168,75,0.08);color:var(--gold);border-left-color:var(--gold)}
+.sb-item.done{color:var(--green);border-left-color:rgba(0,217,126,0.3)}
+.sb-num{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:10px;background:var(--s2);color:var(--text3);flex-shrink:0}
+.sb-item.active .sb-num{background:rgba(200,168,75,0.15);color:var(--gold)}
+.sb-item.done .sb-num{background:rgba(0,217,126,0.15);color:var(--green)}
+/* CONTENT */
+.content{flex:1;margin-left:260px;padding:32px 48px 60px;overflow-y:auto}
+.section{display:none}.section.active{display:block}
+.section-title{font-family:var(--syne);font-size:28px;font-weight:800;letter-spacing:-1px;margin-bottom:6px}
+.section-ref{font-family:var(--mono);font-size:11px;color:var(--gold);margin-bottom:6px;letter-spacing:1px;text-transform:uppercase}
+.section-desc{color:var(--text2);font-size:14px;line-height:1.6;margin-bottom:24px;max-width:600px}
+label{display:block;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.8px;color:var(--text3);margin-bottom:6px}
+input,select,textarea{width:100%;padding:10px 14px;background:var(--bg);border:1px solid var(--border);border-radius:4px;color:var(--text);font-family:var(--sans);font-size:14px;outline:none;transition:border-color 0.2s;margin-bottom:14px}
+input:focus,select:focus,textarea:focus{border-color:var(--gold)}
+textarea{resize:vertical;min-height:100px;font-family:var(--mono);font-size:12px;line-height:1.6}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.card{background:var(--s1);border:1px solid var(--border);border-radius:4px;padding:20px;margin-bottom:14px}
+.field-hint{font-size:12px;color:var(--text3);margin-top:-10px;margin-bottom:12px;line-height:1.4}
+.nav-row{display:flex;justify-content:space-between;align-items:center;margin-top:24px;padding-top:24px;border-top:1px solid var(--border)}
+.btn-primary{background:var(--gold);color:#020305;padding:12px 28px;border-radius:4px;font-size:14px;font-weight:700;border:none;cursor:pointer;font-family:var(--sans);transition:all 0.2s}
+.btn-primary:hover{background:var(--gold2)}
+.btn-ghost{background:transparent;color:var(--text2);border:1px solid var(--border);padding:12px 28px;border-radius:4px;font-size:14px;font-weight:600;cursor:pointer;font-family:var(--sans);transition:all 0.2s}
+.btn-ghost:hover{border-color:var(--gold);color:var(--gold)}
+.progress-bar{height:4px;background:var(--border);border-radius:2px;margin-bottom:32px;overflow:hidden}
+.progress-fill{height:100%;background:var(--gold);border-radius:2px;transition:width 0.4s}
+/* OUTPUT */
+.output-box{background:var(--bg);border:1px solid rgba(200,168,75,0.2);border-radius:4px;padding:20px;font-family:var(--mono);font-size:12px;line-height:1.8;white-space:pre-wrap;color:var(--text2);max-height:500px;overflow-y:auto}
+.spinner{width:14px;height:14px;border:2px solid var(--border);border-top-color:var(--gold);border-radius:50%;animation:spin 0.8s linear infinite;display:inline-block;vertical-align:middle;margin-right:6px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.complete-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:20px}
+.ab{display:inline-flex;align-items:center;gap:8px;padding:11px 22px;border-radius:4px;font-size:14px;font-weight:600;cursor:pointer;border:none;font-family:var(--sans);text-decoration:none;transition:all 0.15s}
+.ab-gold{background:var(--gold);color:#020305}.ab-gold:hover{background:var(--gold2)}
+.ab-ghost{background:transparent;color:var(--text2);border:1px solid var(--border)}.ab-ghost:hover{border-color:var(--gold);color:var(--gold)}
+@media(max-width:900px){.sidebar{display:none}.content{margin-left:0;padding:90px 24px 40px}}
+</style>
+</head>
+<body>
+<nav>
+  <a href="/" class="logo"><div class="logo-mark">SBX</div>GUARDIAN</a>
+  <div class="nav-right">
+    <a href="/fria-wizard.html">FRIA Wizard</a>
+    <a href="/declaration-of-conformity.html">DoC Generator</a>
+    <a href="/app" class="nav-btn">Dashboard</a>
+  </div>
+</nav>
+<div class="layout">
+<div class="sidebar">
+  <div class="sb-label">Annex IV Sections</div>
+  <div class="sb-item active" onclick="showSection(1,this)"><div class="sb-num">1</div>System Description</div>
+  <div class="sb-item" onclick="showSection(2,this)"><div class="sb-num">2</div>Design & Development</div>
+  <div class="sb-item" onclick="showSection(3,this)"><div class="sb-num">3</div>Data & Training</div>
+  <div class="sb-item" onclick="showSection(4,this)"><div class="sb-num">4</div>Testing & Validation</div>
+  <div class="sb-item" onclick="showSection(5,this)"><div class="sb-num">5</div>Risk Management</div>
+  <div class="sb-item" onclick="showSection(6,this)"><div class="sb-num">6</div>Logging & Monitoring</div>
+  <div class="sb-item" onclick="showSection(7,this)"><div class="sb-num">7</div>Human Oversight</div>
+  <div class="sb-item" onclick="showSection(8,this)"><div class="sb-num">8</div>Cybersecurity</div>
+  <div class="sb-item" onclick="showSection(9,this)"><div class="sb-num">9</div>Generate Document</div>
+</div>
+
+<div class="content">
+<div class="progress-bar"><div class="progress-fill" id="progress" style="width:11%"></div></div>
+
+<!-- S1 -->
+<div class="section active" id="s1">
+  <div class="section-ref">Annex IV · Section 1 · Art. 11</div>
+  <div class="section-title">System Description</div>
+  <div class="section-desc">General description of the AI system, its intended purpose, and operational context. Required under Annex IV (1)(a)-(e).</div>
+  <div class="form-grid">
+    <div><label>AI System Name</label><input type="text" id="s1-name" placeholder="Autonomous Assembly Robot KR500"><div class="field-hint">Official product/system name as it appears on the market</div></div>
+    <div><label>Developer / Provider</label><input type="text" id="s1-dev" placeholder="Acme Robotics GmbH"></div>
+    <div><label>Version</label><input type="text" id="s1-ver" placeholder="v2.3.1"></div>
+    <div><label>Deployment Context</label><input type="text" id="s1-context" placeholder="Automotive manufacturing, assembly line operations"></div>
+  </div>
+  <label>General Description of the AI System</label>
+  <textarea id="s1-desc" placeholder="Describe what the AI system does, how it works at a high level, and the key capabilities..."></textarea>
+  <label>Intended Purpose</label>
+  <textarea id="s1-purpose" placeholder="The intended purpose for which the AI system is designed and marketed, including the specific context, domain, and users..."></textarea>
+  <label>Persons Responsible</label>
+  <div class="form-grid">
+    <div><label>Technical Documentation Custodian</label><input type="text" id="s1-custodian" placeholder="Dr. Maria Schmidt, CTO"></div>
+    <div><label>Post-Market Monitoring Contact</label><input type="text" id="s1-monitoring" placeholder="safety@company.com"></div>
+  </div>
+  <div class="nav-row"><div></div><button class="btn-primary" onclick="nextSection(1)">Next: Design & Development →</button></div>
+</div>
+
+<!-- S2 -->
+<div class="section" id="s2">
+  <div class="section-ref">Annex IV · Section 2 · Art. 11</div>
+  <div class="section-title">Design & Development</div>
+  <div class="section-desc">Description of design choices, algorithms used, and key design decisions. Required under Annex IV (1)(b).</div>
+  <label>AI/ML Methods and Techniques Used</label>
+  <textarea id="s2-methods" placeholder="e.g. Convolutional neural networks for object detection, reinforcement learning for path planning, sensor fusion algorithms..."></textarea>
+  <label>Key Design Decisions and Rationale</label>
+  <textarea id="s2-design" placeholder="Describe major design decisions — why certain approaches were chosen, what alternatives were considered, and why this approach is appropriate for the intended purpose..."></textarea>
+  <label>Software Architecture Overview</label>
+  <textarea id="s2-arch" placeholder="High-level description of software components, modules, interfaces, and how they interact..."></textarea>
+  <label>Third-Party Components and Dependencies</label>
+  <textarea id="s2-third-party" placeholder="List any third-party software, libraries, or pre-trained models used and their relevance to the AI functionality..."></textarea>
+  <div class="nav-row">
+    <button class="btn-ghost" onclick="prevSection(2)">← Back</button>
+    <button class="btn-primary" onclick="nextSection(2)">Next: Data & Training →</button>
+  </div>
+</div>
+
+<!-- S3 -->
+<div class="section" id="s3">
+  <div class="section-ref">Annex IV · Section 3 · Art. 10</div>
+  <div class="section-title">Data & Training</div>
+  <div class="section-desc">Data governance documentation including training data description, data quality measures, and testing datasets. Required under Art. 10 and Annex IV.</div>
+  <label>Training Data Description</label>
+  <textarea id="s3-training" placeholder="Describe the training datasets used: source, size, format, collection method, time period, and any known limitations or biases..."></textarea>
+  <label>Data Quality and Governance Measures</label>
+  <textarea id="s3-quality" placeholder="Describe how training data quality was ensured: data cleaning processes, bias assessment, labeling quality control, validation datasets..."></textarea>
+  <label>Data Lineage and Provenance</label>
+  <textarea id="s3-lineage" placeholder="Where did the data come from? Internal collection, licensed datasets, synthetic data? How is data provenance tracked?"></textarea>
+  <label>Data Minimisation and Privacy Measures</label>
+  <textarea id="s3-privacy" placeholder="How was personal data handled in training? What data minimisation techniques were applied? GDPR considerations..."></textarea>
+  <div class="nav-row">
+    <button class="btn-ghost" onclick="prevSection(3)">← Back</button>
+    <button class="btn-primary" onclick="nextSection(3)">Next: Testing & Validation →</button>
+  </div>
+</div>
+
+<!-- S4 -->
+<div class="section" id="s4">
+  <div class="section-ref">Annex IV · Section 4 · Art. 9</div>
+  <div class="section-title">Testing & Validation</div>
+  <div class="section-desc">Documentation of testing procedures, metrics, and results. Required to demonstrate the system performs as intended across all conditions.</div>
+  <label>Testing Methodology</label>
+  <textarea id="s4-methodology" placeholder="Describe testing approach: unit testing, integration testing, system testing, adversarial testing, and how edge cases were identified and tested..."></textarea>
+  <label>Performance Metrics and Results</label>
+  <textarea id="s4-metrics" placeholder="Key performance metrics: accuracy, precision, recall, F1-score, false positive/negative rates. Include results on test datasets separate from training data..."></textarea>
+  <label>Known Limitations and Failure Modes</label>
+  <textarea id="s4-limitations" placeholder="Document known limitations, conditions under which the system may fail or perform suboptimally, and how these are mitigated..."></textarea>
+  <label>Validation Against Intended Purpose</label>
+  <textarea id="s4-validation" placeholder="How was it validated that the system actually achieves its intended purpose in real-world conditions? Field testing results..."></textarea>
+  <div class="nav-row">
+    <button class="btn-ghost" onclick="prevSection(4)">← Back</button>
+    <button class="btn-primary" onclick="nextSection(4)">Next: Risk Management →</button>
+  </div>
+</div>
+
+<!-- S5 -->
+<div class="section" id="s5">
+  <div class="section-ref">Annex IV · Section 5 · Art. 9</div>
+  <div class="section-title">Risk Management System</div>
+  <div class="section-desc">Documentation of the risk management system implemented throughout the AI lifecycle. Required under Article 9.</div>
+  <label>Risk Identification Process</label>
+  <textarea id="s5-risks" placeholder="How risks were identified: FMEA, HAZOP, expert review, incident analysis. List the key identified risks..."></textarea>
+  <label>Risk Assessment and Evaluation</label>
+  <textarea id="s5-assessment" placeholder="How each risk was assessed (likelihood × severity). What residual risks remain after mitigation? Risk acceptance criteria..."></textarea>
+  <label>Risk Mitigation Measures</label>
+  <textarea id="s5-mitigation" placeholder="Specific technical and organisational measures implemented to mitigate each identified risk..."></textarea>
+  <label>Ongoing Risk Monitoring</label>
+  <textarea id="s5-monitoring" placeholder="How risks are monitored post-deployment: monitoring systems, alert thresholds, review frequency, post-incident review process..."></textarea>
+  <div class="nav-row">
+    <button class="btn-ghost" onclick="prevSection(5)">← Back</button>
+    <button class="btn-primary" onclick="nextSection(5)">Next: Logging →</button>
+  </div>
+</div>
+
+<!-- S6 -->
+<div class="section" id="s6">
+  <div class="section-ref">Annex IV · Section 6 · Art. 12</div>
+  <div class="section-title">Logging & Record-keeping</div>
+  <div class="section-desc">Documentation of automatic logging capabilities as required by Article 12. This section documents SBX Guardian integration.</div>
+  <div class="card">
+    <div style="font-family:var(--mono);font-size:11px;color:var(--green);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">SBX Guardian Integration</div>
+    <div style="font-size:14px;color:var(--text2);line-height:1.7">This AI system uses SBX Guardian for tamper-evident logging. All events are recorded in a SHA-256 cryptographic hash chain. Log integrity can be independently verified via the public API endpoint at: sbx-guardian.onrender.com/api/v1/chain/verify</div>
+  </div>
+  <label>Events Logged (describe what is captured)</label>
+  <textarea id="s6-events" placeholder="e.g. All AI decisions (type, confidence, context), sensor readings at decision time, human overrides and interventions, system state changes, anomaly detection alerts, maintenance events, operator commands..."></textarea>
+  <label>Log Retention Policy</label>
+  <input type="text" id="s6-retention" placeholder="e.g. Minimum 6 months per EU AI Act Art. 12, configurable to 5 years for insurance purposes">
+  <label>Log Access Controls</label>
+  <textarea id="s6-access" placeholder="Who can access logs: operators (view), compliance officers (export), regulators (on request). How is log integrity protected..."></textarea>
+  <div class="nav-row">
+    <button class="btn-ghost" onclick="prevSection(6)">← Back</button>
+    <button class="btn-primary" onclick="nextSection(6)">Next: Human Oversight →</button>
+  </div>
+</div>
+
+<!-- S7 -->
+<div class="section" id="s7">
+  <div class="section-ref">Annex IV · Section 7 · Art. 14</div>
+  <div class="section-title">Human Oversight</div>
+  <div class="section-desc">Documentation of human oversight measures enabling effective intervention. Required under Article 14.</div>
+  <label>Human Oversight Mechanisms</label>
+  <textarea id="s7-mechanisms" placeholder="How can humans monitor, intervene, and override the AI system: stop buttons, override controls, monitoring displays, alert systems..."></textarea>
+  <label>Operator Training Requirements</label>
+  <textarea id="s7-training" placeholder="What training is required to understand and effectively oversee this AI system? Training content, duration, certification..."></textarea>
+  <label>Escalation Procedures</label>
+  <textarea id="s7-escalation" placeholder="When and how must operators escalate to supervisors or disable the system? Decision trees for different scenarios..."></textarea>
+  <label>Human-AI Interaction Design</label>
+  <textarea id="s7-interaction" placeholder="How is the system designed to ensure humans remain meaningfully in control? What limitations are placed on autonomous action..."></textarea>
+  <div class="nav-row">
+    <button class="btn-ghost" onclick="prevSection(7)">← Back</button>
+    <button class="btn-primary" onclick="nextSection(7)">Next: Cybersecurity →</button>
+  </div>
+</div>
+
+<!-- S8 -->
+<div class="section" id="s8">
+  <div class="section-ref">Annex IV · Section 8 · Art. 15</div>
+  <div class="section-title">Cybersecurity</div>
+  <div class="section-desc">Documentation of cybersecurity measures to achieve appropriate resilience. Required under Article 15.</div>
+  <label>Cybersecurity Risk Assessment</label>
+  <textarea id="s8-risks" placeholder="Key cybersecurity risks identified: attack vectors, potential impacts, likelihood assessment..."></textarea>
+  <label>Security Controls Implemented</label>
+  <textarea id="s8-controls" placeholder="Technical controls: authentication, encryption, network segmentation, firmware signing, secure communication protocols, intrusion detection..."></textarea>
+  <label>Vulnerability Management</label>
+  <textarea id="s8-vuln" placeholder="How vulnerabilities are identified, disclosed, and patched. Software update mechanism. Penetration testing frequency..."></textarea>
+  <label>Security Incident Response</label>
+  <textarea id="s8-incident" placeholder="How cybersecurity incidents are detected, responded to, and reported. Link to incident response playbook..."></textarea>
+  <div class="nav-row">
+    <button class="btn-ghost" onclick="prevSection(8)">← Back</button>
+    <button class="btn-primary" onclick="nextSection(8)">Generate Document →</button>
+  </div>
+</div>
+
+<!-- S9 - GENERATE -->
+<div class="section" id="s9">
+  <div class="section-ref">Final Step</div>
+  <div class="section-title">Generate Technical Documentation</div>
+  <div class="section-desc">Your Annex IV technical documentation will be generated from all sections you've completed. AI will enhance and structure the content.</div>
+  <div id="gen-status" style="color:var(--text2);font-size:14px;margin-bottom:20px">Click generate to create your complete Annex IV documentation package.</div>
+  <button class="btn-primary" onclick="generateAnnexIV()" id="gen-btn">⚡ Generate Complete Annex IV Documentation</button>
+  <div id="annex-output" style="display:none;margin-top:24px">
+    <div class="output-box" id="annex-text"></div>
+    <div class="complete-actions">
+      <button class="ab ab-gold" onclick="window.print()">🖨 Print / PDF</button>
+      <button class="ab ab-ghost" onclick="navigator.clipboard.writeText(document.getElementById('annex-text').textContent)">📋 Copy</button>
+      <a href="/declaration-of-conformity.html" class="ab ab-ghost">Next: Declaration of Conformity →</a>
+    </div>
+  </div>
+  <div class="nav-row" style="margin-top:32px">
+    <button class="btn-ghost" onclick="prevSection(9)">← Back to Cybersecurity</button>
+  </div>
+</div>
+
+</div>
+</div>
+
+<script>
+let currentSection = 1;
+const totalSections = 9;
+
+function showSection(n, el) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.sb-item').forEach(s => s.classList.remove('active'));
+  document.getElementById('s'+n).classList.add('active');
+  el?.classList.add('active');
+  for(let i=1;i<n;i++) document.querySelectorAll('.sb-item')[i-1]?.classList.add('done');
+  document.getElementById('progress').style.width = (n/totalSections*100)+'%';
+  currentSection = n;
+}
+
+function nextSection(n) {
+  const items = document.querySelectorAll('.sb-item');
+  items[n-1]?.classList.add('done');
+  if(n < totalSections) { showSection(n+1, items[n]); window.scrollTo(0,0); }
+}
+
+function prevSection(n) {
+  const items = document.querySelectorAll('.sb-item');
+  showSection(n-1, items[n-2]); window.scrollTo(0,0);
+}
+
+function g(id) { return document.getElementById(id)?.value || ''; }
+
+async function generateAnnexIV() {
+  const btn = document.getElementById('gen-btn');
+  btn.disabled = true;
+  btn.textContent = 'Generating...';
+  document.getElementById('gen-status').innerHTML = '<span class="spinner"></span> AI is generating your complete Annex IV documentation...';
+
+  const sysName = g('s1-name') || 'AI System';
+  const allData = {
+    system: `${sysName} v${g('s1-ver')} by ${g('s1-dev')}. Purpose: ${g('s1-purpose')}. Context: ${g('s1-context')}.`,
+    design: g('s2-methods') + ' ' + g('s2-design'),
+    data: g('s3-training') + ' ' + g('s3-quality'),
+    testing: g('s4-metrics') + ' ' + g('s4-limitations'),
+    risk: g('s5-risks') + ' ' + g('s5-mitigation'),
+    logging: g('s6-events') + ' Retention: ' + g('s6-retention'),
+    oversight: g('s7-mechanisms') + ' ' + g('s7-training'),
+    security: g('s8-controls') + ' ' + g('s8-vuln')
+  };
+
+  document.getElementById('annex-output').style.display = 'block';
+  document.getElementById('annex-text').innerHTML = '<span class="spinner"></span> Generating...';
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514', max_tokens: 2000,
+        system: 'You are an EU AI Act technical documentation expert. Generate complete, formal Annex IV technical documentation based on the provided information. Use formal regulatory document style.',
+        messages: [{
+          role: 'user',
+          content: `Generate a complete EU AI Act Annex IV Technical Documentation for:
+${JSON.stringify(allData, null, 2)}
+
+Format as a formal technical document with sections numbered 1-8 matching Annex IV structure. Each section should be comprehensive and regulatory-grade. Include specific technical details where provided. Where details are missing, indicate [TO BE COMPLETED BY TECHNICAL TEAM]. End with a document certification block.`
+        }]
+      })
+    });
+    const d = await res.json();
+    const text = d.content?.[0]?.text || 'Generation failed — please configure API key.';
+    document.getElementById('annex-text').textContent = text;
+    document.getElementById('gen-status').textContent = 'Documentation generated. Review with your legal and technical teams before filing.';
+  } catch {
+    document.getElementById('annex-text').textContent = 'API generation requires configuration. Your form data has been collected — export the text from each section manually.';
+  }
+
+  btn.disabled = false;
+  btn.textContent = '↻ Regenerate';
+}
+</script>
+</body>
+</html>

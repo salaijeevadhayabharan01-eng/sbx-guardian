@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Declaration of Conformity — SBX Guardian</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800;900&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#020305;--s1:#07080d;--s2:#0c0e14;--border:#161924;--text:#eef0f8;--text2:#7a849a;--text3:#353d52;--gold:#c8a84b;--gold2:#e8c96b;--green:#00d97e;--red:#ef4444;--orange:#f59e0b;--mono:'DM Mono',monospace;--sans:'DM Sans',sans-serif;--syne:'Syne',sans-serif}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh}
+body::before{content:'';position:fixed;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent);z-index:300}
+nav{position:fixed;top:0;left:0;right:0;z-index:200;padding:14px 48px;display:flex;align-items:center;justify-content:space-between;background:rgba(2,3,5,0.96);border-bottom:1px solid var(--border);backdrop-filter:blur(24px)}
+.logo{font-family:var(--syne);font-size:14px;font-weight:800;letter-spacing:1.5px;text-decoration:none;color:var(--text);display:flex;align-items:center;gap:10px}
+.logo-mark{width:22px;height:22px;background:var(--gold);border-radius:3px;display:flex;align-items:center;justify-content:center;color:#020305;font-size:9px;font-weight:900}
+.nav-right{display:flex;gap:12px;align-items:center}
+.nav-right a{color:var(--text2);text-decoration:none;font-size:13px}.nav-right a:hover{color:var(--gold)}
+.nav-btn{background:var(--gold);color:#020305;padding:8px 18px;border-radius:3px;font-size:13px;font-weight:600}
+.main{max-width:900px;margin:0 auto;padding:90px 48px 60px}
+.eyebrow{font-family:var(--mono);font-size:10px;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);margin-bottom:16px}
+h1{font-family:var(--syne);font-size:clamp(40px,5vw,64px);font-weight:900;letter-spacing:-2.5px;line-height:0.95;margin-bottom:16px}
+h1 em{font-style:normal;color:var(--gold)}
+.hero-sub{color:var(--text2);font-size:16px;line-height:1.7;font-weight:300;margin-bottom:12px;max-width:600px}
+.legal-note{background:rgba(200,168,75,0.07);border:1px solid rgba(200,168,75,0.2);border-radius:4px;padding:12px 16px;font-size:13px;color:var(--text2);margin-bottom:40px;line-height:1.6}
+label{display:block;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.8px;color:var(--text3);margin-bottom:6px}
+input,select,textarea{width:100%;padding:10px 14px;background:var(--bg);border:1px solid var(--border);border-radius:4px;color:var(--text);font-family:var(--sans);font-size:14px;outline:none;transition:border-color 0.2s;margin-bottom:14px}
+input:focus,select:focus,textarea:focus{border-color:var(--gold)}
+textarea{resize:vertical;min-height:80px;font-family:var(--mono);font-size:12px;line-height:1.6}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.card{background:var(--s1);border:1px solid var(--border);border-radius:6px;padding:24px;margin-bottom:16px}
+.card-title{font-family:var(--mono);font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--gold);margin-bottom:18px}
+.check-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px}
+.check-opt{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--s2);border:1px solid var(--border);border-radius:4px;cursor:pointer;font-size:13px;color:var(--text2);transition:all 0.15s}
+.check-opt:hover{border-color:rgba(200,168,75,0.3)}
+.check-opt.selected{border-color:rgba(0,217,126,0.3);background:rgba(0,217,126,0.05);color:var(--text)}
+.cb{width:16px;height:16px;border:1px solid var(--border);border-radius:2px;display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0}
+.check-opt.selected .cb{background:var(--green);border-color:var(--green);color:#020305}
+.gen-btn{background:var(--gold);color:#020305;padding:16px 40px;border-radius:4px;font-size:16px;font-weight:700;border:none;cursor:pointer;font-family:var(--sans);transition:all 0.2s;display:inline-flex;align-items:center;gap:10px;margin-bottom:32px}
+.gen-btn:hover{background:var(--gold2);transform:translateY(-1px)}
+/* DOCUMENT OUTPUT */
+#doc-output{display:none}
+.doc-wrapper{background:#fff;color:#111;border-radius:4px;overflow:hidden;margin-bottom:20px}
+.doc-inner{padding:60px;font-family:'Times New Roman',serif;font-size:14px;line-height:1.8;max-width:800px;margin:0 auto}
+.doc-eu-flag{text-align:center;font-size:48px;margin-bottom:16px}
+.doc-title{text-align:center;font-size:22px;font-weight:700;border-bottom:2px solid #111;padding-bottom:12px;margin-bottom:24px;letter-spacing:1px;text-transform:uppercase}
+.doc-ref{text-align:center;font-size:13px;color:#555;margin-bottom:32px;font-family:monospace}
+.doc-section{margin-bottom:24px}
+.doc-section-title{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:1px;border-bottom:1px solid #ccc;padding-bottom:4px;margin-bottom:12px}
+.doc-row{display:flex;gap:16px;margin-bottom:8px;font-size:13px}
+.doc-label{min-width:200px;font-weight:600;color:#333}
+.doc-value{flex:1;color:#111}
+.doc-table{width:100%;border-collapse:collapse;margin-bottom:16px;font-size:13px}
+.doc-table th{text-align:left;padding:8px;background:#f5f5f5;border:1px solid #ddd;font-weight:600}
+.doc-table td{padding:8px;border:1px solid #ddd}
+.doc-signature-area{display:grid;grid-template-columns:1fr 1fr;gap:40px;margin-top:40px;padding-top:24px;border-top:1px solid #ccc}
+.sig-line{border-bottom:1px solid #111;margin-bottom:6px;height:40px}
+.sig-label{font-size:11px;color:#555;text-transform:uppercase;letter-spacing:0.5px}
+.doc-stamp{border:2px solid #111;border-radius:50%;width:100px;height:100px;display:flex;align-items:center;justify-content:center;text-align:center;font-size:10px;font-weight:700;letter-spacing:0.5px;margin:0 auto;text-transform:uppercase;color:#111}
+.doc-footer{text-align:center;font-size:11px;color:#888;margin-top:40px;padding-top:16px;border-top:1px solid #eee}
+.action-row{display:flex;gap:12px;flex-wrap:wrap}
+.ab{display:inline-flex;align-items:center;gap:8px;padding:11px 22px;border-radius:4px;font-size:14px;font-weight:600;cursor:pointer;border:none;font-family:var(--sans);text-decoration:none;transition:all 0.15s}
+.ab-gold{background:var(--gold);color:#020305}.ab-gold:hover{background:var(--gold2)}
+.ab-ghost{background:transparent;color:var(--text2);border:1px solid var(--border)}.ab-ghost:hover{border-color:var(--gold);color:var(--gold)}
+@media print{nav,.gen-btn,.action-row{display:none!important}.doc-wrapper{box-shadow:none}.main{padding:0}}
+@media(max-width:700px){.form-grid,.check-grid{grid-template-columns:1fr}.main{padding:90px 24px 60px}}
+</style>
+</head>
+<body>
+<nav>
+  <a href="/" class="logo"><div class="logo-mark">SBX</div>GUARDIAN</a>
+  <div class="nav-right">
+    <a href="/app">Dashboard</a>
+    <a href="/fria-wizard.html">FRIA Wizard</a>
+    <a href="/app" class="nav-btn">Login →</a>
+  </div>
+</nav>
+
+<div class="main">
+  <div class="eyebrow">EU AI Act · Legal Document</div>
+  <h1>Declaration of<br><em>Conformity.</em></h1>
+  <p class="hero-sub">Required before CE marking and EU database registration. This generator creates a complete, legally structured EU AI Act Declaration of Conformity for your high-risk AI systems.</p>
+  <div class="legal-note">⚠ This generator produces a draft declaration based on your inputs. The completed document must be reviewed by qualified legal counsel before filing with regulators or affixing CE marking. You are legally responsible for the accuracy of all declarations.</div>
+
+  <!-- FORM -->
+  <div class="card">
+    <div class="card-title">Provider / Manufacturer Details</div>
+    <div class="form-grid">
+      <div><label>Legal Company Name</label><input type="text" id="company-name" placeholder="Acme Robotics GmbH"></div>
+      <div><label>Registered Address</label><input type="text" id="company-address" placeholder="Musterstraße 1, 80331 München, Germany"></div>
+      <div><label>EU Representative (if non-EU company)</label><input type="text" id="eu-rep" placeholder="Leave blank if EU-based"></div>
+      <div><label>Signatory Name & Title</label><input type="text" id="signatory" placeholder="Dr. Hans Mueller, CEO"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">AI System Details</div>
+    <div class="form-grid">
+      <div><label>System Name / Product Name</label><input type="text" id="system-name" placeholder="KUKA KR 500 — Autonomous Assembly Module"></div>
+      <div><label>Model / Version Number</label><input type="text" id="model-num" placeholder="KR500-AAM-v2.3.1"></div>
+      <div><label>Serial Number / Range</label><input type="text" id="serial" placeholder="SN-2024-001 to SN-2024-050"></div>
+      <div><label>Intended Purpose</label><input type="text" id="purpose" placeholder="Autonomous assembly of automotive components"></div>
+      <div><label>First Placed on EU Market</label><input type="date" id="market-date"></div>
+      <div><label>Country of Manufacture</label><input type="text" id="manufacture-country" placeholder="Germany"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Applicable Regulations & Standards</div>
+    <div class="check-grid">
+      <div class="check-opt selected" onclick="toggle(this)"><div class="cb">✓</div>EU AI Act (EU) 2024/1689 — Annex III</div>
+      <div class="check-opt selected" onclick="toggle(this)"><div class="cb">✓</div>Machinery Regulation (EU) 2023/1230</div>
+      <div class="check-opt" onclick="toggle(this)"><div class="cb"></div>General Product Safety Regulation (EU) 2023/988</div>
+      <div class="check-opt" onclick="toggle(this)"><div class="cb"></div>Cyber Resilience Act (EU) 2024/2847</div>
+      <div class="check-opt selected" onclick="toggle(this)"><div class="cb">✓</div>ISO 10218-1:2011 Robots and robotic devices</div>
+      <div class="check-opt selected" onclick="toggle(this)"><div class="cb">✓</div>IEC 61508 Functional Safety</div>
+      <div class="check-opt" onclick="toggle(this)"><div class="cb"></div>ISO/TS 15066:2016 Collaborative robots</div>
+      <div class="check-opt" onclick="toggle(this)"><div class="cb"></div>EN ISO 13849-1 Safety of machinery</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">EU AI Act Conformity Assessment</div>
+    <div class="form-grid">
+      <div>
+        <label>Conformity Assessment Route</label>
+        <select id="assessment-route">
+          <option value="internal">Internal control (Annex VI) — No third party involved</option>
+          <option value="notified">Third-party assessment — Notified Body involved</option>
+          <option value="quality">Quality management system (Annex VII)</option>
+        </select>
+      </div>
+      <div><label>Notified Body Name (if applicable)</label><input type="text" id="notified-body" placeholder="Leave blank for internal assessment"></div>
+      <div><label>Technical File Reference Number</label><input type="text" id="tech-file-ref" placeholder="TF-2026-001"></div>
+      <div><label>EU Database Registration Number</label><input type="text" id="eu-db-num" placeholder="EU-AI-DB-2026-XXXXX (if registered)"></div>
+    </div>
+    <label>Summary of Key Conformity Measures</label>
+    <textarea id="conformity-measures" placeholder="e.g. SHA-256 tamper-evident logging implemented per Art. 12, risk management system per Art. 9, human oversight mechanisms per Art. 14, technical documentation per Art. 11 and Annex IV completed..."></textarea>
+  </div>
+
+  <button class="gen-btn" onclick="generateDoc()" id="gen-btn">⚡ Generate Declaration of Conformity</button>
+
+  <!-- DOCUMENT OUTPUT -->
+  <div id="doc-output">
+    <div class="doc-wrapper" id="doc-content"></div>
+    <div class="action-row">
+      <button class="ab ab-gold" onclick="window.print()">🖨 Print / Save PDF</button>
+      <button class="ab ab-ghost" onclick="navigator.clipboard.writeText(document.getElementById('doc-content').innerText)">📋 Copy Text</button>
+      <button class="ab ab-ghost" onclick="generateDoc()">↻ Regenerate</button>
+    </div>
+  </div>
+</div>
+
+<script>
+function toggle(el) {
+  el.classList.toggle('selected');
+  el.querySelector('.cb').textContent = el.classList.contains('selected') ? '✓' : '';
+}
+
+function generateDoc() {
+  const company = document.getElementById('company-name').value || '[COMPANY NAME]';
+  const address = document.getElementById('company-address').value || '[REGISTERED ADDRESS]';
+  const euRep = document.getElementById('eu-rep').value;
+  const signatory = document.getElementById('signatory').value || '[SIGNATORY NAME AND TITLE]';
+  const sysName = document.getElementById('system-name').value || '[AI SYSTEM NAME]';
+  const model = document.getElementById('model-num').value || '[MODEL NUMBER]';
+  const serial = document.getElementById('serial').value || '[SERIAL NUMBER/RANGE]';
+  const purpose = document.getElementById('purpose').value || '[INTENDED PURPOSE]';
+  const marketDate = document.getElementById('market-date').value ? new Date(document.getElementById('market-date').value).toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'}) : '[DATE]';
+  const mfgCountry = document.getElementById('manufacture-country').value || '[COUNTRY]';
+  const route = document.getElementById('assessment-route').value;
+  const notifiedBody = document.getElementById('notified-body').value;
+  const techFileRef = document.getElementById('tech-file-ref').value || '[TF-XXXX-XXX]';
+  const euDbNum = document.getElementById('eu-db-num').value;
+  const measures = document.getElementById('conformity-measures').value || 'Risk management system established per Article 9. Tamper-evident logging implemented per Article 12. Human oversight mechanisms in place per Article 14. Technical documentation completed per Article 11 and Annex IV.';
+  const standards = [...document.querySelectorAll('.check-opt.selected')].map(el => el.textContent.trim());
+  const docNum = 'DoC-' + Date.now().toString(36).toUpperCase();
+  const today = new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
+  const routeText = route === 'internal' ? 'Internal control as set out in Annex VI of Regulation (EU) 2024/1689' : route === 'notified' ? `Third-party conformity assessment by Notified Body: ${notifiedBody || '[NOTIFIED BODY NAME]'}` : 'Quality management system assessment per Annex VII of Regulation (EU) 2024/1689';
+
+  document.getElementById('doc-content').innerHTML = `
+<div class="doc-inner">
+  <div class="doc-eu-flag">🇪🇺</div>
+  <div class="doc-title">EU Declaration of Conformity</div>
+  <div class="doc-ref">Document Reference: ${docNum} · Date: ${today}</div>
+
+  <div class="doc-section">
+    <div class="doc-section-title">1. Provider / Manufacturer</div>
+    <div class="doc-row"><div class="doc-label">Legal name:</div><div class="doc-value">${company}</div></div>
+    <div class="doc-row"><div class="doc-label">Registered address:</div><div class="doc-value">${address}</div></div>
+    ${euRep ? `<div class="doc-row"><div class="doc-label">EU Representative:</div><div class="doc-value">${euRep}</div></div>` : ''}
+  </div>
+
+  <div class="doc-section">
+    <div class="doc-section-title">2. AI System Identification</div>
+    <div class="doc-row"><div class="doc-label">Product/System name:</div><div class="doc-value">${sysName}</div></div>
+    <div class="doc-row"><div class="doc-label">Model / Version:</div><div class="doc-value">${model}</div></div>
+    <div class="doc-row"><div class="doc-label">Serial number(s):</div><div class="doc-value">${serial}</div></div>
+    <div class="doc-row"><div class="doc-label">Intended purpose:</div><div class="doc-value">${purpose}</div></div>
+    <div class="doc-row"><div class="doc-label">Country of manufacture:</div><div class="doc-value">${mfgCountry}</div></div>
+    <div class="doc-row"><div class="doc-label">First placed on EU market:</div><div class="doc-value">${marketDate}</div></div>
+    ${euDbNum ? `<div class="doc-row"><div class="doc-label">EU AI Database ID:</div><div class="doc-value">${euDbNum}</div></div>` : ''}
+  </div>
+
+  <div class="doc-section">
+    <div class="doc-section-title">3. Declaration</div>
+    <p style="font-size:14px;line-height:1.8;margin-bottom:16px">The above-identified AI system is in conformity with Regulation (EU) 2024/1689 of the European Parliament and of the Council on Artificial Intelligence (the EU AI Act), and in particular the requirements applicable to high-risk AI systems as set out in Chapter III, Sections 2 and 3 thereof.</p>
+    <p style="font-size:14px;line-height:1.8">This AI system has been classified as a <strong>High-Risk AI System</strong> pursuant to Annex III of Regulation (EU) 2024/1689 and is subject to the obligations set out in Articles 9–16 thereof.</p>
+  </div>
+
+  <div class="doc-section">
+    <div class="doc-section-title">4. Applicable Legislation and Standards</div>
+    <table class="doc-table">
+      <thead><tr><th>Regulation / Standard</th><th>Title</th></tr></thead>
+      <tbody>
+        ${standards.map(s => {
+          const parts = s.split(' — ');
+          return `<tr><td>${parts[0]}</td><td>${parts[1] || ''}</td></tr>`;
+        }).join('')}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="doc-section">
+    <div class="doc-section-title">5. Conformity Assessment Procedure</div>
+    <div class="doc-row"><div class="doc-label">Assessment route:</div><div class="doc-value">${routeText}</div></div>
+    <div class="doc-row"><div class="doc-label">Technical file reference:</div><div class="doc-value">${techFileRef}</div></div>
+  </div>
+
+  <div class="doc-section">
+    <div class="doc-section-title">6. Key Conformity Measures</div>
+    <p style="font-size:13px;line-height:1.8">${measures}</p>
+  </div>
+
+  <div class="doc-section">
+    <div class="doc-section-title">7. Tamper-Evident Logging</div>
+    <p style="font-size:13px;line-height:1.8">All operational events from this AI system are logged using a SHA-256 cryptographic hash chain via SBX Guardian (sbx-guardian.onrender.com), providing tamper-evident, court-admissible records as required by Article 12 of Regulation (EU) 2024/1689. Chain integrity can be independently verified via the public API endpoint.</p>
+  </div>
+
+  <div class="doc-section">
+    <div class="doc-section-title">8. Signature</div>
+    <p style="font-size:13px;line-height:1.8;margin-bottom:24px">Signed on behalf of <strong>${company}</strong> by a duly authorised representative. This declaration is issued under the sole responsibility of the manufacturer. It may be subject to revision if the AI system undergoes a substantial modification within the meaning of Article 65 of Regulation (EU) 2024/1689.</p>
+    <div class="doc-signature-area">
+      <div>
+        <div class="sig-line"></div>
+        <div class="sig-label">Signature</div>
+        <div style="font-size:13px;margin-top:8px;font-weight:600">${signatory}</div>
+        <div style="font-size:11px;color:#555">${company}</div>
+        <div style="font-size:11px;color:#555;margin-top:8px">Date: ${today}</div>
+        <div style="font-size:11px;color:#555">Place: ___________________________</div>
+      </div>
+      <div style="text-align:center">
+        <div class="doc-stamp">CE<br>Conformity<br>Assessed<br>${new Date().getFullYear()}</div>
+        <div style="font-size:11px;color:#888;margin-top:10px">Company seal / stamp</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="doc-footer">
+    Document ${docNum} · Generated: ${today} · SBX Guardian Compliance Platform<br>
+    This declaration must be retained for 10 years after the AI system is placed on the market (EU AI Act Art. 18)
+  </div>
+</div>`;
+
+  document.getElementById('doc-output').style.display = 'block';
+  document.getElementById('doc-output').scrollIntoView({behavior:'smooth'});
+}
+</script>
+</body>
+</html>

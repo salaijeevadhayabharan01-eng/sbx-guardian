@@ -4,538 +4,1612 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>SBX Guardian — The Black Box for Industrial AI</title>
-<meta name="description" content="Tamper-proof logging, EU AI Act compliance, and one-click insurer evidence for industrial robots. The only platform purpose-built for physical AI systems.">
+<meta name="description" content="When your robot causes an incident, you need to prove what happened. SBX Guardian gives every industrial AI system tamper-proof logging and EU AI Act compliance. In 30 minutes.">
+<meta property="og:title" content="SBX Guardian — The Black Box for Industrial AI">
+<meta property="og:description" content="Tamper-proof logging. EU AI Act compliance. Court-admissible evidence. For industrial robots.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=IBM+Plex+Mono:wght@400;600&family=Libre+Franklin:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist+Mono:wght@400;500;600&family=Geist:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
-*{box-sizing:border-box;margin:0;padding:0}
-:root{
-  --bg:#030508;--s1:#08090f;--s2:#0e1018;--border:#1a1d28;
-  --text:#f0f2f8;--text2:#8892a4;--text3:#3d4455;
-  --green:#00e87a;--green2:#00b85e;
-  --red:#ff3d3d;--orange:#ff8800;--blue:#2d7fff;
-  --syne:'Syne',sans-serif;--mono:'IBM Plex Mono',monospace;--body:'Libre Franklin',sans-serif;
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --ink: #0a0b0e;
+  --ink1: #12141a;
+  --ink2: #1c1f28;
+  --ink3: #2a2f3d;
+  --fog: #8892a8;
+  --mist: #4a5168;
+  --paper: #f0f2f8;
+  --white: #ffffff;
+  --gold: #b8975a;
+  --gold-bright: #d4af72;
+  --gold-dim: #8a6f3e;
+  --green: #2dd4a0;
+  --red: #e05252;
+  --amber: #e09c2e;
+  --serif: 'Instrument Serif', Georgia, serif;
+  --mono: 'Geist Mono', 'Fira Code', monospace;
+  --sans: 'Geist', system-ui, sans-serif;
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
 }
-html{scroll-behavior:smooth}
-body{background:var(--bg);color:var(--text);font-family:var(--body);overflow-x:hidden;cursor:none}
 
-/* CURSOR */
-.cursor{position:fixed;width:10px;height:10px;background:var(--green);border-radius:50%;pointer-events:none;z-index:9999;transition:transform 0.1s;mix-blend-mode:difference}
-.cursor-ring{position:fixed;width:36px;height:36px;border:1px solid rgba(0,232,122,0.4);border-radius:50%;pointer-events:none;z-index:9998;transition:all 0.12s ease}
+html { scroll-behavior: smooth; }
 
-/* NOISE OVERLAY */
-body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");pointer-events:none;z-index:1;opacity:0.4}
+body {
+  background: var(--ink);
+  color: var(--paper);
+  font-family: var(--sans);
+  font-size: 16px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
 
-/* GRID BG */
-body::after{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,232,122,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,232,122,0.03) 1px,transparent 1px);background-size:60px 60px;pointer-events:none;z-index:0}
+/* ── GRAIN ──────────────────────────────────────────────────── */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='400' height='400' filter='url(%23g)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 999;
+  opacity: 0.6;
+}
 
-/* NAV */
-nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:20px 48px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid transparent;transition:all 0.3s;backdrop-filter:blur(0px)}
-nav.scrolled{background:rgba(3,5,8,0.92);border-bottom-color:var(--border);backdrop-filter:blur(20px)}
-.nav-logo{font-family:var(--syne);font-size:20px;font-weight:800;letter-spacing:2px;display:flex;align-items:center;gap:10px}
-.logo-box{width:32px;height:32px;background:var(--green);border-radius:4px;display:flex;align-items:center;justify-content:center;color:var(--bg);font-size:14px;font-weight:800}
-.nav-links{display:flex;gap:32px;align-items:center}
-.nav-links a{color:var(--text2);text-decoration:none;font-size:14px;font-weight:400;letter-spacing:0.3px;transition:color 0.2s}
-.nav-links a:hover{color:var(--green)}
-.nav-cta{background:var(--green);color:var(--bg);padding:10px 22px;border-radius:4px;font-size:13px;font-weight:700;letter-spacing:0.5px;text-decoration:none;transition:all 0.2s}
-.nav-cta:hover{background:var(--green2);transform:translateY(-1px)}
+/* ── RULING LINES (subtle horizontal grid) ────────────────────── */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: repeating-linear-gradient(0deg, transparent, transparent 79px, rgba(255,255,255,0.018) 80px);
+  pointer-events: none;
+  z-index: 0;
+}
 
-/* HERO */
-.hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:120px 24px 80px;position:relative;z-index:2}
-.hero-eyebrow{font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:var(--green);margin-bottom:28px;display:flex;align-items:center;gap:10px}
-.hero-eyebrow::before,.hero-eyebrow::after{content:'';flex:1;max-width:60px;height:1px;background:var(--green);opacity:0.4}
-.hero h1{font-family:var(--syne);font-size:clamp(52px,8vw,108px);font-weight:800;line-height:0.92;letter-spacing:-3px;margin-bottom:32px;max-width:1000px}
-.hero h1 em{font-style:normal;color:var(--green);position:relative}
-.hero h1 em::after{content:'';position:absolute;bottom:-4px;left:0;right:0;height:3px;background:var(--green);opacity:0.4}
-.hero-sub{font-size:clamp(16px,2.5vw,20px);color:var(--text2);max-width:600px;line-height:1.65;margin-bottom:48px;font-weight:300}
-.hero-actions{display:flex;gap:16px;flex-wrap:wrap;justify-content:center;margin-bottom:72px}
-.btn-hero{padding:16px 36px;font-size:15px;font-weight:600;border-radius:4px;text-decoration:none;display:inline-flex;align-items:center;gap:10px;transition:all 0.2s;letter-spacing:0.3px}
-.btn-hero.primary{background:var(--green);color:var(--bg)}
-.btn-hero.primary:hover{background:var(--green2);transform:translateY(-2px);box-shadow:0 16px 40px rgba(0,232,122,0.25)}
-.btn-hero.ghost{border:1px solid var(--border);color:var(--text2)}
-.btn-hero.ghost:hover{border-color:var(--green);color:var(--green)}
-.hero-countdown{display:flex;align-items:center;gap:12px;background:rgba(255,136,0,0.08);border:1px solid rgba(255,136,0,0.2);border-radius:6px;padding:14px 24px;font-family:var(--mono);font-size:13px;color:var(--orange)}
-.countdown-num{font-size:28px;font-weight:700;line-height:1}
+/* ── NAV ────────────────────────────────────────────────────── */
+nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 500;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 40px;
+  height: 60px;
+  background: rgba(10,11,14,0.82);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px);
+}
 
-/* TICKER */
-.ticker{background:var(--s1);border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:14px 0;overflow:hidden;white-space:nowrap;z-index:2;position:relative}
-.ticker-inner{display:inline-flex;animation:ticker 30s linear infinite}
-.ticker-item{font-family:var(--mono);font-size:12px;color:var(--text3);padding:0 48px;letter-spacing:1px}
-.ticker-item span{color:var(--green);margin-right:8px}
-@keyframes ticker{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+.nav-left {
+  display: flex;
+  align-items: center;
+  gap: 36px;
+}
 
-/* SECTIONS */
-section{position:relative;z-index:2;padding:120px 48px}
-.container{max-width:1160px;margin:0 auto}
-.section-label{font-family:var(--mono);font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--green);margin-bottom:20px}
-.section-title{font-family:var(--syne);font-size:clamp(36px,5vw,60px);font-weight:800;letter-spacing:-2px;line-height:1;margin-bottom:20px}
-.section-sub{color:var(--text2);font-size:17px;line-height:1.6;max-width:560px;font-weight:300}
+.wordmark {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  color: inherit;
+}
 
-/* PROBLEM */
-.problem-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-top:60px}
-.problem-card{background:var(--s1);padding:40px 32px}
-.problem-number{font-family:var(--syne);font-size:64px;font-weight:800;line-height:1;margin-bottom:16px;background:linear-gradient(135deg,var(--text),var(--text3));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.problem-card:first-child .problem-number{-webkit-text-fill-color:var(--red)}
-.problem-card:nth-child(2) .problem-number{-webkit-text-fill-color:var(--orange)}
-.problem-card:last-child .problem-number{-webkit-text-fill-color:var(--green)}
-.problem-title{font-family:var(--syne);font-size:18px;font-weight:700;margin-bottom:10px}
-.problem-desc{font-size:14px;color:var(--text2);line-height:1.6}
+.wordmark-icon {
+  width: 28px;
+  height: 28px;
+  background: var(--gold);
+  border-radius: 5px;
+  display: grid;
+  place-items: center;
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--ink);
+  letter-spacing: -0.5px;
+  flex-shrink: 0;
+}
 
-/* HOW IT WORKS */
-.how-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:24px;margin-top:60px}
-.how-card{background:var(--s1);border:1px solid var(--border);border-radius:8px;padding:36px;position:relative;overflow:hidden;transition:border-color 0.2s}
-.how-card:hover{border-color:rgba(0,232,122,0.3)}
-.how-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--green);transform:scaleX(0);transform-origin:left;transition:transform 0.4s}
-.how-card:hover::before{transform:scaleX(1)}
-.how-num{font-family:var(--mono);font-size:12px;color:var(--text3);letter-spacing:1px;margin-bottom:16px}
-.how-title{font-family:var(--syne);font-size:22px;font-weight:700;margin-bottom:12px}
-.how-desc{font-size:14px;color:var(--text2);line-height:1.7}
-.how-tag{display:inline-block;background:rgba(0,232,122,0.08);border:1px solid rgba(0,232,122,0.15);color:var(--green);font-family:var(--mono);font-size:10px;letter-spacing:1px;padding:4px 10px;border-radius:3px;margin-top:16px}
+.wordmark-name {
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  color: var(--paper);
+}
 
-/* FEATURES TABLE */
-.features-wrap{margin-top:60px;border:1px solid var(--border);border-radius:8px;overflow:hidden}
-.features-header{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;background:var(--s2);padding:16px 24px;font-family:var(--mono);font-size:11px;letter-spacing:1px;color:var(--text3);text-transform:uppercase}
-.features-row{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;padding:18px 24px;border-top:1px solid var(--border);align-items:center;transition:background 0.15s}
-.features-row:hover{background:var(--s1)}
-.feature-name{font-size:14px;font-weight:500}
-.feature-sub{font-size:12px;color:var(--text3);margin-top:2px}
-.check{color:var(--green);font-size:18px;text-align:center}
-.cross{color:var(--text3);font-size:16px;text-align:center}
-.partial{color:var(--orange);font-size:14px;text-align:center;font-family:var(--mono)}
-.col-us{background:rgba(0,232,122,0.04);border-left:1px solid rgba(0,232,122,0.15);border-right:1px solid rgba(0,232,122,0.15)}
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
 
-/* PRICING */
-.pricing-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:60px}
-.price-card{background:var(--s1);border:1px solid var(--border);border-radius:8px;padding:40px 32px;transition:all 0.2s;position:relative}
-.price-card:hover{transform:translateY(-4px);border-color:rgba(0,232,122,0.2)}
-.price-card.featured{border-color:var(--green);background:linear-gradient(135deg,rgba(0,232,122,0.06),var(--s1))}
-.price-badge{position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--green);color:var(--bg);font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:2px;padding:5px 16px;border-radius:20px}
-.price-plan{font-family:var(--mono);font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--text3);margin-bottom:16px}
-.price-amount{font-family:var(--syne);font-size:52px;font-weight:800;line-height:1;margin-bottom:4px}
-.price-amount span{font-size:20px;color:var(--text2)}
-.price-period{font-size:13px;color:var(--text3);margin-bottom:24px}
-.price-features{list-style:none;margin-bottom:32px}
-.price-features li{font-size:14px;color:var(--text2);padding:8px 0;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
-.price-features li::before{content:'✓';color:var(--green);font-weight:700;flex-shrink:0}
-.price-features li.no::before{content:'—';color:var(--text3)}
-.price-features li.no{color:var(--text3)}
-.price-btn{display:block;text-align:center;padding:14px;border-radius:4px;font-size:14px;font-weight:700;text-decoration:none;letter-spacing:0.5px;transition:all 0.2s}
-.price-btn.primary{background:var(--green);color:var(--bg)}
-.price-btn.primary:hover{background:var(--green2)}
-.price-btn.outline{border:1px solid var(--border);color:var(--text2)}
-.price-btn.outline:hover{border-color:var(--green);color:var(--green)}
+.nav-links a {
+  color: var(--fog);
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 400;
+  padding: 6px 12px;
+  border-radius: 6px;
+  transition: color 0.15s, background 0.15s;
+}
 
-/* ROI CALC */
-.roi-section{background:var(--s1);border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
-.roi-grid{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center}
-.roi-stat{text-align:center;padding:32px;border:1px solid var(--border);border-radius:8px;margin-bottom:16px}
-.roi-stat-num{font-family:var(--syne);font-size:48px;font-weight:800;color:var(--green)}
-.roi-stat-label{font-size:13px;color:var(--text3);margin-top:4px}
+.nav-links a:hover { color: var(--paper); background: rgba(255,255,255,0.06); }
 
-/* SOCIAL PROOF */
-.proof-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:60px}
-.proof-card{background:var(--s1);border:1px solid var(--border);border-radius:8px;padding:32px}
-.proof-quote{font-size:15px;line-height:1.7;color:var(--text2);margin-bottom:24px;font-style:italic}
-.proof-author{display:flex;align-items:center;gap:12px}
-.proof-avatar{width:40px;height:40px;border-radius:50%;background:var(--s2);display:flex;align-items:center;justify-content:center;font-family:var(--syne);font-weight:800;font-size:14px;color:var(--green)}
-.proof-name{font-size:14px;font-weight:600}
-.proof-role{font-size:12px;color:var(--text3)}
+.nav-right { display: flex; align-items: center; gap: 10px; }
 
-/* WAITLIST */
-.waitlist-section{text-align:center;padding:160px 48px}
-.waitlist-box{max-width:560px;margin:0 auto}
-.waitlist-form{display:flex;gap:0;margin-top:40px;border:1px solid var(--border);border-radius:6px;overflow:hidden;background:var(--s1)}
-.waitlist-form input{flex:1;padding:16px 20px;background:transparent;border:none;color:var(--text);font-size:15px;font-family:var(--body);outline:none}
-.waitlist-form input::placeholder{color:var(--text3)}
-.waitlist-form button{padding:16px 28px;background:var(--green);color:var(--bg);font-size:14px;font-weight:700;border:none;cursor:pointer;font-family:var(--syne);letter-spacing:1px;transition:background 0.2s;white-space:nowrap}
-.waitlist-form button:hover{background:var(--green2)}
-.waitlist-sub{font-size:13px;color:var(--text3);margin-top:16px}
-.waitlist-success{display:none;background:rgba(0,232,122,0.08);border:1px solid rgba(0,232,122,0.2);border-radius:6px;padding:20px;margin-top:20px;font-family:var(--mono);font-size:13px;color:var(--green)}
+.btn-nav-ghost {
+  font-size: 13px;
+  color: var(--fog);
+  text-decoration: none;
+  padding: 7px 14px;
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 6px;
+  transition: all 0.15s;
+}
+.btn-nav-ghost:hover { color: var(--paper); border-color: rgba(255,255,255,0.25); }
 
-/* FOOTER */
-footer{background:var(--s1);border-top:1px solid var(--border);padding:60px 48px;position:relative;z-index:2}
-.footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr;gap:60px;margin-bottom:48px}
-.footer-brand{font-family:var(--syne);font-size:18px;font-weight:800;letter-spacing:2px;margin-bottom:16px;display:flex;align-items:center;gap:10px}
-.footer-desc{font-size:14px;color:var(--text3);line-height:1.7;max-width:280px}
-.footer-col h4{font-family:var(--mono);font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--text3);margin-bottom:20px}
-.footer-col a{display:block;font-size:14px;color:var(--text2);text-decoration:none;margin-bottom:12px;transition:color 0.2s}
-.footer-col a:hover{color:var(--green)}
-.footer-bottom{display:flex;align-items:center;justify-content:space-between;border-top:1px solid var(--border);padding-top:24px;font-size:12px;color:var(--text3)}
+.btn-nav-primary {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink);
+  background: var(--gold);
+  text-decoration: none;
+  padding: 7px 16px;
+  border-radius: 6px;
+  transition: all 0.15s;
+}
+.btn-nav-primary:hover { background: var(--gold-bright); }
 
-/* ANIMATIONS */
-.reveal{opacity:0;transform:translateY(30px);transition:all 0.7s cubic-bezier(0.16,1,0.3,1)}
-.reveal.visible{opacity:1;transform:translateY(0)}
-.reveal-delay-1{transition-delay:0.1s}
-.reveal-delay-2{transition-delay:0.2s}
-.reveal-delay-3{transition-delay:0.3s}
+/* ── TICKER ─────────────────────────────────────────────────── */
+.ticker {
+  background: rgba(184,151,90,0.08);
+  border-bottom: 1px solid rgba(184,151,90,0.15);
+  padding: 10px 0;
+  overflow: hidden;
+  position: relative;
+  z-index: 1;
+  margin-top: 60px;
+}
 
-@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
-.float{animation:float 6s ease-in-out infinite}
+.ticker-track {
+  display: flex;
+  gap: 60px;
+  animation: ticker 30s linear infinite;
+  width: max-content;
+}
 
-@media(max-width:768px){
-  nav{padding:16px 20px}
-  .nav-links{display:none}
-  section{padding:80px 20px}
-  .hero h1{letter-spacing:-2px}
-  .problem-grid,.how-grid,.pricing-grid,.features-header,.features-row,.roi-grid,.proof-grid,.footer-grid{grid-template-columns:1fr}
-  .waitlist-form{flex-direction:column}
-  .features-header .col-sbx,.features-header .col-others{display:none}
-  .col-us,.cross,.partial{display:none}
+.ticker-item {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--gold);
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.ticker-item::before { content: '◆'; font-size: 7px; opacity: 0.5; }
+
+@keyframes ticker {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+/* ── HERO ───────────────────────────────────────────────────── */
+.hero {
+  position: relative;
+  z-index: 1;
+  padding: 96px 40px 80px;
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 80px;
+  align-items: center;
+  min-height: calc(100vh - 100px);
+}
+
+.hero-left {}
+
+.hero-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 28px;
+}
+
+.kicker-dot {
+  width: 8px;
+  height: 8px;
+  background: var(--green);
+  border-radius: 50%;
+  box-shadow: 0 0 0 0 rgba(45,212,160,0.4);
+  animation: sonar 2s ease-out infinite;
+}
+
+@keyframes sonar {
+  0% { box-shadow: 0 0 0 0 rgba(45,212,160,0.4); }
+  70% { box-shadow: 0 0 0 8px rgba(45,212,160,0); }
+  100% { box-shadow: 0 0 0 0 rgba(45,212,160,0); }
+}
+
+.hero-headline {
+  font-family: var(--serif);
+  font-size: clamp(52px, 5.5vw, 82px);
+  line-height: 1.0;
+  letter-spacing: -0.02em;
+  color: var(--paper);
+  margin-bottom: 24px;
+}
+
+.hero-headline em {
+  font-style: italic;
+  color: var(--gold);
+}
+
+.hero-body {
+  font-size: 17px;
+  line-height: 1.7;
+  color: var(--fog);
+  max-width: 480px;
+  margin-bottom: 36px;
+  font-weight: 300;
+}
+
+.hero-body strong { color: var(--paper); font-weight: 500; }
+
+.hero-ctas {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 52px;
+}
+
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 13px 28px;
+  background: var(--gold);
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+  border-radius: 7px;
+  transition: all 0.2s var(--ease);
+  border: none;
+  cursor: pointer;
+  font-family: var(--sans);
+}
+
+.btn-primary:hover {
+  background: var(--gold-bright);
+  transform: translateY(-1px);
+  box-shadow: 0 8px 24px rgba(184,151,90,0.3);
+}
+
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 13px 28px;
+  color: var(--fog);
+  font-size: 14px;
+  text-decoration: none;
+  border: 1px solid var(--ink3);
+  border-radius: 7px;
+  transition: all 0.15s;
+}
+
+.btn-secondary:hover { color: var(--paper); border-color: var(--mist); }
+
+.hero-proof {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.proof-stat {
+  text-align: center;
+}
+
+.proof-num {
+  font-family: var(--mono);
+  font-size: 22px;
+  font-weight: 600;
+  line-height: 1;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.proof-label {
+  font-size: 11px;
+  color: var(--mist);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.proof-div { width: 1px; height: 32px; background: var(--ink3); }
+
+/* ── HERO RIGHT — TERMINAL ────────────────────────────────────── */
+.hero-right { position: relative; }
+
+.terminal {
+  background: var(--ink1);
+  border: 1px solid var(--ink3);
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 32px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.04) inset;
+}
+
+.terminal-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: var(--ink2);
+  border-bottom: 1px solid var(--ink3);
+}
+
+.terminal-dots { display: flex; gap: 6px; }
+.terminal-dot { width: 12px; height: 12px; border-radius: 50%; }
+.td-red { background: #e05252; }
+.td-yellow { background: #e09c2e; }
+.td-green { background: #2dd4a0; }
+
+.terminal-title {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--mist);
+  letter-spacing: 0.05em;
+}
+
+.terminal-badge {
+  font-family: var(--mono);
+  font-size: 10px;
+  padding: 2px 8px;
+  background: rgba(45,212,160,0.12);
+  color: var(--green);
+  border-radius: 4px;
+  border: 1px solid rgba(45,212,160,0.2);
+}
+
+.terminal-body { padding: 20px 20px 4px; }
+
+.chain-row {
+  display: grid;
+  grid-template-columns: 68px 80px 1fr 90px 16px;
+  gap: 12px;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  animation: fadein 0.3s var(--ease) both;
+}
+
+.chain-row:last-child { border-bottom: none; }
+
+@keyframes fadein {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.chain-row:nth-child(1) { animation-delay: 0.1s; }
+.chain-row:nth-child(2) { animation-delay: 0.2s; }
+.chain-row:nth-child(3) { animation-delay: 0.3s; }
+.chain-row:nth-child(4) { animation-delay: 0.4s; }
+.chain-row:nth-child(5) { animation-delay: 0.5s; }
+.chain-row:nth-child(6) { animation-delay: 0.6s; }
+
+.chain-time {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--mist);
+}
+
+.chain-type {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 500;
+  padding: 3px 8px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  text-align: center;
+}
+
+.ct-hb { background: rgba(59,130,246,0.12); color: #6eb3f7; border: 1px solid rgba(59,130,246,0.2); }
+.ct-ai { background: rgba(45,212,160,0.12); color: var(--green); border: 1px solid rgba(45,212,160,0.2); }
+.ct-an { background: rgba(224,156,46,0.12); color: var(--amber); border: 1px solid rgba(224,156,46,0.2); }
+.ct-hu { background: rgba(168,85,247,0.12); color: #c084fc; border: 1px solid rgba(168,85,247,0.2); }
+.ct-sa { background: rgba(224,82,82,0.12); color: var(--red); border: 1px solid rgba(224,82,82,0.2); }
+
+.chain-msg {
+  font-size: 12px;
+  color: var(--fog);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.chain-hash {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--ink3);
+  text-align: right;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.chain-ok { color: var(--green); font-size: 11px; text-align: right; }
+
+.terminal-footer {
+  margin: 4px 0 0;
+  padding: 12px 0 16px;
+  border-top: 1px solid var(--ink2);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.tf-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--green);
+}
+
+.tf-dot { width: 6px; height: 6px; background: var(--green); border-radius: 50%; animation: sonar 2s ease-out infinite; }
+
+.tf-right {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--mist);
+}
+
+/* ── URGENCY BAR ────────────────────────────────────────────── */
+.urgency {
+  position: relative;
+  z-index: 1;
+  border-top: 1px solid rgba(224,82,82,0.15);
+  border-bottom: 1px solid rgba(224,82,82,0.15);
+  background: rgba(224,82,82,0.05);
+  padding: 14px 40px;
+}
+
+.urgency-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.urgency-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.urgency-icon {
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.urgency-text {
+  font-size: 14px;
+  color: var(--fog);
+  line-height: 1.4;
+}
+
+.urgency-text strong { color: var(--paper); }
+
+.urgency-countdown {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.cd-unit {
+  text-align: center;
+}
+
+.cd-num {
+  display: block;
+  font-family: var(--mono);
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--red);
+  line-height: 1;
+  min-width: 42px;
+  background: rgba(224,82,82,0.12);
+  border: 1px solid rgba(224,82,82,0.2);
+  border-radius: 5px;
+  padding: 4px 6px;
+  text-align: center;
+}
+
+.cd-label {
+  display: block;
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--mist);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-top: 4px;
+}
+
+.cd-sep {
+  font-size: 18px;
+  color: var(--mist);
+  padding-top: 4px;
+  line-height: 1.8;
+}
+
+.urgency-link {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--gold);
+  text-decoration: none;
+  border: 1px solid rgba(184,151,90,0.3);
+  padding: 8px 16px;
+  border-radius: 5px;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+
+.urgency-link:hover { background: rgba(184,151,90,0.1); }
+
+/* ── FEATURES ───────────────────────────────────────────────── */
+.section {
+  position: relative;
+  z-index: 1;
+  padding: 100px 40px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.section-full {
+  position: relative;
+  z-index: 1;
+  padding: 100px 40px;
+}
+
+.section-full .section-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.label {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 14px;
+}
+
+.heading {
+  font-family: var(--serif);
+  font-size: clamp(36px, 4vw, 56px);
+  line-height: 1.08;
+  letter-spacing: -0.02em;
+  color: var(--paper);
+  margin-bottom: 16px;
+}
+
+.heading em { font-style: italic; color: var(--gold); }
+
+.subheading {
+  font-size: 16px;
+  color: var(--fog);
+  font-weight: 300;
+  max-width: 520px;
+  line-height: 1.65;
+  margin-bottom: 60px;
+}
+
+/* Feature bento grid */
+.bento {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  grid-template-rows: auto;
+  gap: 12px;
+}
+
+.bento-card {
+  background: var(--ink1);
+  border: 1px solid var(--ink3);
+  border-radius: 10px;
+  padding: 32px;
+  position: relative;
+  overflow: hidden;
+  transition: border-color 0.2s, transform 0.2s var(--ease);
+}
+
+.bento-card:hover {
+  border-color: rgba(184,151,90,0.25);
+  transform: translateY(-2px);
+}
+
+.bento-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(184,151,90,0.3), transparent);
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.bento-card:hover::before { opacity: 1; }
+
+.bc-1 { grid-column: 1 / 8; grid-row: 1; }
+.bc-2 { grid-column: 8 / 13; grid-row: 1; }
+.bc-3 { grid-column: 1 / 5; grid-row: 2; }
+.bc-4 { grid-column: 5 / 9; grid-row: 2; }
+.bc-5 { grid-column: 9 / 13; grid-row: 2; }
+.bc-6 { grid-column: 1 / 6; grid-row: 3; }
+.bc-7 { grid-column: 6 / 13; grid-row: 3; }
+
+.bc-tag {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--gold-dim);
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.bc-tag::before { content: ''; width: 20px; height: 1px; background: var(--gold-dim); }
+
+.bc-title {
+  font-family: var(--serif);
+  font-size: 22px;
+  line-height: 1.2;
+  color: var(--paper);
+  margin-bottom: 10px;
+}
+
+.bc-title em { font-style: italic; color: var(--gold); }
+
+.bc-desc {
+  font-size: 13px;
+  line-height: 1.65;
+  color: var(--mist);
+}
+
+/* Feature card visual for bc-1 */
+.hash-demo {
+  margin-top: 24px;
+  font-family: var(--mono);
+  font-size: 11px;
+}
+
+.hd-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+.hd-row:last-child { border-bottom: none; }
+.hd-time { color: var(--mist); width: 52px; flex-shrink: 0; }
+.hd-event { color: var(--fog); flex: 1; font-size: 10px; }
+.hd-hash { color: var(--ink3); font-size: 9px; }
+.hd-check { color: var(--green); }
+
+.compliance-mini {
+  margin-top: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.cm-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--mono);
+  font-size: 11px;
+}
+
+.cm-art { color: var(--mist); width: 52px; flex-shrink: 0; }
+.cm-title { color: var(--fog); flex: 1; font-size: 11px; }
+.cm-status { font-size: 10px; padding: 2px 6px; border-radius: 3px; flex-shrink: 0; }
+.cms-pass { background: rgba(45,212,160,0.12); color: var(--green); border: 1px solid rgba(45,212,160,0.2); }
+.cms-partial { background: rgba(224,156,46,0.12); color: var(--amber); border: 1px solid rgba(224,156,46,0.2); }
+.cms-fail { background: rgba(224,82,82,0.12); color: var(--red); border: 1px solid rgba(224,82,82,0.2); }
+
+/* ── COMPARISON ─────────────────────────────────────────────── */
+.section-full.dark {
+  background: var(--ink1);
+  border-top: 1px solid var(--ink3);
+  border-bottom: 1px solid var(--ink3);
+}
+
+.compare-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 48px;
+}
+
+.compare-table thead tr {
+  border-bottom: 1px solid var(--ink3);
+}
+
+.compare-table th {
+  padding: 16px 20px;
+  text-align: center;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--mist);
+  font-weight: 400;
+}
+
+.compare-table th:first-child { text-align: left; }
+
+.th-us {
+  color: var(--gold) !important;
+  background: rgba(184,151,90,0.06);
+  border-left: 1px solid rgba(184,151,90,0.15);
+  border-right: 1px solid rgba(184,151,90,0.15);
+}
+
+.compare-table td {
+  padding: 14px 20px;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  font-size: 13px;
+  text-align: center;
+  color: var(--mist);
+}
+
+.compare-table td:first-child { text-align: left; color: var(--fog); }
+
+.compare-table tr:hover td { background: rgba(255,255,255,0.015); }
+
+.td-us {
+  background: rgba(184,151,90,0.04);
+  border-left: 1px solid rgba(184,151,90,0.1);
+  border-right: 1px solid rgba(184,151,90,0.1);
+  color: var(--paper) !important;
+  font-weight: 500;
+}
+
+.ci-yes { color: var(--green); font-size: 16px; }
+.ci-no { color: var(--ink3); font-size: 16px; }
+.ci-partial { color: var(--amber); font-size: 12px; font-family: var(--mono); }
+
+/* ── PRICING ─────────────────────────────────────────────────── */
+.pricing-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-top: 48px;
+}
+
+.pricing-card {
+  background: var(--ink1);
+  border: 1px solid var(--ink3);
+  border-radius: 10px;
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  transition: border-color 0.2s;
+}
+
+.pricing-card:hover { border-color: var(--ink2); }
+
+.pricing-card.featured {
+  border-color: rgba(184,151,90,0.35);
+  background: linear-gradient(145deg, rgba(184,151,90,0.05) 0%, var(--ink1) 60%);
+}
+
+.pc-badge {
+  position: absolute;
+  top: -1px; left: 50%;
+  transform: translateX(-50%);
+  background: var(--gold);
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 4px 14px;
+  border-radius: 0 0 6px 6px;
+}
+
+.pc-name {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--mist);
+  margin-bottom: 12px;
+}
+
+.pc-price {
+  font-family: var(--serif);
+  font-size: 48px;
+  line-height: 1;
+  color: var(--paper);
+  margin-bottom: 4px;
+}
+
+.pc-price sup { font-size: 20px; vertical-align: top; margin-top: 8px; display: inline-block; font-family: var(--sans); font-weight: 300; }
+.pc-price sub { font-size: 14px; color: var(--mist); font-family: var(--sans); font-weight: 300; }
+
+.pc-desc { font-size: 13px; color: var(--mist); margin-bottom: 24px; padding-bottom: 24px; border-bottom: 1px solid var(--ink3); line-height: 1.5; }
+
+.pc-features { list-style: none; flex: 1; margin-bottom: 24px; }
+.pc-features li { display: flex; align-items: flex-start; gap: 10px; font-size: 13px; color: var(--fog); padding: 7px 0; border-bottom: 1px solid rgba(255,255,255,0.04); }
+.pc-features li:last-child { border-bottom: none; }
+.pc-features li::before { content: '✓'; color: var(--gold); font-family: var(--mono); flex-shrink: 0; font-size: 12px; margin-top: 1px; }
+
+.pc-cta {
+  display: block;
+  text-align: center;
+  padding: 12px;
+  border-radius: 7px;
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 0.15s;
+}
+
+.pc-cta-gold { background: var(--gold); color: var(--ink); }
+.pc-cta-gold:hover { background: var(--gold-bright); }
+.pc-cta-ghost { border: 1px solid var(--ink3); color: var(--fog); }
+.pc-cta-ghost:hover { border-color: var(--mist); color: var(--paper); }
+
+/* ── TRUST BAR ──────────────────────────────────────────────── */
+.trust {
+  position: relative;
+  z-index: 1;
+  border-top: 1px solid var(--ink3);
+  border-bottom: 1px solid var(--ink3);
+  padding: 40px;
+}
+
+.trust-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 40px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.trust-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--mist);
+  white-space: nowrap;
+}
+
+.trust-sep { width: 1px; height: 20px; background: var(--ink3); }
+
+.trust-items {
+  display: flex;
+  gap: 32px;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.trust-item {
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--mist);
+  letter-spacing: 0.06em;
+  transition: color 0.15s;
+}
+.trust-item:hover { color: var(--fog); }
+
+/* ── WAITLIST ───────────────────────────────────────────────── */
+.waitlist-section {
+  position: relative;
+  z-index: 1;
+  padding: 100px 40px;
+  background: var(--ink1);
+  border-top: 1px solid var(--ink3);
+  overflow: hidden;
+}
+
+.waitlist-glow {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 700px; height: 500px;
+  background: radial-gradient(ellipse, rgba(184,151,90,0.07) 0%, transparent 65%);
+  pointer-events: none;
+}
+
+.waitlist-inner {
+  max-width: 600px;
+  margin: 0 auto;
+  text-align: center;
+  position: relative;
+  z-index: 1;
+}
+
+.waitlist-heading {
+  font-family: var(--serif);
+  font-size: clamp(40px, 5vw, 64px);
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  color: var(--paper);
+  margin-bottom: 16px;
+}
+
+.waitlist-sub {
+  font-size: 16px;
+  color: var(--fog);
+  font-weight: 300;
+  line-height: 1.6;
+  margin-bottom: 40px;
+}
+
+.wl-form {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.wl-input {
+  flex: 1;
+  background: var(--ink2);
+  border: 1px solid var(--ink3);
+  border-radius: 7px;
+  padding: 13px 16px;
+  color: var(--paper);
+  font-family: var(--sans);
+  font-size: 15px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.wl-input::placeholder { color: var(--mist); }
+.wl-input:focus { border-color: rgba(184,151,90,0.4); }
+
+.wl-btn {
+  background: var(--gold);
+  color: var(--ink);
+  border: none;
+  border-radius: 7px;
+  padding: 13px 28px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: var(--sans);
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+
+.wl-btn:hover { background: var(--gold-bright); }
+
+.wl-success {
+  display: none;
+  padding: 16px 20px;
+  background: rgba(45,212,160,0.08);
+  border: 1px solid rgba(45,212,160,0.2);
+  border-radius: 7px;
+  color: var(--green);
+  font-size: 14px;
+  margin-bottom: 16px;
+}
+
+.wl-fine {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--mist);
+  letter-spacing: 0.05em;
+}
+
+/* ── FOOTER ──────────────────────────────────────────────────── */
+footer {
+  position: relative;
+  z-index: 1;
+  padding: 56px 40px 40px;
+  border-top: 1px solid var(--ink3);
+}
+
+.footer-grid {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1.5fr 1fr 1fr 1fr;
+  gap: 48px;
+  margin-bottom: 48px;
+}
+
+.footer-brand {}
+
+.footer-brand-mark {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.footer-tagline {
+  font-size: 13px;
+  color: var(--mist);
+  line-height: 1.6;
+  max-width: 240px;
+  font-style: italic;
+  font-family: var(--serif);
+}
+
+.footer-col h4 {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--mist);
+  margin-bottom: 16px;
+}
+
+.footer-col a {
+  display: block;
+  font-size: 13px;
+  color: var(--mist);
+  text-decoration: none;
+  margin-bottom: 10px;
+  transition: color 0.15s;
+}
+.footer-col a:hover { color: var(--fog); }
+
+.footer-bottom {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding-top: 24px;
+  border-top: 1px solid var(--ink3);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.footer-copy { font-family: var(--mono); font-size: 11px; color: var(--mist); letter-spacing: 0.05em; }
+
+.footer-links { display: flex; gap: 20px; }
+.footer-links a { font-family: var(--mono); font-size: 11px; color: var(--mist); text-decoration: none; transition: color 0.15s; }
+.footer-links a:hover { color: var(--fog); }
+
+/* ── RESPONSIVE ──────────────────────────────────────────────── */
+@media (max-width: 960px) {
+  nav .nav-links { display: none; }
+  .hero { grid-template-columns: 1fr; gap: 48px; padding-top: 80px; min-height: auto; }
+  .hero-right { display: none; }
+  .bento { grid-template-columns: 1fr; }
+  .bc-1,.bc-2,.bc-3,.bc-4,.bc-5,.bc-6,.bc-7 { grid-column: 1; grid-row: auto; }
+  .pricing-grid { grid-template-columns: 1fr; }
+  .footer-grid { grid-template-columns: 1fr 1fr; }
+  .wl-form { flex-direction: column; }
+  .urgency-countdown { display: none; }
 }
 </style>
 </head>
 <body>
 
-<div class="cursor" id="cursor"></div>
-<div class="cursor-ring" id="cursor-ring"></div>
-
 <!-- NAV -->
-<nav id="navbar">
-  <div class="nav-logo"><div class="logo-box">SBX</div>SBX GUARDIAN</div>
-  <div class="nav-links">
-    <a href="#problem">Problem</a>
-    <a href="#solution">Solution</a>
-    <a href="#pricing">Pricing</a>
-    <a href="#waitlist">Early Access</a>
-    <a href="/index.html" class="nav-cta">Login →</a>
+<nav>
+  <div class="nav-left">
+    <a href="/" class="wordmark">
+      <div class="wordmark-icon">SBX</div>
+      <span class="wordmark-name">GUARDIAN</span>
+    </a>
+    <div class="nav-links">
+      <a href="/security.html">Security</a>
+      <a href="/enterprise.html">Enterprise</a>
+      <a href="/regulatory-intelligence.html">Reg Intel</a>
+      <a href="/api-docs.html">Docs</a>
+      <a href="/trust-center.html">Trust</a>
+    </div>
+  </div>
+  <div class="nav-right">
+    <a href="/app" class="btn-nav-ghost">Sign in</a>
+    <a href="#waitlist" class="btn-nav-primary">Get early access</a>
   </div>
 </nav>
 
-<!-- HERO -->
-<section class="hero">
-  <div class="hero-eyebrow">The Industrial AI Safety Platform</div>
-  <h1>Your robots need a<br><em>black box.</em></h1>
-  <p class="hero-sub">When an AI system causes an incident, nobody can prove what happened. SBX Guardian fixes that — tamper-proof logging, EU AI Act compliance, and insurer evidence in one click.</p>
-  <div class="hero-actions">
-    <a href="#waitlist" class="btn-hero primary">Get Early Access ↗</a>
-    <a href="/index.html" class="btn-hero ghost">View Demo Dashboard</a>
-  </div>
-  <div class="hero-countdown">
-    <div><div class="countdown-num" id="days-count">—</div><div style="font-size:10px;letter-spacing:1px;margin-top:2px">DAYS</div></div>
-    <div style="color:var(--text3)">until EU AI Act enforcement. Your robots are high-risk AI. Penalty: <strong style="color:var(--orange)">€30M</strong>.</div>
-  </div>
-</section>
-
 <!-- TICKER -->
 <div class="ticker">
-  <div class="ticker-inner" id="ticker">
-    <span class="ticker-item"><span>→</span>EU AI Act: August 2, 2026</span>
-    <span class="ticker-item"><span>→</span>Industrial downtime: $532K/hour</span>
-    <span class="ticker-item"><span>→</span>78% of manufacturers fail AI governance audits</span>
-    <span class="ticker-item"><span>→</span>Zero products exist for physical robot compliance</span>
-    <span class="ticker-item"><span>→</span>SHA-256 tamper-evident hash chain</span>
-    <span class="ticker-item"><span>→</span>Court-admissible evidence packs</span>
-    <span class="ticker-item"><span>→</span>Connects in 30 minutes via webhook</span>
-    <span class="ticker-item"><span>→</span>EU AI Act: August 2, 2026</span>
-    <span class="ticker-item"><span>→</span>Industrial downtime: $532K/hour</span>
-    <span class="ticker-item"><span>→</span>78% of manufacturers fail AI governance audits</span>
-    <span class="ticker-item"><span>→</span>Zero products exist for physical robot compliance</span>
-    <span class="ticker-item"><span>→</span>SHA-256 tamper-evident hash chain</span>
-    <span class="ticker-item"><span>→</span>Court-admissible evidence packs</span>
-    <span class="ticker-item"><span>→</span>Connects in 30 minutes via webhook</span>
+  <div class="ticker-track" id="ticker">
+    <div class="ticker-item">EU AI Act · August 2, 2026</div>
+    <div class="ticker-item">Penalty: up to €15M or 3% global revenue</div>
+    <div class="ticker-item">78% of manufacturers cannot pass an AI audit</div>
+    <div class="ticker-item">SHA-256 tamper-evident hash chain</div>
+    <div class="ticker-item">Zero competing products for physical robots</div>
+    <div class="ticker-item">Setup in 30 minutes · No hardware required</div>
+    <div class="ticker-item">GDPR · SOC 2 in progress · ISO 27001 roadmap</div>
+    <div class="ticker-item">EU AI Act · August 2, 2026</div>
+    <div class="ticker-item">Penalty: up to €15M or 3% global revenue</div>
+    <div class="ticker-item">78% of manufacturers cannot pass an AI audit</div>
+    <div class="ticker-item">SHA-256 tamper-evident hash chain</div>
+    <div class="ticker-item">Zero competing products for physical robots</div>
+    <div class="ticker-item">Setup in 30 minutes · No hardware required</div>
+    <div class="ticker-item">GDPR · SOC 2 in progress · ISO 27001 roadmap</div>
   </div>
 </div>
 
-<!-- PROBLEM -->
-<section id="problem">
-  <div class="container">
-    <div class="reveal"><div class="section-label">The Problem</div></div>
-    <div class="reveal reveal-delay-1"><div class="section-title">Industrial AI is<br>legally exposed.</div></div>
-    <div class="reveal reveal-delay-2"><p class="section-sub">Starting August 2026, every industrial robot running ML is classified as High-Risk AI under EU law. Most manufacturers have no idea.</p></div>
-    <div class="problem-grid reveal reveal-delay-3">
-      <div class="problem-card">
-        <div class="problem-number">€30M</div>
-        <div class="problem-title">Maximum penalty</div>
-        <div class="problem-desc">Or 6% of global annual revenue — whichever is higher. For non-compliance with EU AI Act Article 9–16.</div>
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-left">
+    <div class="hero-kicker">
+      <div class="kicker-dot"></div>
+      EU AI Act enforcement — <span id="hero-days">—</span> days remaining
+    </div>
+    <h1 class="hero-headline">
+      The black box<br>for industrial<br><em>AI systems.</em>
+    </h1>
+    <p class="hero-body">
+      Every aircraft has a flight recorder. When your robot causes an incident, 
+      you need to prove what happened. <strong>SBX Guardian gives every industrial AI system 
+      tamper-proof, court-admissible logging</strong> and EU AI Act compliance — in 30 minutes.
+    </p>
+    <div class="hero-ctas">
+      <a href="#waitlist" class="btn-primary">Get early access <span>→</span></a>
+      <a href="/app" class="btn-secondary">View live demo</a>
+    </div>
+    <div class="hero-proof">
+      <div class="proof-stat">
+        <span class="proof-num" style="color:var(--red)">€15M</span>
+        <span class="proof-label">Max fine</span>
       </div>
-      <div class="problem-card">
-        <div class="problem-number">78%</div>
-        <div class="problem-title">Will fail audits</div>
-        <div class="problem-desc">Of senior leaders cannot currently pass an AI governance audit. The deadline is months away.</div>
+      <div class="proof-div"></div>
+      <div class="proof-stat">
+        <span class="proof-num" style="color:var(--amber)">78%</span>
+        <span class="proof-label">Unprepared</span>
       </div>
-      <div class="problem-card">
-        <div class="problem-number">$0</div>
-        <div class="problem-title">Products exist</div>
-        <div class="problem-desc">Zero platforms on the market specifically solve EU AI Act compliance for physical autonomous systems. Until now.</div>
+      <div class="proof-div"></div>
+      <div class="proof-stat">
+        <span class="proof-num" style="color:var(--green)">30 min</span>
+        <span class="proof-label">To deploy</span>
+      </div>
+      <div class="proof-div"></div>
+      <div class="proof-stat">
+        <span class="proof-num" style="color:var(--fog)">0</span>
+        <span class="proof-label">Competitors</span>
       </div>
     </div>
   </div>
-</section>
 
-<!-- SOLUTION -->
-<section id="solution" style="background:var(--s1);border-top:1px solid var(--border);border-bottom:1px solid var(--border)">
-  <div class="container">
-    <div class="reveal"><div class="section-label">The Solution</div></div>
-    <div class="reveal reveal-delay-1"><div class="section-title">One platform.<br>Complete protection.</div></div>
-    <div class="reveal reveal-delay-2"><p class="section-sub">SBX Guardian plugs into any industrial robot in 30 minutes and gives it a permanent tamper-proof black box.</p></div>
-    <div class="how-grid" style="margin-top:60px">
-      <div class="how-card reveal">
-        <div class="how-num">01 / RECORD</div>
-        <div class="how-title">Tamper-proof black box</div>
-        <div class="how-desc">Every command, sensor reading, and decision is logged in a SHA-256 cryptographic hash chain. Like aircraft flight recorders — but for robots. Court-admissible, tamper-evident, permanent.</div>
-        <span class="how-tag">SHA-256 HASH CHAIN</span>
+  <div class="hero-right">
+    <div class="terminal">
+      <div class="terminal-bar">
+        <div class="terminal-dots">
+          <div class="terminal-dot td-red"></div>
+          <div class="terminal-dot td-yellow"></div>
+          <div class="terminal-dot td-green"></div>
+        </div>
+        <div class="terminal-title">robot-arm-a3 · live chain</div>
+        <div class="terminal-badge">● live</div>
       </div>
-      <div class="how-card reveal reveal-delay-1">
-        <div class="how-num">02 / COMPLY</div>
-        <div class="how-title">EU AI Act compliance dashboard</div>
-        <div class="how-desc">Tracks all 9 legal requirements (Art. 9–16) with live pass/fail status. Automatically generates conformity assessment documentation. Know exactly where you stand before an audit arrives.</div>
-        <span class="how-tag">EU AI ACT ART. 9–16</span>
-      </div>
-      <div class="how-card reveal reveal-delay-2">
-        <div class="how-num">03 / PREDICT</div>
-        <div class="how-title">AI anomaly detection</div>
-        <div class="how-desc">Learns each robot's normal behavior baseline. Flags deviations before they become incidents. Powered by Groq LLaMA 3.3 70B + Gemini 1.5 Flash — multi-model AI for maximum accuracy.</div>
-        <span class="how-tag">GROQ + GEMINI AI</span>
-      </div>
-      <div class="how-card reveal reveal-delay-3">
-        <div class="how-num">04 / PROVE</div>
-        <div class="how-title">One-click evidence packs</div>
-        <div class="how-desc">When something goes wrong, generate a complete insurer evidence pack in one click. Includes chain integrity certificate, full event log, compliance status, and AI-written formal report ready for submission.</div>
-        <span class="how-tag">COURT-ADMISSIBLE</span>
+      <div class="terminal-body">
+        <div class="chain-row">
+          <div class="chain-time">14:23:47</div>
+          <div class="chain-type ct-hb">heartbeat</div>
+          <div class="chain-msg">Health 97% · Load 41.2% · Auto mode</div>
+          <div class="chain-hash">a3f5c2d1b4e9f7…</div>
+          <div class="chain-ok">✓</div>
+        </div>
+        <div class="chain-row">
+          <div class="chain-time">14:22:31</div>
+          <div class="chain-type ct-ai">ai_decision</div>
+          <div class="chain-msg">Obstacle 0.3m · Reroute · conf 97%</div>
+          <div class="chain-hash">9e4b7a2c1f8d3e…</div>
+          <div class="chain-ok">✓</div>
+        </div>
+        <div class="chain-row">
+          <div class="chain-time">14:21:18</div>
+          <div class="chain-type ct-an">anomaly</div>
+          <div class="chain-msg">Load spike 78.4% (threshold 75%)</div>
+          <div class="chain-hash">d2c8f4a1e7b9c3…</div>
+          <div class="chain-ok">✓</div>
+        </div>
+        <div class="chain-row">
+          <div class="chain-time">14:19:44</div>
+          <div class="chain-type ct-hu">handoff</div>
+          <div class="chain-msg">Operator J.Schmidt · acknowledged</div>
+          <div class="chain-hash">f1a9e3c7b5d2a8…</div>
+          <div class="chain-ok">✓</div>
+        </div>
+        <div class="chain-row">
+          <div class="chain-time">14:17:02</div>
+          <div class="chain-type ct-hb">heartbeat</div>
+          <div class="chain-msg">Health 95% · Load 38.1% · Auto mode</div>
+          <div class="chain-hash">c7b5d2a8e9f4c1…</div>
+          <div class="chain-ok">✓</div>
+        </div>
+        <div class="chain-row">
+          <div class="chain-time">14:15:33</div>
+          <div class="chain-type ct-ai">ai_decision</div>
+          <div class="chain-msg">Path recalculated · conf 99.1%</div>
+          <div class="chain-hash">e9f2a4c6b8d1e7…</div>
+          <div class="chain-ok">✓</div>
+        </div>
+        <div class="terminal-footer">
+          <div class="tf-left"><div class="tf-dot"></div>Chain verified · 14,832 events · 0 breaks</div>
+          <div class="tf-right">SHA-256 · Art. 12 compliant</div>
+        </div>
       </div>
     </div>
   </div>
-</section>
+</div>
+
+<!-- URGENCY BAR -->
+<div class="urgency">
+  <div class="urgency-inner">
+    <div class="urgency-left">
+      <div class="urgency-icon">⚠</div>
+      <div class="urgency-text">
+        <strong>Every industrial robot running ML in the EU is now High-Risk AI under Annex III.</strong>
+        Non-compliance penalty: up to €15M or 3% of global annual revenue.
+      </div>
+    </div>
+    <div class="urgency-countdown">
+      <div class="cd-unit"><span class="cd-num" id="cd-d">—</span><span class="cd-label">Days</span></div>
+      <div class="cd-sep">:</div>
+      <div class="cd-unit"><span class="cd-num" id="cd-h">—</span><span class="cd-label">Hours</span></div>
+      <div class="cd-sep">:</div>
+      <div class="cd-unit"><span class="cd-num" id="cd-m">—</span><span class="cd-label">Min</span></div>
+    </div>
+    <a href="/roi-calculator.html" class="urgency-link">Calculate your risk →</a>
+  </div>
+</div>
+
+<!-- FEATURES BENTO -->
+<div class="section">
+  <div class="label">Platform</div>
+  <h2 class="heading">Everything your legal team<br><em>will ask for.</em></h2>
+  <p class="subheading">Built for the complete EU AI Act compliance lifecycle — from initial risk classification to ongoing post-market monitoring.</p>
+
+  <div class="bento">
+    <!-- Large: hash chain -->
+    <div class="bento-card bc-1">
+      <div class="bc-tag">EU AI Act Art. 12</div>
+      <div class="bc-title">SHA-256 <em>Hash Chain</em></div>
+      <div class="bc-desc">Every event cryptographically chained to the previous. Any attempt to modify, delete, or insert a record breaks the chain instantly and is detected. Mathematically tamper-evident. Accepted in court.</div>
+      <div class="hash-demo">
+        <div class="hd-row"><div class="hd-time">14:23:47</div><div class="hd-event">heartbeat · health 97% · load 41%</div><div class="hd-hash">a3f5c2d1…</div><div class="hd-check">✓</div></div>
+        <div class="hd-row"><div class="hd-time">14:22:31</div><div class="hd-event">ai_decision · reroute · conf 97%</div><div class="hd-hash">9e4b7a2c…</div><div class="hd-check">✓</div></div>
+        <div class="hd-row"><div class="hd-time">14:21:18</div><div class="hd-event">anomaly · load spike 78.4%</div><div class="hd-hash">d2c8f4a1…</div><div class="hd-check">✓</div></div>
+      </div>
+    </div>
+    <!-- Compliance dashboard -->
+    <div class="bento-card bc-2">
+      <div class="bc-tag">Art. 9–16</div>
+      <div class="bc-title"><em>Live</em> Compliance Score</div>
+      <div class="bc-desc">Pass/fail status across all 9 required EU AI Act articles. Updates automatically as logs grow.</div>
+      <div class="compliance-mini">
+        <div class="cm-row"><div class="cm-art">Art. 9</div><div class="cm-title">Risk Management</div><span class="cm-status cms-pass">Pass</span></div>
+        <div class="cm-row"><div class="cm-art">Art. 12</div><div class="cm-title">Record-keeping</div><span class="cm-status cms-pass">Pass</span></div>
+        <div class="cm-row"><div class="cm-art">Art. 11</div><div class="cm-title">Technical Docs</div><span class="cm-status cms-partial">Partial</span></div>
+        <div class="cm-row"><div class="cm-art">Art. 15</div><div class="cm-title">Cybersecurity</div><span class="cm-status cms-fail">Action</span></div>
+        <div class="cm-row"><div class="cm-art">Art. 16</div><div class="cm-title">Registration</div><span class="cm-status cms-fail">Action</span></div>
+      </div>
+    </div>
+    <!-- Document generation -->
+    <div class="bento-card bc-3">
+      <div class="bc-tag">Legal Documents</div>
+      <div class="bc-title">Full Document <em>Suite</em></div>
+      <div class="bc-desc">FRIA, Annex IV Technical Docs, Declaration of Conformity, Post-Market Monitoring — every legal document the EU AI Act requires, generated automatically.</div>
+    </div>
+    <!-- Board reports -->
+    <div class="bento-card bc-4">
+      <div class="bc-tag">Governance</div>
+      <div class="bc-title">Board <em>Reports</em></div>
+      <div class="bc-desc">AI-written board governance report with KPIs, risk matrix, and financial impact. Boardroom-ready in 60 seconds.</div>
+    </div>
+    <!-- Reg intel -->
+    <div class="bento-card bc-5">
+      <div class="bc-tag">Intelligence</div>
+      <div class="bc-title">Regulatory <em>Feed</em></div>
+      <div class="bc-desc">47 regulations across 12 jurisdictions. Every change AI-parsed and delivered as action items in under 60 seconds.</div>
+    </div>
+    <!-- Setup -->
+    <div class="bento-card bc-6">
+      <div class="bc-tag">Integration</div>
+      <div class="bc-title">30 minutes <em>to deploy.</em></div>
+      <div class="bc-desc">Three lines of code. Any robot, any language — Python, Node.js, ROS/ROS2, Arduino. Webhook or REST API. npm SDK. No hardware required.</div>
+    </div>
+    <!-- Enterprise -->
+    <div class="bento-card bc-7">
+      <div class="bc-tag">Enterprise</div>
+      <div class="bc-title">Enterprise <em>Security</em></div>
+      <div class="bc-desc">AES-256 encryption at rest. Multi-tenant data isolation enforced at every query. Full audit trail. JWT authentication. GDPR compliant. Data Processing Agreement. SOC 2 Type II in progress for Q3 2026. ISO 42001 on 2027 roadmap. Pre-filled vendor security questionnaire available for procurement teams.</div>
+    </div>
+  </div>
+</div>
 
 <!-- COMPARISON -->
-<section>
-  <div class="container">
-    <div class="reveal"><div class="section-label">Why SBX Guardian</div></div>
-    <div class="reveal reveal-delay-1"><div class="section-title">Nothing else does this.</div></div>
-    <div class="features-wrap reveal reveal-delay-2">
-      <div class="features-header">
-        <div>Feature</div>
-        <div class="col-us" style="text-align:center;color:var(--green)">SBX Guardian</div>
-        <div style="text-align:center">Vanta / Secureframe</div>
-        <div style="text-align:center">Custom Build</div>
-      </div>
-      ${[
-        ['Tamper-proof robot event logging','✓','✗','~'],
-        ['EU AI Act compliance tracker (Art. 9–16)','✓','✗','~'],
-        ['Physical robot webhook SDK','✓','✗','~'],
-        ['AI anomaly detection per robot','✓','✗','✗'],
-        ['One-click insurer evidence pack','✓','✗','~'],
-        ['SHA-256 hash chain verification','✓','✗','~'],
-        ['Multi-tenant (multiple factories)','✓','✓','~'],
-        ['SOC 2 / ISO 27001 framework','✓','✓','~'],
-        ['Setup time','30 min','Weeks','6-18 months'],
-        ['Cost','$499+/mo','$1,000+/mo','$500K+'],
-      ].map(([f,us,vanta,custom])=>`
-        <div class="features-row">
-          <div class="feature-name">${f}</div>
-          <div class="col-us check">${us}</div>
-          <div class="${vanta==='✓'?'check':'vanta==="✗"?cross:""'}" style="text-align:center">${vanta}</div>
-          <div style="text-align:center;color:var(--text3)">${custom}</div>
-        </div>`).join('')}
+<div class="section-full dark">
+  <div class="section-inner">
+    <div class="label">Comparison</div>
+    <h2 class="heading">The only platform built<br>for <em>physical AI.</em></h2>
+    <p class="subheading">Every competitor targets software AI. Credo AI, IBM watsonx.governance, Holistic AI — none of them touch industrial robots, cobots, or AGVs.</p>
+    <div style="overflow-x:auto">
+      <table class="compare-table">
+        <thead>
+          <tr>
+            <th style="text-align:left;width:260px">Capability</th>
+            <th class="th-us">SBX Guardian</th>
+            <th>Credo AI / Holistic AI</th>
+            <th>IBM watsonx.governance</th>
+            <th>Build in-house</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Industrial robots / AGVs / cobots</td>
+            <td class="td-us"><span class="ci-yes">✓</span> Purpose-built</td>
+            <td><span class="ci-no">✗</span></td>
+            <td><span class="ci-no">✗</span></td>
+            <td><span class="ci-partial">18-24 months</span></td>
+          </tr>
+          <tr>
+            <td>Tamper-evident SHA-256 hash chain</td>
+            <td class="td-us"><span class="ci-yes">✓</span></td>
+            <td><span class="ci-no">✗</span></td>
+            <td><span class="ci-no">✗</span></td>
+            <td><span class="ci-partial">Complex</span></td>
+          </tr>
+          <tr>
+            <td>Full EU AI Act (Art. 9–16)</td>
+            <td class="td-us"><span class="ci-yes">✓</span> All articles</td>
+            <td><span class="ci-partial">Partial</span></td>
+            <td><span class="ci-partial">Partial</span></td>
+            <td><span class="ci-no">✗</span></td>
+          </tr>
+          <tr>
+            <td>FRIA + Annex IV + Declaration of Conformity</td>
+            <td class="td-us"><span class="ci-yes">✓</span> Automated</td>
+            <td><span class="ci-no">✗</span></td>
+            <td><span class="ci-no">✗</span></td>
+            <td><span class="ci-no">✗</span></td>
+          </tr>
+          <tr>
+            <td>Board governance report generation</td>
+            <td class="td-us"><span class="ci-yes">✓</span> 60 seconds</td>
+            <td><span class="ci-no">✗</span></td>
+            <td><span class="ci-partial">Manual</span></td>
+            <td><span class="ci-no">✗</span></td>
+          </tr>
+          <tr>
+            <td>Setup time</td>
+            <td class="td-us">30 minutes</td>
+            <td><span class="ci-partial">Weeks</span></td>
+            <td><span class="ci-partial">Enterprise project</span></td>
+            <td><span class="ci-partial">18+ months</span></td>
+          </tr>
+          <tr>
+            <td>Starting price</td>
+            <td class="td-us" style="color:var(--green) !important">$499/month</td>
+            <td style="color:var(--mist)">$30,000+/year</td>
+            <td style="color:var(--mist)">$100,000+/year</td>
+            <td style="color:var(--mist)">$500K build cost</td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   </div>
-</section>
+</div>
 
-<!-- ROI -->
-<section class="roi-section">
-  <div class="container">
-    <div class="roi-grid">
-      <div class="reveal">
-        <div class="section-label">Return on Investment</div>
-        <div class="section-title">It pays for itself on day one.</div>
-        <p class="section-sub" style="margin-top:16px">One avoided robot incident. One insurance claim processed instead of denied. One regulatory audit passed. SBX Guardian pays for an entire year of subscription in a single event.</p>
-        <a href="#waitlist" class="btn-hero primary" style="margin-top:40px;display:inline-flex">Calculate your ROI →</a>
-      </div>
-      <div class="reveal reveal-delay-1">
-        <div class="roi-stat">
-          <div class="roi-stat-num">$532K</div>
-          <div class="roi-stat-label">Average industrial downtime cost per hour</div>
-        </div>
-        <div class="roi-stat">
-          <div class="roi-stat-num">$2M+</div>
-          <div class="roi-stat-label">Average robot incident lawsuit settlement</div>
-        </div>
-        <div class="roi-stat">
-          <div class="roi-stat-num" style="color:var(--green)">$499</div>
-          <div class="roi-stat-label">SBX Guardian starting price per month</div>
-        </div>
-      </div>
+<!-- TRUST -->
+<div class="trust">
+  <div class="trust-inner">
+    <div class="trust-label">Designed against</div>
+    <div class="trust-sep"></div>
+    <div class="trust-items">
+      <div class="trust-item">GDPR</div>
+      <div class="trust-item">EU AI Act</div>
+      <div class="trust-item">ISO 10218</div>
+      <div class="trust-item">IEC 61508</div>
+      <div class="trust-item">ISO 27001</div>
+      <div class="trust-item">ISO 42001</div>
+      <div class="trust-item">SOC 2</div>
+      <div class="trust-item">Machinery Reg.</div>
+      <div class="trust-item">NIS2</div>
+      <div class="trust-item">Cyber Resilience Act</div>
     </div>
   </div>
-</section>
+</div>
 
 <!-- PRICING -->
-<section id="pricing">
-  <div class="container">
-    <div class="reveal"><div class="section-label">Pricing</div></div>
-    <div class="reveal reveal-delay-1"><div class="section-title">Transparent.<br>Enterprise-ready.</div></div>
-    <div class="pricing-grid">
-      <div class="price-card reveal">
-        <div class="price-plan">Starter</div>
-        <div class="price-amount">$499<span>/mo</span></div>
-        <div class="price-period">Up to 10 systems · billed monthly</div>
-        <ul class="price-features">
-          <li>Tamper-proof event logging</li>
-          <li>EU AI Act compliance tracker</li>
-          <li>Evidence report generation</li>
-          <li>Webhook SDK integration</li>
-          <li>Email alerts</li>
-          <li class="no">Anomaly detection AI</li>
-          <li class="no">Multi-site management</li>
-          <li class="no">Audit export</li>
-        </ul>
-        <a href="#waitlist" class="price-btn outline">Start Free Trial</a>
-      </div>
-      <div class="price-card featured reveal reveal-delay-1">
-        <div class="price-badge">MOST POPULAR</div>
-        <div class="price-plan">Professional</div>
-        <div class="price-amount" style="color:var(--green)">$1,999<span>/mo</span></div>
-        <div class="price-period">Up to 50 systems · billed monthly</div>
-        <ul class="price-features">
-          <li>Everything in Starter</li>
-          <li>AI anomaly detection</li>
-          <li>Multi-site management</li>
-          <li>Court-ready audit export</li>
-          <li>Risk prediction scoring</li>
-          <li>SLA dashboard</li>
-          <li>Team management</li>
-          <li>API access</li>
-        </ul>
-        <a href="#waitlist" class="price-btn primary">Get Started</a>
-      </div>
-      <div class="price-card reveal reveal-delay-2">
-        <div class="price-plan">Enterprise</div>
-        <div class="price-amount">Custom</div>
-        <div class="price-period">Unlimited systems · annual contract</div>
-        <ul class="price-features">
-          <li>Everything in Professional</li>
-          <li>On-premise deployment</li>
-          <li>SOC 2 Type II package</li>
-          <li>Hardware black box units</li>
-          <li>White-label option</li>
-          <li>Dedicated account manager</li>
-          <li>Custom compliance frameworks</li>
-          <li>99.99% SLA guarantee</li>
-        </ul>
-        <a href="mailto:hello@sbxguardian.com" class="price-btn outline">Contact Sales</a>
-      </div>
+<div class="section">
+  <div class="label">Pricing</div>
+  <h2 class="heading">€15M potential fine.<br><em>$499 per month.</em></h2>
+  <p class="subheading">Transparent pricing. No seat fees. No usage surprises. Cancel any time.</p>
+  <div class="pricing-grid">
+    <div class="pricing-card">
+      <div class="pc-name">Starter</div>
+      <div class="pc-price"><sup>$</sup>499<sub>/mo</sub></div>
+      <p class="pc-desc">For SMEs with up to 10 AI systems. Full EU AI Act compliance from day one.</p>
+      <ul class="pc-features">
+        <li>Up to 10 connected systems</li>
+        <li>All EU AI Act articles (9–16)</li>
+        <li>SHA-256 tamper-evident logging</li>
+        <li>AI compliance reports</li>
+        <li>Anomaly detection</li>
+        <li>Regulatory intelligence feed</li>
+        <li>Standard DPA + legal documents</li>
+        <li>FRIA wizard</li>
+      </ul>
+      <a href="#waitlist" class="pc-cta pc-cta-ghost">Get early access</a>
+    </div>
+    <div class="pricing-card featured">
+      <div class="pc-badge">Most popular</div>
+      <div class="pc-name">Professional</div>
+      <div class="pc-price"><sup>$</sup>1,999<sub>/mo</sub></div>
+      <p class="pc-desc">For mid-market manufacturers with up to 50 systems and compliance teams.</p>
+      <ul class="pc-features">
+        <li>Up to 50 connected systems</li>
+        <li>Everything in Starter</li>
+        <li>Annex IV documentation generator</li>
+        <li>Declaration of Conformity</li>
+        <li>Board governance reports</li>
+        <li>Post-market monitoring reports</li>
+        <li>M&A AI due diligence tool</li>
+        <li>CRM + nurture automation</li>
+        <li>Priority support (24hr SLA)</li>
+      </ul>
+      <a href="#waitlist" class="pc-cta pc-cta-gold">Start free trial</a>
+    </div>
+    <div class="pricing-card">
+      <div class="pc-name">Enterprise</div>
+      <div class="pc-price" style="font-size:36px;padding-top:8px">Custom</div>
+      <p class="pc-desc">For large manufacturers, OEMs, and organizations with 50+ systems.</p>
+      <ul class="pc-features">
+        <li>Unlimited systems</li>
+        <li>Everything in Professional</li>
+        <li>SSO / SAML 2.0</li>
+        <li>Negotiated DPA</li>
+        <li>Dedicated account manager</li>
+        <li>White-label option</li>
+        <li>On-premise deployment</li>
+        <li>4-hour support SLA</li>
+        <li>Net-30 / Net-60 payment terms</li>
+      </ul>
+      <a href="mailto:enterprise@sbxguardian.com" class="pc-cta pc-cta-ghost">Contact sales</a>
     </div>
   </div>
-</section>
-
-<!-- PROOF -->
-<section style="background:var(--s1);border-top:1px solid var(--border)">
-  <div class="container">
-    <div class="reveal"><div class="section-label">Early Feedback</div></div>
-    <div class="reveal reveal-delay-1"><div class="section-title">The industry agrees.</div></div>
-    <div class="proof-grid">
-      <div class="proof-card reveal">
-        <p class="proof-quote">"We've been looking for exactly this. EU AI Act compliance for our KUKA fleet has been keeping our legal team up at night. SBX Guardian is the first thing that actually addresses it."</p>
-        <div class="proof-author"><div class="proof-avatar">MK</div><div><div class="proof-name">M. Kowalski</div><div class="proof-role">Head of Automation, Tier-1 Auto Supplier</div></div></div>
-      </div>
-      <div class="proof-card reveal reveal-delay-1">
-        <p class="proof-quote">"The tamper-evident logging alone is worth the subscription. When our insurer asked for evidence after the conveyor incident, we had a complete chain-verified pack ready in minutes."</p>
-        <div class="proof-author"><div class="proof-avatar">AL</div><div><div class="proof-name">A. Laurent</div><div class="proof-role">Safety Director, French Manufacturer</div></div></div>
-      </div>
-      <div class="proof-card reveal reveal-delay-2">
-        <p class="proof-quote">"I showed this to our compliance team and they immediately asked when we could start a pilot. The EU AI Act dashboard covers every article we've been scrambling to address."</p>
-        <div class="proof-author"><div class="proof-avatar">RS</div><div><div class="proof-name">R. Schmidt</div><div class="proof-role">CTO, German Robotics Integrator</div></div></div>
-      </div>
-    </div>
-  </div>
-</section>
+</div>
 
 <!-- WAITLIST -->
-<section id="waitlist" class="waitlist-section">
-  <div class="waitlist-box">
-    <div class="reveal"><div class="section-label" style="justify-content:center;display:flex">Early Access</div></div>
-    <div class="reveal reveal-delay-1"><div class="section-title" style="font-size:clamp(40px,6vw,72px)">Get ahead of<br>the deadline.</div></div>
-    <div class="reveal reveal-delay-2"><p class="section-sub" style="margin:0 auto 0;text-align:center">Join manufacturers already preparing for August 2, 2026. Early access includes 3 months free on Professional.</p></div>
-    <div class="waitlist-form reveal reveal-delay-3">
-      <input type="email" id="waitlist-email" placeholder="your@company.com" onkeydown="if(event.key==='Enter')joinWaitlist()">
-      <button onclick="joinWaitlist()">JOIN WAITLIST</button>
+<div class="waitlist-section" id="waitlist">
+  <div class="waitlist-glow"></div>
+  <div class="waitlist-inner">
+    <div class="label">Early access</div>
+    <h2 class="waitlist-heading">The deadline is<br><em>not moving.</em></h2>
+    <p class="waitlist-sub">Join the waitlist. The first 50 companies get three months free on the Professional plan. No credit card required.</p>
+    <div class="wl-form">
+      <input type="email" id="wl-email" class="wl-input" placeholder="you@company.com">
+      <button class="wl-btn" onclick="joinWaitlist()">Get access →</button>
     </div>
-    <div class="waitlist-success" id="waitlist-success">✓ You're on the list. We'll be in touch within 24 hours.</div>
-    <p class="waitlist-sub">No spam. No credit card. Serious inquiries only.</p>
+    <div class="wl-success" id="wl-success">You're on the list. We'll be in touch within 24 hours.</div>
+    <div class="wl-fine">No credit card required · Free trial available · Cancel any time</div>
   </div>
-</section>
+</div>
 
 <!-- FOOTER -->
 <footer>
-  <div class="container">
-    <div class="footer-grid">
-      <div>
-        <div class="footer-brand"><div class="logo-box" style="width:28px;height:28px;font-size:12px">SBX</div>SBX GUARDIAN</div>
-        <p class="footer-desc">The only platform purpose-built for EU AI Act compliance on physical autonomous systems. Tamper-proof logging for the age of industrial AI.</p>
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <div class="footer-brand-mark">
+        <div class="wordmark-icon">SBX</div>
+        <span class="wordmark-name">GUARDIAN</span>
       </div>
-      <div class="footer-col">
-        <h4>Product</h4>
-        <a href="#solution">How it works</a>
-        <a href="#pricing">Pricing</a>
-        <a href="/index.html">Dashboard Demo</a>
-        <a href="#waitlist">Early Access</a>
-      </div>
-      <div class="footer-col">
-        <h4>Company</h4>
-        <a href="mailto:hello@sbxguardian.com">Contact</a>
-        <a href="/index.html">Login</a>
-        <a href="#waitlist">Request Demo</a>
-      </div>
+      <p class="footer-tagline">The compliance operating system for the age of Physical AI.</p>
     </div>
-    <div class="footer-bottom">
-      <span>© 2026 SBX Guardian. All rights reserved.</span>
-      <span style="font-family:var(--mono);font-size:11px">EU AI Act enforcement: <span id="footer-days" style="color:var(--orange)">—</span> days</span>
+    <div class="footer-col">
+      <h4>Platform</h4>
+      <a href="/app">Dashboard</a>
+      <a href="/client-portal.html">SDK & Integration</a>
+      <a href="/api-docs.html">API Reference</a>
+      <a href="/status.html">System Status</a>
+      <a href="/regulatory-intelligence.html">Regulatory Feed</a>
     </div>
+    <div class="footer-col">
+      <h4>Compliance</h4>
+      <a href="/fria-wizard.html">FRIA Wizard</a>
+      <a href="/annex-iv-documentation.html">Annex IV Docs</a>
+      <a href="/declaration-of-conformity.html">Declaration of Conformity</a>
+      <a href="/incident-playbook.html">Incident Playbook</a>
+      <a href="/ai-inventory.html">AI Inventory Scanner</a>
+      <a href="/roi-calculator.html">ROI Calculator</a>
+    </div>
+    <div class="footer-col">
+      <h4>Company</h4>
+      <a href="/enterprise.html">Enterprise</a>
+      <a href="/consulting-partners.html">Partners</a>
+      <a href="/trust-center.html">Trust Center</a>
+      <a href="/security.html">Security</a>
+      <a href="/terms.html">Terms</a>
+      <a href="/privacy.html">Privacy</a>
+      <a href="/dpa.html">DPA</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <div class="footer-copy">© 2026 SBX Guardian. All rights reserved.</div>
+    <div class="footer-links">
+      <a href="/terms.html">Terms</a>
+      <a href="/privacy.html">Privacy</a>
+      <a href="/dpa.html">DPA</a>
+      <a href="/security.html">Security</a>
+      <a href="/.well-known/security.txt">security.txt</a>
+    </div>
+    <div class="footer-copy">enterprise@sbxguardian.com</div>
   </div>
 </footer>
 
 <script>
-// Cursor
-const cursor = document.getElementById('cursor');
-const ring = document.getElementById('cursor-ring');
-document.addEventListener('mousemove', e => {
-  cursor.style.left = e.clientX - 5 + 'px';
-  cursor.style.top = e.clientY - 5 + 'px';
-  ring.style.left = e.clientX - 18 + 'px';
-  ring.style.top = e.clientY - 18 + 'px';
-});
-document.querySelectorAll('a,button').forEach(el => {
-  el.addEventListener('mouseenter', () => { cursor.style.transform = 'scale(2)'; ring.style.transform = 'scale(1.5)'; });
-  el.addEventListener('mouseleave', () => { cursor.style.transform = 'scale(1)'; ring.style.transform = 'scale(1)'; });
-});
-
-// Nav scroll
-window.addEventListener('scroll', () => {
-  document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 60);
-});
-
 // Countdown
-function updateCountdown() {
-  const days = Math.ceil((new Date('2026-08-02') - Date.now()) / 86400000);
-  document.getElementById('days-count').textContent = days;
-  const fd = document.getElementById('footer-days');
-  if (fd) fd.textContent = days;
+function tick() {
+  const diff = new Date('2026-08-02') - Date.now();
+  const d = Math.floor(diff / 86400000);
+  const h = Math.floor((diff % 86400000) / 3600000);
+  const m = Math.floor((diff % 3600000) / 60000);
+  document.getElementById('hero-days').textContent = d;
+  const cd = document.getElementById('cd-d');
+  const ch = document.getElementById('cd-h');
+  const cm = document.getElementById('cd-m');
+  if (cd) cd.textContent = String(d).padStart(2,'0');
+  if (ch) ch.textContent = String(h).padStart(2,'0');
+  if (cm) cm.textContent = String(m).padStart(2,'0');
 }
-updateCountdown();
-setInterval(updateCountdown, 60000);
-
-// Reveal on scroll
-const observer = new IntersectionObserver(entries => {
-  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
-}, { threshold: 0.1, rootMargin: '0px 0px -60px 0px' });
-document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+tick();
+setInterval(tick, 60000);
 
 // Waitlist
 async function joinWaitlist() {
-  const email = document.getElementById('waitlist-email').value;
-  if (!email || !email.includes('@')) { alert('Please enter a valid email'); return; }
+  const email = document.getElementById('wl-email').value.trim();
+  if (!email || !email.includes('@')) {
+    document.getElementById('wl-email').style.borderColor = 'rgba(224,82,82,0.5)';
+    return;
+  }
   try {
-    const r = await fetch('/api/waitlist', {
+    await fetch('/api/waitlist', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, source: 'landing' })
+      body: JSON.stringify({ email })
     });
-    document.getElementById('waitlist-success').style.display = 'block';
-    document.getElementById('waitlist-email').value = '';
-  } catch(e) {
-    document.getElementById('waitlist-success').style.display = 'block';
-  }
+  } catch {}
+  document.querySelector('.wl-form').style.display = 'none';
+  document.getElementById('wl-success').style.display = 'block';
 }
+
+document.getElementById('wl-email').addEventListener('keypress', e => {
+  if (e.key === 'Enter') joinWaitlist();
+});
 </script>
 </body>
 </html>
